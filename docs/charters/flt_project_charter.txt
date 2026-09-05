@@ -1,0 +1,36 @@
+# Project Selection Confirmation Form: Federated Learning Threat Model
+**Project Title:** Federated Learning Threat Model (Privacy/Networking)
+**Sponsor:** [TBD - Academic Dept.]
+**Team Members:** [List Names]
+
+**Confirmation Status:** Confirmed.
+**Rationale:** This approach addresses the core conflict between needing global threat intelligence and maintaining client data sovereignty. By using FL, we enable secure, distributed collaboration while strictly protecting raw data residency.
+
+---
+# Project Charter: Federated Learning Threat Model
+**Problem Statement:** Data sharing for threat intelligence is limited by data sovereignty laws (like GDPR), making centralized collection impossible. This creates dangerous single points of failure and privacy violations due to the necessity of protecting raw client data.
+**Objectives:**
+1.  Develop a simulated secure architecture for decentralized model training across multiple, independent client nodes.
+2.  Implement networking protocols to transmit only model weights/gradients, preventing raw data exposure.
+3.  Create a mathematical method to validate that the combined model's performance improves significantly, while simultaneously guaranteeing the privacy of individual contributing datasets.
+**Scope Summary:** The project will deliver a simulation framework that demonstrates the mathematical viability of Multi-Party Computation (MPC) on model weights, and quantifies the performance advantage over non-private data aggregation.
+**Preliminary Schedule:**
+*   **Module 01-03 (Weeks 1-5):** Theoretical framework design and simulated secure channel setup (Focus: MPC/Encryption concepts).
+*   **Module 04-06 (Weeks 6-10):** Implementation of the core FL mechanism, simulating the client/server weight update loop.
+*   **Module 07-12 (Weeks 11-15):** Final validation and comparative analysis, proving the model's efficacy and privacy guarantees.
+
+---
+# Preliminary Scope Statement: Federated Learning Threat Model
+**Functional Requirements (FRs):**
+*   FR1: System must simulate multiple, disconnected client nodes, each possessing unique, sensitive local datasets.
+*   FR2: The central coordinator must orchestrate weight aggregation, receiving strictly model updates and no raw data.
+*   FR3: The system must implement differential privacy techniques prior to aggregation, obscuring individual data contributions.
+*   FR4: Must compare the operational performance of the FL model against a non-private baseline (if permitted).
+**Non-Functional Requirements (NFRs):**
+*   NFR1 (Security): The weight aggregation must mathematically prove prevention of inversion attacks, maintaining established differential privacy levels.
+*   NFR2 (Scalability): Architecture must scale to simulate consortiums with dozens of contributing nodes.
+*   NFR3 (Performance): The simulation must complete an entire training epoch within the time allotted.
+**Constraints & Assumptions:**
+*   **Constraint:** The system will model complex cryptography (MPC, HE) via simulated network calls.
+*   **Assumption:** A reliable, secure channel exists for transmitting model weights/gradients.
+**Key Deliverable:** A functional, simulated, and mathematically validated privacy-preserving model.

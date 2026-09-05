@@ -1,0 +1,36 @@
+# Project Selection Confirmation Form: Automated Digital Forensics Simulator
+**Project Title:** Automated Digital Forensics Simulator
+**Sponsor:** [TBD - Academic Dept.]
+**Team Members:** [List Names]
+
+**Confirmation Status:** Confirmed.
+**Rationale:** This project automates the entire forensic investigation, moving beyond static evidence gathering. It simulates a true incident response workflow, using AI to synthesize disparate data streams into a definitive, legally defensible narrative.
+
+---
+# Project Charter: Automated Digital Forensics Simulator
+**Problem Statement:** Traditional forensics is manual, time-intensive, and suffers from human error or omission, especially when dealing with massive, multi-source data artifacts (e.g., VM memory dumps, corrupted logs). There is a need for a systematic, automated system that can reliably correlate evidence to establish a technical chain of custody.
+**Objectives:**
+1.  Design and implement a simulator that accepts a raw system snapshot (VM image or artifact set).
+2.  Develop 'forensic playbooks' to systematically extract and analyze data from core forensic locations (RAM, file system, network logs).
+3.  Integrate an AI engine to perform evidence triage, correlation, and automated narrative generation, connecting all findings into a single, coherent breach activity report.
+**Scope Summary:** The project delivers a functional prototype that ingests multiple data types, runs a defined investigation workflow, and outputs a structured, narrative-based conclusion proving the activity chain.
+**Preliminary Schedule:**
+*   **Module 01-03 (Weeks 1-5):** Simulator scaffolding and data ingestion (defining artifact parsers for RAM, logs, file system).
+*   **Module 04-06 (Weeks 6-10):** Developing and running modular 'forensic playbooks' and normalizing data schema.
+*   **Module 07-12 (Weeks 11-15):** Core AI integration for evidence correlation and final report generation (Full PoC).
+
+---
+# Preliminary Scope Statement: Automated Digital Forensics Simulator
+**Functional Requirements (FRs):**
+*   FR1: Must accept a containerized system snapshot (e.g., raw VM disk image).
+*   FR2: Must execute a sequence of defined forensic playbooks (e.g., file carving, timeline reconstruction, memory analysis).
+*   FR3: Must perform cross-artifact correlation (e.g., linking a process ID found in memory to a file path in the filesystem).
+*   FR4: Must generate a structured, natural language narrative report detailing the chain of activity and evidence sources.
+**Non-Functional Requirements (NFRs):**
+*   NFR1 (Accuracy): The correlation engine must achieve a verifiable minimum recall score for linking related evidence (TBD).
+*   NFR2 (Reproducibility): All steps must be logged and repeatable, proving the integrity of the findings.
+*   NFR3 (Time): The full investigative cycle, from ingest to report, must complete within a defined time budget (TBD).
+**Constraints & Assumptions:**
+*   **Constraint:** The initial scope is limited to common OS artifacts (Linux/Windows VM images).
+*   **Assumption:** Necessary forensic tooling and libraries are available or can be simulated in the environment.
+**Key Deliverable:** A fully containerized, systematic forensic simulation and report generator.

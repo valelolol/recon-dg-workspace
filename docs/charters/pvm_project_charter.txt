@@ -1,0 +1,36 @@
+# Project Selection Confirmation Form: Predictive Vulnerability Mapping
+**Project Title:** Predictive Vulnerability Mapping (Graph Theory)
+**Sponsor:** [TBD - Academic Dept.]
+**Team Members:** [List Names]
+
+**Confirmation Status:** Confirmed.
+**Rationale:** This project shifts vulnerability assessment from a reactive stance on discrete CVEs to predicting systemic, emergent risks. We predict catastrophic failure by analyzing multi-node component interactions, proactively strengthening software supply chains.
+
+---
+# Project Charter: Predictive Vulnerability Mapping
+**Problem Statement:** Current security methods are reactive, assessing only known vulnerabilities (CVEs). This approach crucially fails to predict systemic risk arising from the combined, interconnected exploitation of multiple low-severity issues across modern, complex software dependency graphs.
+**Objectives:**
+1.  Develop a dynamic dependency graph builder that ingests various inputs (manifests, build metadata).
+2.  Implement graph theory algorithms to calculate a quantifiable, real-time weighted risk score for the entire system.
+3.  Develop a predictive model simulating linked vulnerabilities to anticipate high-impact exploit vectors.
+**Scope Summary:** The deliverable is a proof-of-concept SaaS ingestor and an interactive dashboard that visualizes complex risk scores and predicted exploitation paths across the graph.
+**Preliminary Schedule:**
+*   **Module 01-03 (Weeks 1-5):** Building the foundational graph model and data ingestion pipeline (Graph Builder v0.1).
+*   **Module 04-06 (Weeks 6-10):** Core algorithmic development for risk scoring and path traversal (Risk Scoring Layer).
+*   **Module 07-12 (Weeks 11-15):** Predictive simulation and dashboard integration (Final PoC).
+
+---
+# Preliminary Scope Statement: Predictive Vulnerability Mapping
+**Functional Requirements (FRs):**
+*   FR1: System must process varied dependency manifest formats (e.g., `requirements.txt`, `package.json`).
+*   FR2: Must construct and maintain a directed, weighted graph database representing component dependencies.
+*   FR3: Must calculate a composite risk score based on both vulnerability severity and path connectivity depth.
+*   FR4: Must visualize all simulated predictitive exploit pathways on an interactive dashboard.
+**Non-Functional Requirements (NFRs):**
+*   NFR1 (Performance): Graph ingestion and scoring must process a 100-node sample within 5 seconds.
+*   NFR2 (Scalability): Architecture must support federated scaling to process mission-level telemetry data (thousands of nodes).
+*   NFR3 (Usability): Dashboard must provide clear, intuitive visualization of risk paths for non-security experts.
+**Constraints & Assumptions:**
+*   **Constraint:** Scope is limited to publicly available or simulated dependency manifests.
+*   **Assumption:** Stable and manageable access to a graph database (e.g., Neo4j) is available.
+**Key Deliverable:** Functional, visualized, and containerized prototype.
