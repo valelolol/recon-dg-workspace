@@ -1,0 +1,52 @@
+{
+  "_demo_fixture": "Demonstration fixture — inventory scan result. Synthetic data; not a production output.",
+  "schema_version": "0.1",
+  "scan_id": "65dc7956-41a0-480c-b480-a6e4588dabee",
+  "created_at": "2026-09-16T12:00:00.000Z",
+  "status": "complete",
+  "input": {
+    "type": "directory",
+    "filename": "requirements.txt",
+    "format": "requirements.txt"
+  },
+  "analysis_mode": "inventory",
+  "topology_status": "unavailable",
+  "packages": [
+    {
+      "id": "pkg-001",
+      "name": "requests",
+      "version": "2.31.0",
+      "hash": null
+    },
+    {
+      "id": "pkg-002",
+      "name": "urllib3",
+      "version": "2.0.4",
+      "hash": null
+    },
+    {
+      "id": "pkg-003",
+      "name": "certifi",
+      "version": "2023.7.22",
+      "hash": null
+    }
+  ],
+  "edges": [],
+  "vulnerability_lookup": {
+    "status": "not_run",
+    "total_packages": 3,
+    "checked_package_ids": [],
+    "matched": 0
+  },
+  "findings": [],
+  "risk": {
+    "status": "unavailable",
+    "score": null,
+    "method": null,
+    "reason": "Dependency topology is unavailable; edges could not be resolved from inventory scan."
+  },
+  "warnings": [
+    "Topology status is unavailable; risk scoring cannot be performed.",
+    "Vulnerability lookup was not requested for this demonstration."
+  ]
+}

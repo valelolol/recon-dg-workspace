@@ -1,0 +1,76 @@
+{
+  "_demo_fixture": "Demonstration fixture — synthetic dependency graph scan result. Uses fictional package names; not a production output. This example defines an intended interface; a serializer connecting the existing parser to this format has not yet been implemented.",
+  "schema_version": "0.1",
+  "scan_id": "823a64b1-9530-45eb-bbbd-e2dc3518386d",
+  "created_at": "2026-09-16T14:00:00.000Z",
+  "status": "partial",
+  "input": {
+    "type": "directory",
+    "filename": "synthetic-graph-v1.json",
+    "format": "synthetic-graph"
+  },
+  "analysis_mode": "dependency_graph",
+  "topology_status": "known",
+  "packages": [
+    {
+      "id": "pkg-001",
+      "name": "synth-utils",
+      "version": "1.3.0",
+      "hash": null
+    },
+    {
+      "id": "pkg-002",
+      "name": "synth-network",
+      "version": "2.1.0",
+      "hash": null
+    },
+    {
+      "id": "pkg-003",
+      "name": "synth-utils",
+      "version": "1.3.0",
+      "hash": null
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-001",
+      "source_id": "pkg-001",
+      "target_id": "pkg-002",
+      "type": "runtime"
+    },
+    {
+      "id": "edge-002",
+      "source_id": "pkg-002",
+      "target_id": "pkg-003",
+      "type": "runtime"
+    }
+  ],
+  "vulnerability_lookup": {
+    "status": "partial",
+    "total_packages": 3,
+    "checked_package_ids": ["pkg-001", "pkg-002"],
+    "matched": 1
+  },
+  "findings": [
+    {
+      "id": "find-001",
+      "package_id": "pkg-002",
+      "advisory_source": "synth-advisory-db",
+      "advisory_id": "SYNTH-2026-0042",
+      "severity": null,
+      "title": "Synthetic prototype advisory for demonstration",
+      "description": "This is a synthetic advisory used solely for demonstrating the scan result contract. It does not represent a real vulnerability and its advisory ID is not a real identifier."
+    }
+  ],
+  "risk": {
+    "status": "unavailable",
+    "score": null,
+    "method": null,
+    "reason": "scoring_method_pending"
+  },
+  "warnings": [
+    "Vulnerability lookup status is partial: 2 of 3 packages were checked. pkg-003 was not checked.",
+    "Severity for finding find-001 is null — advisory source did not provide a numeric score.",
+    "Risk scoring is unavailable — scoring method has not been configured."
+  ]
+}
