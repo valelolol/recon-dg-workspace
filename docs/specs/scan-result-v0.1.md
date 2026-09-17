@@ -5,9 +5,10 @@
 This document defines the canonical JSON schema for scan results produced by
 the recon-dg dependency risk analysis engine. It covers inventory scans
 (package discovery) and full dependency graph scans that include advisory
-lookups and risk scoring. These examples define an intended interface;
-a serializer connecting the existing parser to this format has not yet
-been implemented.
+lookups and risk scoring.
+
+The inventory serializer (`src.reporter.inventory.serialize_inventory`) is
+implemented. The full dependency-graph serializer remains unimplemented.
 
 ## Schema
 
@@ -31,10 +32,13 @@ been implemented.
 
 | Field               | Type    | Notes                               |
 |---------------------|---------|--------------------------------------|
-| type                | string  | `"directory"`, `"lockfile"`, `"manual"` |
+| type                | string  | `"directory"`, `"lockfile"`, `"manual"`, `"file"` |
 | filename            | string  | The scanned file or entry name       |
 | format              | string  | Input format (e.g. `"requirements.txt"`, `"synthetic-graph"`) |
 | environment         | object? | Optional metadata about the scanned environment |
+
+Inventory serialization uses `input.type: "file"` for requirements.txt.
+This corrects the original omission of `"file"` from the allowed types.
 
 ### Packages
 
@@ -152,7 +156,15 @@ the data is synthetic and not a production output.
 ### Timestamps
 
 All timestamps MUST use UTC (`Z` suffix) and ISO-8601 format.
+The serializer accepts YYYY-MM-DDTHH:MM:SS with optional fractional
+seconds and exactly one trailing Z. Invalid calendar/time values,
+date-only strings, repeated Z, and additional timezone offsets are rejected.
 
 ### Paths
 
 All path fields MUST be relative. Absolute host paths are prohibited.
+
+### Error Handling
+
+Missing input files raise `FileNotFoundError`. Other read or I/O failures
+may raise `OSError` (also available under the alias `IOError`).
