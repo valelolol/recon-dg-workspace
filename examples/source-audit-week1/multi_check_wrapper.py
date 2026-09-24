@@ -110,7 +110,7 @@ def run_bandit_check(source_path: str, check_id: str) -> tuple[int, subprocess.C
     Returns:
         tuple: (exit_code, completed_process)
     """
-    venv_path = os.path.join(os.getcwd(), ".venv")
+    venv_path = os.path.join("/home/vale/projects/recon-dg-workspace", ".venv")
     cmd = [
         os.path.join(venv_path, "bin", "bandit"),
         "-f", "json",
@@ -328,9 +328,9 @@ Examples:
         print(f"Report written (validation failed): {report_path.resolve()}")
         sys.exit(2)
 
-    # Check if Bandit is available
+    # Check if Bandit is available in project venv
     try:
-        venv_path = os.path.join(os.getcwd(), ".venv")
+        venv_path = os.path.join("/home/vale/projects/recon-dg-workspace", ".venv")
         bandit_check = subprocess.run(
             [os.path.join(venv_path, "bin", "bandit"), "--version"],
             capture_output=True,
