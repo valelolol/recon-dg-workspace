@@ -8,10 +8,10 @@ Current security methods are reactive, assessing only known CVEs and failing to 
 
 | Module | Description |
 | --- | --- |
-| `src/parser` | Ingests and normalizes dependency manifest formats (e.g., `requirements.txt`, `package.json`) into an intermediate representation for downstream graph construction. |
+| `src/parser` | Ingests and normalizes dependency manifest formats (e.g., `requirements.txt`, `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`) into shared `DependencyGraph` IR. |
 | `src/models` | Defines the directed, weighted graph data structures representing component dependencies, their relationships, and associated metadata. |
-| `src/engine` | Implements the core risk-scoring algorithms, traversing the dependency graph to compute the PHEI (Predictive Vulnerability) Index for each component and the system as a whole. |
-| `src/reporter` | Generates human-readable risk summaries and structured output, including predicted exploitation pathways and visualizable graph representations for dashboard integration. |
+| `src/engine` | Implements the core risk-scoring algorithms (NVD API integration, OSV fallback, rate-limiting, caching) and PHEI path-maximum scoring formula. |
+| `src/reporter` | Generates structured JSON reports, human-readable summaries, and LLM explanations with deterministic fallback behavior. |
 
 ## Graph Schema
 
@@ -22,14 +22,55 @@ Current security methods are reactive, assessing only known CVEs and failing to 
 
 ## Risk Scoring
 
-`calculate_systemic_risk(graph)` in `src/engine/risk_analyzer.py` computes a single aggregate score (capped at 10.0) through three stages:
+**PHEI (Predictive Vulnerability) Index** — Path-maximum scoring with functional-domain multipliers.
 
-1. **Max CVE severity per node** — for each node, `get_cve_severity()` looks up its `{CVE ID: severity}` dict (currently from a hardcoded `MOCK_CVE_DB`; in production this would query NVD/OSV), and the node's risk is the maximum severity value across all its CVEs (0.0 if none).
-2. **Betweenness centrality** — computed over the underlying NetworkX digraph via `betweenness_centrality()`; it measures how often a node lies on shortest paths between all other node pairs, serving as a proxy for the node's structural importance in the dependency network.
-3. **Weighted edge formula** — for every edge `(source, target)` with weight `w`, the dynamic risk is `w × (source_vuln + target_vuln) × (source_c × target_c + 1.0)`, where `vuln` is the node's max CVE severity and `c` is its betweenness centrality. The sum of all edge risks is averaged over the number of edges, amplified by `√(node_count)`, and capped at 10.0.
+Formula: `PHEI(G) = max_P [ (Σ_edge_weights(P)) × ImpactMultiplicity(P) ]`
 
-The formula heavily penalizes edges between two highly vulnerable, central components — the very pattern that defines a systemic risk pathway.
+### Implementation Stages:
+1. **Max CVE severity per node** — `get_cve_severity()` queries NVD API (with OSV fallback for npm/PyPI/Go/Rust), returning `{CVE_ID: severity}` dict. Node risk = max severity across CVEs (0.0 if none).
+2. **Path traversal** — All paths from leaf nodes to critical assets are enumerated via NetworkX.
+3. **Edge weight accumulation** — For each path P, sum edge weights `w_uv` (dependency criticality, trust boundaries, interaction depth).
+4. **Impact multiplicity** — Paths traversing multiple functional domains (Network → Auth → File I/O) receive exponential multiplier.
+5. **PHEI calculation** — Maximum path risk across all paths determines systemic risk, capped at 10.0.
 
-## Known Divergences
+The implementation penalizes the most dangerous single pathway, not the sum of all risks. This matches the threat model: catastrophic failure emerges from the weakest link in the longest chain, not cumulative exposure.
 
-The design specification (`docs/specs/design_spec.md`) defines PHEI as `max over all paths P` in the graph of a path-based risk product, i.e., the most dangerous single path determines the system risk. `risk_analyzer.py`, however, **sums weighted edge risk across the entire graph**, averages it over edge count, and amplifies by `√(node_count)`. This is a fundamentally different aggregation strategy — path-maximum vs. global-sum — and needs to be resolved to ensure the implementation matches the intended threat model.
+## Agent Layer
+
+The `src/agent` module provides optional, pluggable LLM-generated explanations using a configured local endpoint or API key. Deterministic scan orchestration and risk scoring operate independently. Structured reports persist when no model is configured, with deterministic plain-language fallback. Hermes is a development tool and is not a runtime dependency of recon-dg.
+
+## Architecture Decisions
+
+### **Scoring Formula Resolution (2026-09-17)**
+
+**Decision:** Adopt path-maximum scoring (PHEI Index) over global-sum.
+
+**Rationale:**
+- The threat model defines catastrophic failure as emerging from the weakest link in the longest chain, not cumulative exposure
+- Global-sum averages risk across all edges, diluting critical pathway signals
+- Path-maximum identifies the single most dangerous exploitation route
+- Functional-domain multipliers amplify paths crossing trust boundaries (e.g., Network → Auth → File I/O)
+
+**Implementation:**
+- `calculate_path_weight()` computes sum of edge risks along each path
+- `calculate_impact_multiplicity()` adds exponential factor for paths crossing multiple functional domains
+- `calculate_systemic_risk()` implements PHEI: `max_P [sum_edge_weights(P) × ImpactMultiplicity(P)]`
+- Documented in `ARCHITECTURE.md`
+
+**Alignment:** Matches `docs/specs/design_spec.md` Section 3 formula.
+
+## NVD/OSV Integration
+
+The `src/engine/nvd_client.py` module implements:
+- **NVD API client** with rate-limiting (`RateLimiter`), exponential backoff, and `CachedResponse`
+- **OSV API fallback** for npm/PyPI/Go/Rust ecosystems
+- **Key format:** `{ecosystem}:{package}:{version}:{cve_id}`
+- **Severity normalization:** NVD CVSS → OSV severity → PHEI scale
+
+## Reporter Interface
+
+The `src/reporter/` module provides:
+- **`RiskReport` dataclass** with structured JSON schema (report_id, timestamp, risk_delta, detailed_findings, recommendations)
+- **`explanation_prompt_design.md`** for LLM-generated human-readable summaries
+- **Deterministic fallback** when external APIs fail (unverified flag, 30% confidence reduction)
+- **Tests:** 18 pytest cases validating schema compliance, risk calculation, and determinism

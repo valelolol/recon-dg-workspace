@@ -18,6 +18,7 @@ class DependencyGraph:
         self.graph = nx.DiGraph()
         self.nodes: dict[tuple[str, str], DependencyNode] = {} # Key: (package, version)
         self.edge_weights: dict[tuple[str, str], float] = {} # Key: (source, target)
+        self.edge_availability: str = "none"  # "known" | "unavailable" | "none"
 
     def add_node(self, node: DependencyNode):
         key = (node.package_name, node.version)

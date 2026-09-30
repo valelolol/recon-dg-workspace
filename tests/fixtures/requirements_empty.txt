@@ -1,0 +1,1 @@
+# Test fixture: valid but empty requirements.txt

@@ -1,20 +1,13 @@
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-dist/
-*.egg-info/
-.venv/
-venv/
-env/
+*.pyc
+*.pyo
 .pytest_cache/
-.ruff_cache/
-.coverage
-htmlcov/
-.env
-.DS_Store
-*.swp
-.idea/
-.vscode/
+.venv/
+# Dev artifacts — generated scan/output, do not commit
+output/
+test_output/
+test.py
+# Generated JSON reports (regenerate from the scanner)
+*.report.json
+comprehensive_report.json
+vuln_report.json
