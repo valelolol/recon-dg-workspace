@@ -3,7 +3,11 @@ Source Audit Pipeline Demo — Week 1
 
 Pipeline Overview
 -----------------
-This demonstration implements the core scan-pipeline workflow for RECON-DG:
+This demonstration implements the source-audit pipeline for the RECON-DG
+supporting sub-track (Bandit static analysis of Python source code). It is
+distinct from the dependency risk mapper, which is the December deliverable
+(dependency inventory → known-CVE lookup → PHEI systemic-risk scoring →
+dashboard + AI explanations):
 
     input file → analysis engine (Bandit) → structured findings → JSON report
 
