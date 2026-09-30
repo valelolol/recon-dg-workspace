@@ -101,8 +101,9 @@ Kept separate from dependency findings. See `examples/source-audit-week1/` and
 
 - **T-SA-03 Christian** — `tests/test_harness.py` + example pairs + results table:
   fix path / `-ll` flag / B704→B301; assert on `test_id` (never `test_name`); add
-  shell/B602 + SQL/B608 pairs; cover all 5 rules + unsupported-rule→error; build the
-  evidence table; prove the 3 Month-1 checks (vuln→finding, safe→none, unsupported→error).
+  shell/B602 + SQL/B608 pairs; cover the 4 tested rules (B307, B301, B602, B608)
+  as 8 vulnerable/secure cases, plus unsupported-rule→error; build the evidence
+  table; prove the 3 Month-1 checks (vuln→finding, safe→none, unsupported→error).
   Handoff: `HANDOFF_CHRISTIAN.md`.
   - [ ] Fix examples path: `Path(__file__).parent.parent / \"examples\" /
     \"source-audit-week1\"`.
@@ -118,17 +119,28 @@ Kept separate from dependency findings. See `examples/source-audit-week1/` and
     `-ll` + expects B704 for pickle).
 
 ### Shared source-audit contract (single source of truth)
-- **Rule = JSON `test_id`.** `test_name` is *always* the literal string `"blacklist"`.
-  Never read the rule from `test_name`.
+- **Rule = JSON `test_id`.** `test_name` is **not** a reliable rule ID — its value
+  varies by rule/version (e.g. `blacklist` for B307/B301,
+  `subprocess_popen_with_shell_equals_true` for B602,
+  `hardcoded_sql_expressions` for B608). Never read the rule from `test_name`.
 - **Exit codes — `rc=5` does NOT exist:** `0`=clean (missing file → rc=0 with `errors`
   populated) · `1`=**findings** · `2`=internal error · `3`=unknown.
 - **Any rc ≥ 2 = error state — report it; NEVER turn it into "0 vulnerabilities."**
-- **CLI shape (bare rule IDs only; no `-ll`):**
-  `bandit -f json -t B602 /path/to/file.py`  (`-ll` is invalid; `-c` is `--config-file`
-  (INI), not a rule.)
+- **"Clean" is composite, not just `rc=0`:** a scan is clean only when the process
+  result AND the JSON agree — `rc=0` **and** valid JSON **and** an empty `results`
+  list **and** no entries in `errors`. A missing file also returns `rc=0` (with
+  `errors` populated), so `rc=0` alone is **not** proof of success.
+- **CLI shape (bare rule IDs only):** `bandit -f json -t B602 /path/to/file.py`
+  (`-c` is `--config-file` (INI), not a rule. `-ll` *is* a valid severity filter —
+  it reports **medium-or-higher** only and **omits low-severity findings** — so it
+  is omitted here; use no severity flag when low-severity findings must be measured.)
 - **Canonical rule table (Bandit 1.9.4, verified):** B307=eval/exec, B301=pickle
-  deserialization, B602=shell command injection, B608=SQL injection,
-  B704=markupsafe XSS (NOT deserialization).
+  deserialization, B602=shell command injection (NOT `os.system` — that is B605),
+  B608=SQL injection, B704=markupsafe XSS (NOT deserialization).
+- **Four tested rules vs eight cases:** the 8-case harness (T-SA-03) tests the four
+  rules B307, B301, B602, B608 — each vulnerable and secure (4 × 2 = 8). B704 is a
+  fifth rule in the table but is **not** tested in the 8-case harness; do not
+  describe the harness as "5 rules."
 
 ## Phase 1: Parser (Multi-format Manifest Support) — December-critical → T-DE-01
 Owner: Vale. Depends: shared `DependencyGraph` IR (T-DE-03 schema).
@@ -200,7 +212,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
   bug (`"1474 results"`); `scan_demo.py` crashes (`NameError: venv_path`);
   `test_harness.py` does not run. Corrections in flight — **Nick** = rule mapping +
   `docs/security-checks.md` (T-SA-02); **Christian** = harness (path, `-ll` flag,
-  B704→B301, cover 5 rules) + new shell/B602 & SQL/B608 example pairs (T-SA-03).
+  B704→B301, 4 tested rules / 8 cases) + new shell/B602 & SQL/B608 example pairs (T-SA-03).
   This is the supporting track, **not** the December deliverable.
 
 > Test counts are **historical/unverified** unless re-run: an earlier note recorded

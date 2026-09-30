@@ -15,7 +15,7 @@ No completion percentages are quoted; status is per task ID.
 
 ## Blockers (as of Sep 30)
 - `tests/test_nvd_integration.py` previously failing (68/79, historical — not re-run).
-- `test_harness.py` does not run (wrong examples path, invalid `-ll`, B704-for-pickle).
+- `test_harness.py` does not run correctly: wrong examples path (exits before scanning); the `-ll` flag (a *valid* Bandit severity filter that omits low-severity findings); and the pickle pair expects B704 (must be B301).
 - Dashboard, AI layer, and Docker not started (T-DE-04 / T-DE-03 AI-layer item / T-DE-05).
 
 ## Handoffs (beginner-friendly, one manageable assignment each)

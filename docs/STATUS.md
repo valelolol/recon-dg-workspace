@@ -2,10 +2,15 @@
 
 **Date:** 2026-09-30 (UTC)
 **Host:** vale-llm
-**Branch / HEAD:** `feat/inventory-report` / `c548f32`
-**Working tree:** doc changes only — untracked `AGENTS.md`, `docs/STATUS.md`,
-`docs/WEEKLY.md`; modified `TASKS.md` and `examples/source-audit-week1/README.md`.
-No implementation files touched.
+**Branch / HEAD:** `feat/inventory-report` / `f2303ee` (base at the start of this
+documentation cleanup; this commit adds the reconciliation on top of it)
+**Working tree:** clean at checkout (fetched and fast-forwardable; no local changes).
+This review edits documentation only — no scanner, test, example-pair, or
+teammate-deliverable files. It removes the two obsolete root handoffs
+(`HANDOFF_WEEK1_NICK_CHRISTIAN.md`, `WEEK1_DELIVERABLES_AND_PLAN.md`), adds a root
+`README.md`, and aligns the shared-contract statements (test_id vs test_name, the
+`-ll` severity floor, the clean-scan definition, 4 tested rules vs 8 cases, and
+os.system=B605 not B602).
 
 ## Scope
 RECON-DG identifies project dependencies, checks known vulnerabilities (NVD + OSV),

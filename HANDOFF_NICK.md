@@ -21,7 +21,10 @@ Known issue (verify against the current tree before editing): `src/scanner/bandi
 - **Rule = JSON `test_id`.** The `test_id` field carries the rule ID (e.g. `B608`). `test_name`'s value varies by rule/version — never infer the rule from `test_name`.
 - **Exit codes — `rc=5` does not exist:** `0`=no findings · `1`=findings · `2`=internal error · `3`=unknown; `rc ≥ 2` = error, never "0 vulnerabilities."
 - **A run is "clean" only when the process result AND the JSON agree:** `rc=0` *and* an empty `results` list *and* no entries in `errors`. `rc=0` alone is **not** proof of success — a missing file also returns `rc=0` (with `errors` populated), and a bad invocation can return `rc=0` without a real result. Check both.
-- **CLI shape (bare rule IDs only; no `-ll`):** `bandit -f json -t B602 /path/to/file.py` (`-ll` is invalid; `-c` is `--config-file`/INI, not a rule).
+- **CLI shape (bare rule IDs only):** `bandit -f json -t B602 /path/to/file.py`
+  (`-c` is `--config-file`/INI, not a rule. `-ll` is **valid** — it is a severity
+  filter for medium-or-higher only — so it is omitted here; it would **omit
+  low-severity findings**, e.g. B608, which we must measure.)
 
 ## 2. Files you own and prerequisites
 
