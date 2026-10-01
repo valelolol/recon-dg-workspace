@@ -45,7 +45,7 @@ the tree — treat it as not done until verified.
 | T-DE-01 | Parser: multi-format manifest support | Core | Vale | In progress | v0.1 contract (done) |
 | T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | In progress | T-DE-01, T-DE-03 |
 | T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | In progress | T-DE-01, T-DE-02 |
-| T-DE-04 | Dashboard: graph + risk + per-package view | Core | Team | Not started | T-DE-02, T-DE-03 |
+| T-DE-04 | Dashboard: graph + risk + per-package view | Core | Aliyan (provisional) | Not started | T-DE-02, T-DE-03 |
 | T-DE-05 | Docker packaging + local compose | Core | Team | Not started | T-DE-04 |
 | T-SA-01 | Scanner pipeline (Bandit) → correct report | Supporting | Vale | In progress (unverified) | shared contract (done) |
 | T-SA-02 | Check config + security-checks docs | Supporting | Nick | In progress (unverified) | shared contract (done) |
@@ -55,7 +55,92 @@ Handoffs: **T-SA-02** → `HANDOFF_NICK.md`. **T-SA-03** → `HANDOFF_CHRISTIAN.
 Shared contract lives in `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md`
 §"Shared contract".
 
+## M-DE-CORE — One-Week Core Dependency-Risk Report (local edit; uncommitted)
+
+Goal: one command → a **v0.1 `report.json`** with **no live NVD/OSV calls**, in two
+modes:
+- **Mode A — inventory** (unchanged): `requirements.txt` → edgeless graph,
+  `analysis_mode: inventory`, `topology_status: unavailable`, `edges: []`, risk unavailable.
+  Acceptance: existing fields/behavior preserved and existing tests pass.
+- **Mode B — dependency-graph** (new this week): a clearly-labeled synthetic
+  `known_topology.json` + `cve_fixture.json` → graph with `edge_availability: known`
+  → **topology-based PHEI** score (**6.0**) → `report.json` (packages, edges,
+  `findings`, `vulnerability_lookup`, `warnings`) + a static HTML
+  view (`report.html`, no framework).
+
+**Score wording (all outputs must carry it):** *"This is a labeled synthetic
+dependency-risk demo. Graph and CVE data are fictional fixtures. The PHEI score
+6.0 is topology-based (edge weights × node multiplicity). Advisory severity is
+unspecified — `findings[].severity` is `null` per v0.1 — and is NOT included in the
+score because the edge-weight function w_uv is undefined (design_spec §3). This is a
+topology PHEI report, not a complete vulnerability-risk score."*
+
+**Out of scope this week:** live NVD/OSV, the full dashboard framework (Phase 4
+Flask+D3 is T-DE-04's December meaning and is preserved, not rewritten — the viewer
+is a provisional spike toward it), the AI layer, Docker, severity-in-score, and
+LOW/MEDIUM/HIGH/CRITICAL labels (level thresholds deferred).
+
+**Contract checkpoint C0 (sign before parallel work):** the Mode B field mapping
+below. All emitted fields are spec-defined v0.1 fields — **no out-of-spec extension
+is emitted this week**; a risk-path field (e.g. `top_risk_path`) is deferred to a
+separate schema decision.
+
+| Subtask | Parent | Owner | Owned file(s) — exactly one owner each | First checkpoint | Acceptance |
+|---------|--------|-------|----------------------------------------|------------------|------------|
+| W1-DE-01.F | T-DE-01 | Nick | `examples/fixtures/known_topology.json` | Fixture loads; 3 unique nodes, 2 directed unit-weight edges; labeled synthetic | Round-trips to a `known` graph; no duplicate IDs |
+| W1-DE-02.S | T-DE-02 | Nick | `examples/fixtures/cve_fixture.json`, `docs/limitations.md` | Fixture loads; IDs `SYNTH-2026-xxxx`; limitations note names source + severity-not-in-score limit | Synthetic-labeled; no real identifiers |
+| W1-DE-01.L | T-DE-01 | Vale | `src/parser/parser.py` | `load_known_topo_json()` → graph `edge_availability="known"`; correct nodes/edges/weights | `calculate_phei` on it == 6.0; `parse_requirements` untouched |
+| W1-DE-02.R | T-DE-02 | Vale | `src/engine/risk_analyzer.py`, `src/reporter/report_generator.py` | `calculate_phei` returns the argmax scalar score (6.0); `generate_report` calls PHEI (path-max), not `calculate_systemic_risk` (global-sum); `w_uv` logged as OPEN | Score numerics preserved (6.0) and invariant to severity; no formula change/invented; no path field emitted; severity not in score |
+| W1-DE-03.R | T-DE-03 | Vale | `src/reporter/inventory.py`, `src/cli.py`, `examples/fixtures/sample_risk_report.json` | `sample_risk_report.json`: `input.type=="file"`, `input.format=="synthetic-graph"`, `risk.score==6.0`, `method=="phei"`, 3 findings, synthetic-labeled, no path field | Matches v0.1; Mode A fields/behavior preserved + existing tests pass; offline, deterministic |
+| W1-DE-04.V | T-DE-04 | Aliyan (provisional) | `src/dashboard/view.py` | `view.py <report.json>` → `report.html`: packages, edges, score, findings; **no level labels** | Data-driven; no framework; numeric score + status only |
+| W1-DE-03.T | T-DE-02/03 | Christian | `tests/test_e2e_risk.py`, `docs/E2E_EXPECTED_RESULTS.md` | Passing offline test asserts the 6.0 reference (and no path field) | Deterministic; byte-identical on fixed seed |
+| — | T-SA-01/02/03 | — | (unchanged) | — | **Non-gating this week; course requirement UNKNOWN (pending confirmation).** |
+
+**Resolved field mapping (all spec-supported; see STATUS.md Verified/Proposed/Unverified):**
+- `input = { type: file, filename: "known_topology.json", format:
+  "synthetic-graph" }` — the known-topology case is a JSON file, so its `type` is
+  `file`; `format` is a free string and `synthetic-graph` is a spec-valid value (the
+  spec lists it as an example; the committed demo uses it). `type` is a separate
+  field with enum `directory`/`lockfile`/`manual`/`file`.
+- `analysis_mode: dependency_graph`, `topology_status: known`.
+- `packages[]`: id, name, version, hash (null). `edges[]`: id, source_id, target_id,
+  type (edge weight is an input consumed by PHEI, not an output field).
+- `vulnerability_lookup`: `{ status, total_packages, checked_package_ids, matched }`
+  only — **no `advisory_source`** in the lookup (it belongs on each finding, not the
+  lookup). `matched` = the number of **distinct** package IDs with at least one finding
+  — 3 here only because each of the 3 findings is on a different checked package.
+- `findings[]`: one per synthetic advisory — required `id`, `package_id` (references a
+  checked package), `advisory_source` (e.g. `synthetic-fixture`), `advisory_id`
+  (`SYNTH-2026-xxxx`), `severity` **`null`** (v0.1 defines no severity values yet),
+  `title`, `description` (marked synthetic). Synthetic findings are included; severity
+  is unspecified and does not affect the score.
+- `risk`: `{ status: available, score: 6.0, method: phei, reason }` — risk status enum
+  is `available`/`unavailable` (NOT `complete`); `available` here because a numeric
+  PHEI score is present. Reason: topology-based (edge weights × node multiplicity); severity
+  is unspecified (`findings[].severity` is `null`) and is not in the score.
+- **No path field emitted.** v0.1 defines no risk-path field; a risk-path (e.g. a
+  `top_risk_path`) is **not** part of this week's report and is deferred to a
+  separate schema decision. **`packages[].risk_score`: deferred** (node-level PHEI
+  undefined; emitting it would require inventing a definition).
+- `warnings[]`: carries (a) "CVE/advisory data is a synthetic fixture, not a live
+  lookup; `findings[].severity` is unspecified (`null`) and not in the score; the edge-
+  weight function w_uv is an open decision."
+
+**PHEI argmax (how the 6.0 is obtained; no path field is emitted this week):**
+`calculate_phei` computes each path's value as
+`path_phei = sum_edge_weights(P) × impact_multiplicity(P)` and returns the scalar
+maximum (`max_path_phei`). For the 3-node unit chain (A→B, B→C): 2 edges × 1.0 =
+path weight 2.0, × 3 nodes = 6.0. The score is this argmax value, capped at 10.0,
+and is invariant to CVE severity (severity is `null` per v0.1 and does not enter the
+score).
+`calculate_phei` returns **only the scalar score** — its return shape is **unchanged**.
+v0.1 defines **no** risk-path field, so no path (e.g. a `top_risk_path`) is emitted,
+rendered, or asserted in this week's report or tests. Any risk-path output is a
+**proposed** out-of-spec addition to be decided separately (not this week); it is
+deferred, not added.
+
 ## Supporting sub-track: Source-Audit / Bandit (Week 1, NOT the December core)
+
 
 Kept separate from dependency findings. See `examples/source-audit-week1/` and
 `src/scanner/bandit_config.py`. Month-1 scope:

@@ -5,7 +5,7 @@
   "created_at": "2026-09-16T12:00:00.000Z",
   "status": "complete",
   "input": {
-    "type": "directory",
+    "type": "file",
     "filename": "requirements.txt",
     "format": "requirements.txt"
   },
