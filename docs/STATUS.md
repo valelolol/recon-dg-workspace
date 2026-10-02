@@ -1,15 +1,17 @@
 # STATUS — Recon-DG
 
-**Date:** 2026-10-01 (UTC)
+**Date:** 2026-10-02 (UTC)
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
-**Baseline HEAD (start of this documentation session, tree clean):** `1524425`
-  ("Publish reviewed M-DE-CORE plan and four handoffs" — a docs-only commit; the
-  *implementation* state is identical to the preceding commit `5b8a1f7`, where the
-  verified executions below were run).
+**Published baseline:** `6323285` ("docs: publish current team handoffs and clean up
+  obsolete guidance", 2026-10-02, docs-only) — the current live state of
+  `feat/inventory-report`.
 **Remote:** `git ls-remote` (read-only) confirms `origin/feat/inventory-report` ==
-  `1524425`; the local tracking ref also matches. Verified against the live remote
-  in this session.
+  `6323285`; the local tracking ref matches. Verified against the live remote.
+*Historical prior states (label only; not the current state):* the docs-only handoff
+  publish commit `1524425` (2026-10-01), and the implementation baseline `5b8a1f7` —
+  the executed verifications below (PHEI == 6.0, pytest 79 passed) date to `5b8a1f7`
+  and remain *historical* unless re-run.
 **This session:** documentation + verification only. **No** scanner, test, example-pair,
 fixture, dependency-manifest, or code edited. The edits made this session are **uncommitted**:
 The four M-DE-CORE handoffs were rewritten; this week's cleanup **removed** the two
@@ -26,7 +28,7 @@ dashboard and AI explanations grounded in the findings. Inventory-only input mus
 produce invented dependency edges; risk scoring requires explicitly "known" topology.
 Bandit source auditing is a supporting sub-track, **not** the December deliverable.
 
-## Current state (docs-only session, HEAD `1524425`)
+## Current state (HEAD `6323285`)
 
 - **Onboarding / handoffs:** rewritten for complete beginners on individual machines
   (Windows PowerShell and Linux/macOS routes in `docs/TEAM_ONBOARDING.md`).
@@ -51,8 +53,8 @@ Bandit source auditing is a supporting sub-track, **not** the December deliverab
   **not** exist in the tree. The reference `report.json` is **not** checked in. This is a
   prerequisite for Christian's E2E assertion and Aliyan's viewer — see the handoffs.
 
-## Evidence-supported implementation progress (verified at HEAD `5b8a1f7`; unchanged
-by the docs-only commit `1524425`)
+## Evidence-supported implementation progress (verified at HEAD `5b8a1f7`; unchanged by
+the docs-only commits `1524425` and `6323285`)
 
 - **Parser (T-DE-01):** `requirements.txt` done + `build_mock_graph()` (3-node unit
   chain A→B→C, edge weights 1.0). Known-topology loader **not yet built**
@@ -71,7 +73,7 @@ by the docs-only commit `1524425`)
   Nick (T-SA-02) and Christian (T-SA-03) own the corrections — see the T-SA-02 /
   T-SA-03 sections of `TASKS.md` (the source-audit handoff files were removed this week).
 
-## Blockers (as of HEAD `1524425`)
+## Blockers (as of HEAD `6323285`)
 
 - Mode B (dependency-graph serializer) does not exist yet — required to emit the 6.0 report
   (W1-DE-03.R).

@@ -55,7 +55,7 @@ Bandit handoff files (`HANDOFF_NICK.md`, `HANDOFF_CHRISTIAN.md`) were removed th
 
 ## M-DE-CORE — One-Week Core Dependency-Risk Report
 
-> **Status:** the *plan* below is committed (HEAD `1524425`). The *implementation* it
+> **Status:** the *plan* below is committed (HEAD `6323285`). The *implementation* it
 > describes (known-topology loader, Mode B serializer, `src/cli.py`, viewer, reference
 > output, E2E test) is **not in the tree yet** — these are the deliverables the handoffs
 > assign. Do not read any file below as "already built."
@@ -354,18 +354,22 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 ## Status
 
-### Current baseline (this documentation session)
-- **Date:** 2026-10-01 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `1524425`
-  ("Publish reviewed M-DE-CORE plan and four handoffs").
-- **Working tree (pre-edit):** clean.
+### Current baseline (published HEAD `6323285`, 2026-10-02)
+- **Date:** 2026-10-02 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `6323285`
+  ("docs: publish current team handoffs and clean up obsolete guidance").
+- **Prior baseline (historical):** `1524425` ("Publish reviewed M-DE-CORE plan and four
+  handoffs", 2026-10-01) — the docs-only commit that published the plan and the four
+  handoffs; implementation code was unchanged by it.
+- **Working tree:** this session's documentation edits are present but **uncommitted**
+  (see `docs/STATUS.md` for the file list).
 - **Remote:** the local `origin/feat/inventory-report` tracking ref matches HEAD at
-  `1524425`. No fresh network `git fetch` was performed in this session, so agreement
-  with the **live** remote is **not re-verified**.
+  `6323285`; verified this session (the push succeeded and the local remote-tracking
+  ref equals HEAD).
 - **This session:** documentation only (see `docs/STATUS.md` for the exact file list).
   Those edits are **uncommitted**.
 
 ### Implementation state (last independently confirmed at HEAD 5b8a1f7; unchanged by
-the four M-DE-CORE handoff commits at 1524425)
+the handoff commits at 1524425 and the docs-only cleanup commit at 6323285)
 - **Parser (T-DE-01):** `requirements.txt` done (1 of ~6 manifest formats).
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +

@@ -5,16 +5,22 @@ Move the **core** T-DE-01/02/03 path from "PHEI implemented" to "a small, demons
 dependency-risk report" using clearly-labeled synthetic fixtures and **no live API calls**.
 The Bandit sub-track (T-SA-01/02/03) stays **non-gating this week** (course requirement
 UNKNOWN — pending confirmation). No completion percentages are quoted; status is per task ID.
-The docs reviewed in this session (2026-10-01, HEAD `1524425`) are the *documentation-only*
+The docs reviewed in this session (2026-10-01, reviewed at HEAD `1524425`; published at
+HEAD `6323285`, 2026-10-02) are the *documentation-only*
 state: handoffs rewritten for complete beginners, README/TASKS/STATUS reconciled. No code,
 fixture, manifest, or test changed.
 
 ## Baseline (for the reader)
-- **Branch:** `feat/inventory-report`. **HEAD:** `1524425` ("Publish reviewed M-DE-CORE plan
-  and four handoffs", a docs-only commit). **Live remote** `origin/feat/inventory-report`
-  == `1524425` (verified this session via `git ls-remote`).
-- The *implementation* state is as of the preceding commit `5b8a1f7`; the verified
-  executions below (PHEI == 6.0, pytest 79 passed) are historical unless re-run.
+- **Branch:** `feat/inventory-report`. **HEAD:** `6323285` ("docs: publish current team
+  handoffs and clean up obsolete guidance", 2026-10-02, docs-only). **Live remote**
+  `origin/feat/inventory-report` == `6323285` (verified via `git ls-remote`).
+- *Historical prior HEAD (label only):* `1524425` ("Publish reviewed M-DE-CORE plan and
+  four handoffs", 2026-10-01) — the docs-only publish commit the earlier docs session
+  reviewed from.
+- The *implementation* code state is as of `5b8a1f7` (the last commit that changed
+  implementation code; both later docs-only commits, `1524425` and `6323285`, did not
+  alter it). The verified executions below (PHEI == 6.0, pytest 79 passed) date to `5b8a1f7`
+  and are *historical* unless re-run.
 
 ## Intended deliverable & acceptance criteria (M-DE-CORE)
 | Task ID | Owner | Deliverable | Acceptance criteria |
@@ -47,7 +53,7 @@ of synthetic fixtures and no live API.
 Nothing waits on a finished CLI; the reference sample is the single shared artifact the
 later three roles depend on.
 
-## Blockers (as of Oct 1, HEAD `1524425`)
+## Blockers (as of Oct 2, HEAD `6323285`)
 - **No reference `report.json` / `examples/fixtures/` in the tree.** This is the single
   gating prerequisite for Christian's byte-assertion and Aliyan's viewer. Must be produced
   by Vale (W1-DE-03.R). Without it, their "first checkpoints" are static-only.

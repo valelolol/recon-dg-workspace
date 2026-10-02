@@ -67,7 +67,7 @@ library, no Flask, no D3, no framework).
 
 Render, from the `report.json` argument, **only fields defined by the v0.1 spec**:
 - **Packages:** `id` / `name` / `version`.
-- **Edges:** `source` → `target`.
+- **Edges:** `source_id` → `target_id`.
 - **Risk:** the **numeric score** and the existing `risk.status`.
 - **Findings:** `id`, `advisory_source`, `advisory_id`, `title`, `description`.
 - **Warnings:** the synthetic warnings (they tell the reader the data is a fixture and the
@@ -116,13 +116,17 @@ grep -n "Low\|Medium:\|High:\|Critical:" /tmp/a.html   # expect: no severity LEV
   findings render as text.
 - **Windows PowerShell equivalent:**
   ```powershell
-  .\.venv\Scripts\python.exe src\dashboard\view.py .\..\..\..\..\tmp\scratch_synthetic_report.json -o .\..\..\..\..\tmp\a.html
-  .\.venv\Scripts\python.exe src\dashboard\view.py .\..\..\..\..\tmp\scratch_synthetic_report.json -o .\..\..\..\..\tmp\b.html
-  Compare-Object (Get-Content .\..\..\..\..\tmp\a.html) (Get-Content .\..\..\..\..\tmp\b.html)   # expect: empty
-  Select-String -Path .\..\..\..\..\tmp\a.html -Pattern 'Low|MEDIUM|High|Critical'
+  # sample and outputs live in the user temp folder ($env:TEMP)
+  $sample = Join-Path $env:TEMP "scratch_synthetic_report.json"
+  $a = Join-Path $env:TEMP "a.html"
+  $b = Join-Path $env:TEMP "b.html"
+  .\.venv\Scripts\python.exe .\src\dashboard\view.py $sample -o $a
+  .\.venv\Scripts\python.exe .\src\dashboard\view.py $sample -o $b
+  Compare-Object (Get-Content $a) (Get-Content $b)   # expect: empty
+  Select-String -Path $a -Pattern 'Low|MEDIUM|High|Critical'
   ```
-  (Adjust the relative path to where your scratch sample lives. On Windows, use the full
-  absolute path to `view.py` and the sample to avoid relative-path surprises.)
+  (The block above uses $env:TEMP for the scratch sample and outputs, so there
+  is no fragile relative path to adjust.)
 - **Open** `/tmp/a.html` (or the Windows output) in a browser: packages, edges, the numeric
   score, `risk.status`, and findings are all visible; no level words; any `null` severity
   renders as `"unspecified"`/blank.
