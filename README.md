@@ -15,16 +15,17 @@ vulnerabilities *inside the code scanned* (a useful extra signal and a pipeline/
 exercise). It must stay separate from dependency findings and must not displace the
 core track.
 
-## Key documents
+## Getting started (read this first)
 
-- [AGENTS.md](AGENTS.md) — startup/completion routine, evidence rules, routing
-- [TASKS.md](TASKS.md) — task register, phase plans, shared source-audit contract
-- [docs/STATUS.md](docs/STATUS.md) — current state (date, branch/HEAD, working tree)
-- [docs/WEEKLY.md](docs/WEEKLY.md) — weekly focus and acceptance criteria
-- [HANDOFF_NICK.md](HANDOFF_NICK.md) — active teammate instructions (T-SA-02)
-- [HANDOFF_CHRISTIAN.md](HANDOFF_CHRISTIAN.md) — active teammate instructions (T-SA-03)
-- `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md` — source-audit roadmap
-  (includes the verified shared contract)
+- **`docs/TEAM_ONBOARDING.md`** — how to clone the repo and set up **your own computer**
+  (Git + Python checks, a personal branch, a virtual environment, and how to validate
+  your JSON fixtures). It defines the ten terms you will meet and gives separate
+  PowerShell / terminal routes.
+- **`docs/WEEKLY.md`** — this week's (M-DE-CORE) focus, acceptance criteria, and the
+  **current** M-DE-CORE handoffs. It tells you which handoff is *active this week*.
+- **`TASKS.md`** — the task register (stable IDs), phase plans, and the shared
+  source-audit contract.
+- **`docs/STATUS.md`** — the current state (date, branch/HEAD, working-tree state).
 
 ## Two tracks — do not conflate
 
@@ -34,6 +35,32 @@ core track.
 | Engine | NVD/OSV + PHEI graph scoring | Bandit static analysis |
 | Location | `src/parser`, `src/models`, `src/engine`, `src/reporter`, `src/agent`, dashboard | `examples/source-audit-week1/`, `src/scanner/` |
 | Output | dependency risk paths + CVE findings | source-code findings (kept separate) |
+
+## Key documents
+
+- [docs/TEAM_ONBOARDING.md](docs/TEAM_ONBOARDING.md) — beginner setup on your own machine (read first)
+- [AGENTS.md](AGENTS.md) — startup/completion routine, evidence rules, routing
+- [TASKS.md](TASKS.md) — task register, phase plans, shared source-audit contract
+- [docs/STATUS.md](docs/STATUS.md) — current state (date, branch/HEAD, working tree)
+- [docs/WEEKLY.md](docs/WEEKLY.md) — weekly focus and acceptance criteria
+- **Current (M-DE-CORE, this week — active first):**
+  - `HANDOFF_NICK_MDECORE.md` — Nick · fixtures + limitations note (T-DE-01/02)
+  - `HANDOFF_CHRISTIAN_MDECORE.md` — Christian · offline tests + expected results (T-DE-02/03)
+  - `HANDOFF_VALE_MDECORE.md` — Vale · loader, PHEI/report integration, reference output (T-DE-01/02/03)
+  - `HANDOFF_ALIYAN_MDECORE.md` — Aliyan (provisional) · static viewer spike (T-DE-04)
+- **Supporting (source-audit, parked / non-gating this week — NOT the December deliverable):**
+  - The Bandit handoff files (`HANDOFF_NICK.md` / `HANDOFF_CHRISTIAN.md`) were removed this week.
+    Their task descriptions remain in `TASKS.md` (T-SA-01 / T-SA-02 / T-SA-03) and the shared
+    contract in `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md`. Read those only if you
+    are on the source-audit track.
+- [examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md](examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md)
+  — source-audit roadmap (includes the verified shared contract)
+
+> **Read the current handoff first.** `docs/WEEKLY.md` says which handoff is active
+> for the current week; the `HANDOFF_*_MDECORE.md` files are this week's. The older
+> source-audit handoffs (`HANDOFF_NICK.md` / `HANDOFF_CHRISTIAN.md`) were removed this
+> week (Bandit track **parked / non-gating this week**); their content lives in
+> `TASKS.md` and the Month-1 roadmap. Do not treat it as the December deliverable.
 
 ## Verified shared contract (source audit)
 

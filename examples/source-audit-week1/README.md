@@ -1,6 +1,22 @@
 Source Audit Pipeline Demo — Week 1
 =====================================
 
+> **HISTORICAL / NON-OPERATIONAL — do not run this as a live pipeline.**
+> These Week 1 demo files (`scan_demo.py`, `multi_check_wrapper.py`) are legacy
+> prototypes kept only to show the *pipeline shape* (input → engine → findings →
+> JSON report). They are **not operational** and must not be relied on or copied:
+> `scan_demo.py` crashes (`NameError: venv_path` is not defined), and
+> `multi_check_wrapper.py` mislabels the rule ID (`test_name` → `"blacklist"` instead of
+> `test_id`) and used a nonexistent `rc=5`.
+>
+> **Canonical shared contract (single source of truth) — read before touching any
+> scanner/config/harness code:** `RECON-DG_MONTH1_ROADMAP.md` §"Shared contract",
+> restated in `README.md` / `docs/STATUS.md`:
+> - Rule = JSON **`test_id`**, never `test_name`.
+> - Bandit exit codes: `0`=clean, `1`=**findings**, `2`=internal error, `3`=unknown;
+>   **`rc=5` does not exist**. Any `rc >= 2` is an **error state** — never "0 vulnerabilities."
+> - CLI: `bandit -f json -t <bare_rule_id> <file.py>` (bare rule IDs, no severity flag).
+
 Pipeline Overview
 -----------------
 This demonstration implements the source-audit pipeline for the RECON-DG
@@ -89,11 +105,20 @@ Each scan produces a JSON report in the following schema:
   "errors": []
 }
 
-Exit Codes
-----------
-- 0: Scan completed successfully with no findings
-- 1: Tool unavailable or internal error
-- 2: Input validation error (file not found, output conflicts with input)
+Exit Codes — Bandit (canonical contract)
+----------------------------------------
+- `0` — clean, no findings. A **missing file** also returns `rc=0` with `errors`
+  populated — so `rc=0` alone is **not** proof of success ("clean" is composite:
+  `rc=0` + valid JSON + empty `results` + empty `errors`).
+- `1` — **findings found** (e.g., the B307 eval/exec finding below).
+- `2` — internal error.
+- `3` — unknown / unrecognized.
+- **`rc=5` does not exist.** Any `rc >= 2` is an *error state* — report it as an
+  error, never turn it into "0 vulnerabilities."
+
+(These are **Bandit's** exit codes, which the legacy wrapper mirrors. The wrapper's
+*internal* report-status strings (`validation_failed`, `tool_unavailable`) are a
+separate, non-operational prototype detail.)
 
 What This Demonstrates
 ----------------------
@@ -103,7 +128,6 @@ This is ONE static check (B307: use of eval/exec). It demonstrates:
 2. Input validation: checking file existence, preventing output/input conflicts
 3. Structured reporting: consistent schema, deterministic output
 4. Error handling: clear distinction between "no issues" and "scan failed"
-5. Exit code semantics: B307 findings produce exit code 5, not failure
 
 This does NOT represent comprehensive vulnerability detection. Real-world usage
 would integrate multiple checks (Nick's domain) and validate results (Christian's domain).
