@@ -50,7 +50,7 @@ and are the #1 bug source in this repo:
 | Field | Meaning |
 |-------|---------|
 | **`test_id`** | The actual rule ID (e.g. `B602`). **This is the rule.** Read this. |
-| **`test_name`** | Always the literal string `"blacklist"`. It does **NOT** hold the rule. Never read the rule from it. |
+| **`test_name`** | **Not** a reliable rule ID — its value varies by rule/version (e.g. `blacklist` for B307/B301, `subprocess_popen_with_shell_equals_true` for B602, `hardcoded_sql_expressions` for B608). Never read the rule from it. |
 
 **Bandit exit codes (rc=5 does NOT exist):**
 
@@ -63,11 +63,16 @@ and are the #1 bug source in this repo:
 
 **Any rc >= 2 = scan error → report it as an error state. Never turn it into "0 vulnerabilities."**
 
-**CLI shape (bare rule IDs only; no `-ll`):**
+**CLI shape (bare rule IDs only):**
 
 ```bash
 bandit -f json -t B602 /path/to/file.py
 ```
+
+No severity flag is used. (`-l`/`-ll`/`-lll` *are* valid Bandit flags — they
+report low / medium-or-higher / high-or-higher severity **floors**. They are
+omitted here so **low-severity findings are not silently omitted**, e.g. B608 is
+LOW-confidence/MEDIUM-severity and would vanish under `-ll`.)
 
 ## Canonical rule table (wins over every other doc)
 
@@ -75,13 +80,19 @@ bandit -f json -t B602 /path/to/file.py
 |------|----------|-----------------|
 | B307 | eval / exec | `eval()`, `exec()` |
 | B301 | unsafe-deserialization | `pickle.loads` / `pickle.load` |
-| B602 | shell command injection | `subprocess`/`os.system` with user input |
+| B602 | shell command injection | `subprocess` calls with `shell=True` (NOT `os.system` — that is B605) |
 | B608 | SQL injection | raw `cursor.execute()` string concat |
 | B704 | markupsafe XSS | **(NOT deserialization!)** |
 
 > ⚠️ Earlier drafts of this doc listed *Shell → B608* and *Deserialization → B704*.
 > That was **backwards** and is wrong for Bandit 1.9.4. The table above is ground
-> truth. Bandit 1.9.4 emits **B301** for pickle and **B602** for `shell=True`.
+> truth. Bandit 1.9.4 emits **B301** for pickle and **B602** for `shell=True`;
+> `os.system` is **B605**, not B602.
+
+> **Four tested rules, eight cases (T-SA-03).** The harness tests **B307, B301,
+> B602 and B608** — each as a vulnerable and a secure example (4 × 2 = **8 cases**).
+> **B704** (markupsafe XSS) is the fifth rule in this table but is **not** one of
+> the four tested in the eight-case harness; do not describe the harness as "5 rules."
 
 ---
 
@@ -135,8 +146,10 @@ The demo must show three things:
   mapping (Shell→B608, Deser→B704). Correct to B602 / B301.
 
 ### Harness (Christian's)
-- ⚠️ `tests/test_harness.py` does **not run** — wrong examples path, invalid `-ll` flag,
-  and it expects B704 for the pickle example (must be B301).
+- ⚠️ `tests/test_harness.py` does **not run** correctly — wrong examples path (exits
+  before scanning); it also passes the *valid* `-ll` severity flag (which would
+  omit low-severity findings, e.g. B608) and it expects B704 for the pickle
+  example (must be B301).
 
 ---
 
@@ -167,7 +180,8 @@ December deliverable** — the dashboard + AI explanations are Phase 4/3, separa
 ## Next Steps (Immediate)
 
 1. **All three:** agree on the shared contract in the section above — `test_id`
-   (never `test_name`), exit codes (no rc=5), CLI shape (no `-ll`).
+   (never `test_name`), exit codes (no rc=5), and the CLI shape (bare rule IDs,
+   **no** severity flag so low-severity findings are measured).
 2. **Nick:** correct the config + docs mapping (B602 / B301), verify by hand.
 3. **Christian:** add the B602 (shell) and B608 (SQL) pairs; fix the harness; run the 3 checks.
 4. **Vale:** fix the scanner (`rule_id`, rc, evidence); move it into `src/scanner/`; then wire the dependency engine (NVD/OSV + PHEI) toward the December deliverable.
