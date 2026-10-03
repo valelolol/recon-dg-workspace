@@ -55,7 +55,7 @@ Bandit handoff files (`HANDOFF_NICK.md`, `HANDOFF_CHRISTIAN.md`) were removed th
 
 ## M-DE-CORE — One-Week Core Dependency-Risk Report
 
-> **Status:** the *plan* below is committed (HEAD `6323285`). The *implementation* it
+> **Status:** the *plan* below is committed (HEAD `b4fc87c`). The *implementation* it
 > describes (known-topology loader, Mode B serializer, `src/cli.py`, viewer, reference
 > output, E2E test) is **not in the tree yet** — these are the deliverables the handoffs
 > assign. Do not read any file below as "already built."
@@ -87,6 +87,10 @@ LOW/MEDIUM/HIGH/CRITICAL labels (level thresholds deferred).
 and the **proposed input-fixture contract** (§ C0-prereq). All emitted fields are
 spec-defined v0.1 fields — **no out-of-spec extension is emitted this week**; a
 risk-path field (e.g. `top_risk_path`) is deferred to a separate schema decision.
+Scope: C0 gates Nick's fixture authoring and the downstream fixture-consuming steps
+(Vale's E2E + generated reference, Christian's running assertions, Aliyan's viewer)
+— it does not gate drafting the loader/serializer/CLI or the handoff review (see
+`docs/STATUS.md` §C0).
 
 | Subtask | Parent | Owner | Owned file(s) — exactly one owner each | First checkpoint | Acceptance |
 |---------|--------|-------|----------------------------------------|------------------|------------|
@@ -354,22 +358,27 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 ## Status
 
-### Current baseline (published HEAD `6323285`, 2026-10-02)
-- **Date:** 2026-10-02 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `6323285`
-  ("docs: publish current team handoffs and clean up obsolete guidance").
-- **Prior baseline (historical):** `1524425` ("Publish reviewed M-DE-CORE plan and four
-  handoffs", 2026-10-01) — the docs-only commit that published the plan and the four
-  handoffs; implementation code was unchanged by it.
-- **Working tree:** this session's documentation edits are present but **uncommitted**
-  (see `docs/STATUS.md` for the file list).
+### Current baseline (published HEAD `b4fc87c`, 2026-10-02)
+- **Date:** 2026-10-02 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `b4fc87c`
+  ("docs: correct Aliyan handoff schema/path and baseline dates").
+- **Prior baseline (historical):** `6323285` ("docs: publish current team handoffs and
+  clean up obsolete guidance", 2026-10-02) and `1524425` ("Publish reviewed M-DE-CORE
+  plan and four handoffs", 2026-10-01) — both docs-only commits that published the plan
+  and the four handoffs; implementation code was unchanged by either.
+- **Working tree:** currently **dirty** — **7 files are modified** (this review's
+  documentation corrections) and **nothing is staged**; the edits are uncommitted.
+  (As of the committed tip `b4fc87c` the tree was clean, with those docs committed
+  and pushed.)
 - **Remote:** the local `origin/feat/inventory-report` tracking ref matches HEAD at
-  `6323285`; verified this session (the push succeeded and the local remote-tracking
+  `b4fc87c`; verified this session (the push succeeded and the local remote-tracking
   ref equals HEAD).
 - **This session:** documentation only (see `docs/STATUS.md` for the exact file list).
-  Those edits are **uncommitted**.
+  Those edits were **committed in `b4fc87c`**.
 
-### Implementation state (last independently confirmed at HEAD 5b8a1f7; unchanged by
-the handoff commits at 1524425 and the docs-only cleanup commit at 6323285)
+### Implementation state (last implementation change at HEAD c548f32 — the NVD/reporter/
+scanner scaffolding commit; the state below was last independently confirmed at the
+historical verification point `5b8a1f7` and is unchanged by the handoff commit at
+1524425 and the docs-only commits `6323285` and `b4fc87c`)
 - **Parser (T-DE-01):** `requirements.txt` done (1 of ~6 manifest formats).
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +

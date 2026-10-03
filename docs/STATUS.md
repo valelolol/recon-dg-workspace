@@ -3,21 +3,19 @@
 **Date:** 2026-10-02 (UTC)
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
-**Published baseline:** `6323285` ("docs: publish current team handoffs and clean up
-  obsolete guidance", 2026-10-02, docs-only) — the current live state of
-  `feat/inventory-report`.
+**Published baseline:** `b4fc87c` ("docs: correct Aliyan handoff schema/path and baseline
+dates", 2026-10-02, docs-only) — the current live tip of `feat/inventory-report`.
 **Remote:** `git ls-remote` (read-only) confirms `origin/feat/inventory-report` ==
-  `6323285`; the local tracking ref matches. Verified against the live remote.
-*Historical prior states (label only; not the current state):* the docs-only handoff
-  publish commit `1524425` (2026-10-01), and the implementation baseline `5b8a1f7` —
-  the executed verifications below (PHEI == 6.0, pytest 79 passed) date to `5b8a1f7`
-  and remain *historical* unless re-run.
-**This session:** documentation + verification only. **No** scanner, test, example-pair,
-fixture, dependency-manifest, or code edited. The edits made this session are **uncommitted**:
-The four M-DE-CORE handoffs were rewritten; this week's cleanup **removed** the two
-older source-audit handoffs (`HANDOFF_NICK.md` / `HANDOFF_CHRISTIAN.md` — git history
-preserves them), plus `README.md`, `TASKS.md`, and `docs/TEAM_ONBOARDING.md`.
-No commits or pushes.
+  `b4fc87c`; the local tracking ref matches. Verified against the live remote.
+*Historical prior states (label only, not the current state):* the last commit that
+changed implementation code is `c548f32` ("wip(scanner): save source-audit week-1 work +
+NVD/reporter scaffolding"); the later commits `f2303ee`, `5b8a1f7`, `1524425`, `6323285`,
+and `b4fc87c` are docs-only and did not alter the code. The executed verifications below
+(PHEI == 6.0, pytest 79 passed) were run at the historical point `5b8a1f7` and remain
+*historical* unless re-run.
+**This session:** documentation corrections (Aliyan schema/path + baseline dates) were
+**committed as `b4fc87c` and pushed** to `origin/feat/inventory-report`; as of that tip
+the working tree is clean. No scanner, test, fixture, manifest, or code was edited.
 
 ## Scope
 
@@ -28,7 +26,7 @@ dashboard and AI explanations grounded in the findings. Inventory-only input mus
 produce invented dependency edges; risk scoring requires explicitly "known" topology.
 Bandit source auditing is a supporting sub-track, **not** the December deliverable.
 
-## Current state (HEAD `6323285`)
+## Current state (HEAD `b4fc87c`)
 
 - **Onboarding / handoffs:** rewritten for complete beginners on individual machines
   (Windows PowerShell and Linux/macOS routes in `docs/TEAM_ONBOARDING.md`).
@@ -53,8 +51,9 @@ Bandit source auditing is a supporting sub-track, **not** the December deliverab
   **not** exist in the tree. The reference `report.json` is **not** checked in. This is a
   prerequisite for Christian's E2E assertion and Aliyan's viewer — see the handoffs.
 
-## Evidence-supported implementation progress (verified at HEAD `5b8a1f7`; unchanged by
-the docs-only commits `1524425` and `6323285`)
+## Evidence-supported implementation progress (implementation state at HEAD `c548f32`;
+verified at the historical point `5b8a1f7`; unchanged by the docs-only commits
+`1524425`, `6323285`, and `b4fc87c`)
 
 - **Parser (T-DE-01):** `requirements.txt` done + `build_mock_graph()` (3-node unit
   chain A→B→C, edge weights 1.0). Known-topology loader **not yet built**
@@ -73,7 +72,7 @@ the docs-only commits `1524425` and `6323285`)
   Nick (T-SA-02) and Christian (T-SA-03) own the corrections — see the T-SA-02 /
   T-SA-03 sections of `TASKS.md` (the source-audit handoff files were removed this week).
 
-## Blockers (as of HEAD `6323285`)
+## Blockers (as of HEAD `b4fc87c`)
 
 - Mode B (dependency-graph serializer) does not exist yet — required to emit the 6.0 report
   (W1-DE-03.R).
@@ -110,22 +109,17 @@ the docs-only commits `1524425` and `6323285`)
   fixtures), then Vale implements the known-topology loader (W1-DE-01.L) + Mode B
   serializer (W1-DE-03.R) to emit the 6.0 reference `report.json`. Only after that
   can Christian's E2E byte-assertion and Aliyan's viewer be run against a real sample.
-- **What the pending C0 fixture-contract decision does and does not block.** C0 approval
-  gates **Nick's M-DE-CORE fixture authoring** (and, transitively, the downstream
-  implementation: Vale's reference sample, Christian's byte-assertion, Aliyan's
-  data-driven view). It does **NOT** block presenting the proposed handoffs to the team
-  or reviewing them — every handoff is already written, consistent, and readable as-is.
-  Sharing the handoffs for review is therefore possible **now**; only the fixture-dependent
-  implementation work is held at the C0 gate.
-- **Publication gap — `docs/TEAM_ONBOARDING.md` is not yet part of the repo.** It is
-  the single source of beginner setup that every handoff points to (all four
-  M-DE-CORE handoffs, `README.md`, and `docs/WEEKLY.md` link to it), but it is currently
-  **untracked** in Git and **absent from `origin`**. Every teammate who clones from the
-  remote will be told to read a file they do **not** have. Before the handoff package is
-  considered complete, this file must be **added to the repository**
-  (`git add docs/TEAM_ONBOARDING.md` + committed) so it ships with the published handoffs.
-  (This session edits it locally but does **not** stage/commit it per the task
-  instructions.)
+- **What the pending C0 fixture-contract decision does and does not block.** C0 (the
+  shared contract + the proposed input-fixture contract, `TASKS.md` §C0-prereq) gates
+  exactly two things: **(a)** Nick authoring the two M-DE-CORE fixtures, and **(b)**
+  anything that **consumes** those approved fixtures — Vale's end-to-end CLI run +
+  generated reference sample, Christian's running E2E assertions, and Aliyan's viewer run
+  against real data. C0 does **not** gate (i) drafting/writing Vale's loader / Mode B
+  serializer / CLI against the proposed shape, (ii) drafting Christian's test scaffolding
+  + expected-results doc, or (iii) reviewing or sharing the handoffs.
+- **Beginner onboarding doc committed:** `docs/TEAM_ONBOARDING.md` is **committed** in the
+  repo and ships with the published handoffs (confirmed by `git ls-files`); all four
+  M-DE-CORE handoffs, `README.md`, and `docs/WEEKLY.md` link to it.
 
 ## Verified / Proposed / Unverified
 

@@ -62,21 +62,23 @@ determinism check below is the correct way to assert stability.
 
 | # | Name | What it asserts | Status (today) |
 |---|------|----------------|----------------|
-| 1 | **Topology validity** | Nick's `known_topology.json` parses; 3 unique package ids; exactly 2 directed unit-weight edges; each edge's `source`/`target` reference a real package id; no self-loops. | **Blocked — needs Nick's fixture** (write the assertions now). |
-| 2 | **PHEI score is the expected scalar** | Build the graph in-memory from the fixture; call `calculate_phei`; assert the returned value **equals 6.0** (the maximum path score) and is a scalar (a number, not a list). Do **not** assert any path field — `calculate_phei` returns **only** the scalar score per the approved contract. | **Blocked — needs Nick's fixture** (write the assertions now). |
-| 3 | **Output schema** | If/when Vale's reference `report.json` lands, load it and assert it matches the v0.1 schema: `input.type == "file"`, `input.format == "synthetic-graph"`, `risk.score == 6.0`, `risk.method == "phei"`, 3 findings each with `id` + `advisory_source == "synthetic-fixture"` + `severity: null`, and **no** `top_risk_path` field. | **Blocked on Vale's reference** — write the assertions now, mark the test with a clear "skips until reference exists" guard so it doesn't run yet. |
-| 4 | **Determinism (applied to scenario 2, and 3 when available)** | Run the PHEI engine twice on the same topology; assert the two returned scores are byte-identical (and equal 6.0). When scenario 3's reference exists, run the schema check twice and assert both pass identically. This is a **check**, not a fourth functional scenario. | **Blocked** — on the fixture for the scenario-2 half and on the reference for the scenario-3 half. |
+| 1 | **Topology validity** | Nick's `known_topology.json` parses; 3 unique package ids; exactly 2 directed unit-weight edges; each edge's `source`/`target` reference a real package id; no self-loops. | **Skip today** — Nick's `known_topology.json` is not committed yet. Guard it to `pytest.skip()` with a reason when the file is absent; it passes once Nick commits the fixture. |
+| 2 | **PHEI score is the expected scalar** | Build the graph in-memory from the fixture; call `calculate_phei`; assert the returned value **equals 6.0** (the maximum path score) and is a scalar (a number, not a list). Do **not** assert any path field — `calculate_phei` returns **only** the scalar score per the approved contract. | **Skip today** — same fixture. Build the graph in-memory from the fixture, call `calculate_phei`, `assert result == 6.0` and a scalar; skip (with reason) when the fixture is absent; passes once Nick commits it. |
+| 3 | **Output schema** | If/when Vale's reference `report.json` lands, load it and assert it matches the v0.1 schema: `input.type == "file"`, `input.format == "synthetic-graph"`, `risk.score == 6.0`, `risk.method == "phei"`, 3 findings each with `id` + `advisory_source == "synthetic-fixture"` + `severity: null`, and **no** `top_risk_path` field. | **Skip today** — Vale's reference is absent. `pytest.skip()` with reason; passes once the reference lands. |
+| 4 | **Determinism (applied to scenario 2, and 3 when available)** | Run the PHEI engine twice on the same topology; assert the two returned scores are byte-identical (and equal 6.0). When scenario 3's reference exists, run the schema check twice and assert both pass identically. This is a **check**, not a fourth functional scenario. | **Skip today** — fixture half skips on Nick's missing fixture; reference half skips on Vale's missing reference; both pass once present. |
 
 ## 3. Steps
 1. **Scenario 1 test.** Load `examples/fixtures/known_topology.json` with the standard-library
    `json` module (no new deps). Assert the 3/2/unique/edge-reference conditions listed in the
-   table. *Expected today:* the test **fails with the fixture missing** (the file does not exist
-   yet); it **passes once Nick commits `known_topology.json`**.
+   table. *Expected today:* the test **skips with a reason** (`pytest.skip("Nick's
+   known_topology.json not committed yet (W1-DE-01.F)")`) when the file is absent;
+   **passes** once Nick commits `known_topology.json`.
 2. **Scenario 2 test.** In a small helper (no new file), build a `DependencyGraph` from the
    fixture's packages+edges (mirror what `calculate_phei` expects), call `calculate_phei(graph)`,
    and `assert result == 6.0`. Also `assert isinstance(result, (int, float))`. *Expected today:*
-   **fails with the fixture missing**; the engine itself is fine — this passes only once Nick
-   commits the fixture.
+   **skips with a reason** (`pytest.skip("Nick's known_topology.json not committed yet (W1-DE-01.F)")`
+   when the fixture is absent); the engine itself is fine — this passes only once Nick commits the
+   fixture.
 3. **Scenario 3 test (blocked on reference).** Write the schema assertions from the table
    (load `examples/fixtures/sample_risk_report.json`, compare fields). Wrap it so it
    **skips** (pytest `pytest.skip`) when the file doesn't exist yet, with a comment
@@ -84,8 +86,8 @@ determinism check below is the correct way to assert stability.
    Vale's reference lands.
 4. **Scenario 4 (determinism).** For scenario 2: run the engine twice; `assert run1 == run2`.
    Add the same double-run for scenario 3 (skipped until reference). *Expected:* the
-   scenario-2 half **fails with the fixture missing**; it passes once Nick's fixture is present.
-   The scenario-3 half skips until the reference exists.
+   scenario-2 half **skips with a reason** until the fixture exists; it passes once Nick's
+   fixture is present. The scenario-3 half skips until the reference exists.
 
 > **Do not claim `pytest` produces `report.json`.** The harness does not run the pipeline.
 > The reference `report.json` will be produced by Vale's CLI (a future file) — when it exists,
@@ -94,32 +96,32 @@ determinism check below is the correct way to assert stability.
 ## 4. Verification commands (what is expected today vs. after the dependencies land)
 From the repo root, venv active. `python` = the venv Python (TEAM_ONBOARDING.md §7).
 
-**Today (no fixtures, no reference in the tree):** the two fixture-dependent scenarios and the
-one-liner will **not** pass because `examples/fixtures/known_topology.json` does not exist.
-The reference-dependent scenario 3 **skips**. This is the expected, correct state for a
-harness that is *drafted*, not *green*.
+**Today (no fixtures, no reference in the tree):** every scenario **skips**, for a different reason — the fixture half (scenarios 1, 2, and the scenario-2 half of 4) skips because Nick's `known_topology.json` is not committed yet; the reference half (scenario 3 and the scenario-3 half of 4) skips because Vale's reference is not present. The one-liner also skips (it needs the fixture). This is the expected, correct state for a drafted harness: nothing should be a red `FAIL`.
 
 ```bash
-# Runs your test file. EXPECTED TODAY: scenario 3 + the ref half of 4 SKIP; scenarios 1, 2 and
-# the scenario-2 half of 4 FAIL because Nick's known_topology.json does not exist yet.
-# (That failure is a missing-dependency signal, not a test-authoring bug. Do not "fix" it by
-# inventing the fixture — that is Nick's W1-DE-01.F.)
+# Runs your test file.
+# EXPECTED TODAY: ALL scenarios SKIP with reasons.
+#   1, 2, and the scenario-2 half of 4: reason = "Nick's known_topology.json not committed yet (W1-DE-01.F)".
+#   3 and the scenario-3 half of 4: reason = "Vale's sample_risk_report.json not present yet (W1-DE-03.G)".
+#   No FAILs are expected today. If you see a red FAIL, the fixture/reference logic (or the
+#   skip-guard) is wrong — do NOT "fix" it by inventing the fixture (that is Nick's W1-DE-01.F).
 python -m pytest tests/test_e2e_risk.py -v
 
 # AFTER Nick's fixture is committed: the fixture-dependent scenarios + the one-liner should
 # pass / print 6.0. Then the reference-dependent parts still skip until Vale's sample lands.
 ```
 
-- **Expected (pytest, today):** `SKIP` for scenario 3 and the reference-dependent half of 4
-  (correct — "waiting on reference"); `FAIL` for the fixture-dependent parts (correct — Nick's
-  fixture not yet committed). A `FAIL` here is **not** a failure of your test code — it is the
-  missing-dependency signal the handoff expects. **Do not** present a failing harness as passing.
-- **Expected (one-liner):** `6.0` — only once the fixture exists.
+- **Expected (pytest, today):** `SKIP` (with a reason) for scenarios 1, 2, 3, and 4 — all
+  skipped because a dependency is missing, not because the test is broken. After Nick's
+  fixture: 1, 2, and the fixture half of 4 turn to `PASS`; 3 and the reference half of 4 stay
+  `SKIP` until Vale's sample lands.
+- **Expected (one-liner):** `6.0` — only once the fixture exists (before that the check skips).
 - **Do not** run `bandit`, the full test suite, or any live advisory service — none of it is
   in scope for this task.
 
 ## Acceptance
 - `tests/test_e2e_risk.py` exists, runs, and shows the expected PASS/SKIP pattern above.
+  **Today: all scenarios SKIP with reasons (no red FAILs).**
 - Scenario 2 asserts a **scalar** `6.0`; it asserts **no path field** and **no severity in the
   score**.
 - Scenario 3 is written and guarded to skip until Vale's reference exists (do not create a fake

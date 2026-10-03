@@ -89,12 +89,15 @@ cd ~/projects/recon-dg
 ```text
 git remote -v
 git branch -vv
+git branch -r
 git status
 ```
 Expected:
 - `origin → https://github.com/valelolol/recon-dg-workspace.git`
-- a branch named `feat/inventory-report`
-- `git status` → `On branch feat/inventory-report` and `nothing to commit, working tree clean`
+- the default branch (often `main`) checked out; a fresh clone opens on the **default**, not `feat/inventory-report` (that is expected — `git branch -r` will list `refs/heads/feat/inventory-report`)
+- `git status` → `nothing to commit, working tree clean`
+
+**Note:** a fresh clone opens on the repository's **default branch** (usually `main`) because GitHub defaults `git clone` to it. That is **expected** and not an error. Section 6 ("Start a personal branch from the integration baseline") switches you to the integration branch `feat/inventory-report` before you make any changes — do that step before editing.
 
 If any line differs, stop and send me the full output (section 10). Do **not** proceed with a clone that does not look right.
 
@@ -109,7 +112,7 @@ git status
 git branch -vv
 ```
 
-- **If `git status` shows modified or untracked files:** you have local work. **Do not `pull` or switch branches yet.** Either commit it to a scratch branch (`git checkout -b local-wip && git add -A && git commit -m "wip: local work before setup"`) so it is safe, **or** send Vale the `git status` output before doing anything else.
+- **If `git status` shows modified or untracked files:** you have local work. **Do not `pull`, switch branches, or run `git add -A`, `git stash`, or `git reset` yet.** Stop and send Vale the output of `git status --short` and `git branch -vv` before doing anything else — we resolve it so no work is lost.
 - **Update the integration branch with fast-forward-only updating** (no merge, no reset):
   ```text
   git checkout feat/inventory-report
@@ -145,7 +148,10 @@ Now `git status` should say you are on your new branch and the tree is clean. If
 
 ## 7. Virtual environment — create one **only** when you need it
 
-You do **not** need a venv for pure standard-library work (for example, authoring and validating a JSON fixture). You **do** need one to run `pytest` (tests) or `bandit` (the supporting source-audit handoffs).
+You do **not** need a venv for pure standard-library work (for example, authoring and
+validating a JSON fixture); for fixture/docs-only work you do **not** need a venv or any
+install. You **do** need one for code/test tasks that need the project (create a venv and
+install `requirements-dev.txt`) or for `bandit` (the supporting source-audit handoffs only).
 
 ### Which dependencies does the project actually need?
 
@@ -161,11 +167,13 @@ Check the real manifests before installing anything:
 **Windows (PowerShell) — prefer the explicit interpreter path so activation-policy settings do not block you.**
 ```powershell
 py -3.11 -m venv .venv
-# Install what you need (pick only what applies to your task):
-#   pytest (tests):
-.venv\Scripts\python -m pip install pytest
+# Install what your task needs (pick only what applies):
+#   code / test tasks that need project dependencies (one step — pulls networkx + numpy
+#   from requirements.txt, plus pytest + ruff):
+.venv\Scripts\python -m pip install -r requirements-dev.txt
 #   Bandit (supporting source-audit handoffs only):
 .venv\Scripts\python -m pip install bandit
+#   fixture / docs-only work: nothing to install — standard library (`json`) only
 # Verify:
 .venv\Scripts\python -m pytest --version
 .venv\Scripts\python -m bandit --version
@@ -175,9 +183,10 @@ py -3.11 -m venv .venv
 **Linux / macOS**
 ```bash
 python3 -m venv .venv
-# Install what you need:
-.venv/bin/python -m pip install pytest            # tests
-.venv/bin/python -m pip install bandit            # supporting source-audit only
+# Install what your task needs (pick only what applies):
+.venv/bin/python -m pip install -r requirements-dev.txt            # code/test tasks (networkx+numpy from requirements.txt, pytest, ruff)
+.venv/bin/python -m pip install bandit                            # supporting source-audit only
+# fixture / docs-only work: nothing to install — standard library (`json`) only
 # Verify:
 .venv/bin/python -m pytest --version
 .venv/bin/python -m bandit --version
@@ -250,17 +259,19 @@ cd C:\my-projects\recon-dg
 # 2) Confirm
 git remote -v
 git branch -vv
+git branch -r
 git status
 
-# 3) Your branch from the baseline
+# 3) Your branch from the baseline (a fresh clone is on the default branch, usually
+# `main`; switch to the integration branch now):
 git checkout feat/inventory-report
 git pull --ff-only
 git branch mdecore-<your-name>-<topic>
 git checkout mdecore-<your-name>-<topic>
 
-# 4) Virtual env (only if your task needs pytest or bandit)
+# 4) Virtual env (only if your task needs the project or bandit)
 py -3.11 -m venv .venv
-.venv\Scripts\python -m pip install pytest
+.venv\Scripts\python -m pip install -r requirements-dev.txt
 # .venv\Scripts\python -m pip install bandit    # supporting source-audit only
 
 # 5) Validate a JSON file without writing over it (stdout to null)
@@ -286,16 +297,18 @@ cd ~/projects/recon-dg
 # 2) Confirm
 git remote -v
 git branch -vv
+git branch -r
 git status
 
-# 3) Your branch from the baseline
+# 3) Your branch from the baseline (a fresh clone is on the default branch, usually
+# `main`; switch to the integration branch now):
 git checkout feat/inventory-report
 git pull --ff-only
 git switch -c mdecore-<your-name>-<topic>
 
-# 4) Virtual env (only if your task needs pytest or bandit)
+# 4) Virtual env (only if your task needs the project or bandit)
 python3 -m venv .venv
-.venv/bin/python -m pip install pytest
+.venv/bin/python -m pip install -r requirements-dev.txt
 # .venv/bin/python -m pip install bandit    # supporting source-audit only
 
 # 5) Validate a JSON file without writing over it (stdout to null)

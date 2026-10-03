@@ -7,8 +7,23 @@ they connect), (2) checks each package for known CVEs (NVD + OSV), (3) scores
 paths into a real threat (PHEI path-max) — (4) displays the results in a dashboard,
 and (5) explains each finding in plain language via an AI backend.
 
+**Intended full pipeline (the December deliverable — *planned; not all of it is
+implemented yet*):** the (1)–(5) steps above are the full intended pipeline.
+
+**What works this week (M-DE-CORE):** only two pieces are implemented in the tree —
+the Mode A **inventory serializer** (`src/reporter/inventory.py`) and the **PHEI
+function** (`calculate_phei` in `src/engine/risk_analyzer.py`). The **Mode B**
+dependency-graph serializer and the **synthetic `report.json`** are *planned* deliverables,
+not yet working features. Previous verification results (e.g., PHEI == 6.0 on a
+synthetic 3-node unit chain, and the "pytest 79 passed" count) are **historical**: they
+date to an earlier commit and are not re-run this week. Steps (2) live NVD/OSV, (4) the
+dashboard, and (5) the AI layer are **planned** and not yet running.
+
 **Core track (December deliverable):** dependency inventory → CVE enrichment →
 deterministic risk analysis → reporting → dashboard → AI explanations.
+*Planned pipeline — as of Week 1 (M-DE-CORE) only the inventory serializer and the PHEI
+function exist in the tree; the Mode B serializer + synthetic `report.json`, NVD/OSV,
+dashboard, and AI are not implemented.*
 
 **Supporting sub-track:** a Bandit source-code static-analysis prototype that finds
 vulnerabilities *inside the code scanned* (a useful extra signal and a pipeline/harness
@@ -34,7 +49,7 @@ core track.
 | Question | Which dependencies are risky, and how bad? | What vulnerabilities does the code contain? |
 | Engine | NVD/OSV + PHEI graph scoring | Bandit static analysis |
 | Location | `src/parser`, `src/models`, `src/engine`, `src/reporter`, `src/agent`, dashboard | `examples/source-audit-week1/`, `src/scanner/` |
-| Output | dependency risk paths + CVE findings | source-code findings (kept separate) |
+| Output | dependency risk score + CVE findings (risk paths are deferred per the open path-field schema decision) | source-code findings (kept separate) |
 
 ## Key documents
 

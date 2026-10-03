@@ -6,21 +6,24 @@ dependency-risk report" using clearly-labeled synthetic fixtures and **no live A
 The Bandit sub-track (T-SA-01/02/03) stays **non-gating this week** (course requirement
 UNKNOWN — pending confirmation). No completion percentages are quoted; status is per task ID.
 The docs reviewed in this session (2026-10-01, reviewed at HEAD `1524425`; published at
-HEAD `6323285`, 2026-10-02) are the *documentation-only*
+HEAD `6323285`; corrected/baseline-updated at HEAD `b4fc87c`, 2026-10-02) are the
+*documentation-only*
 state: handoffs rewritten for complete beginners, README/TASKS/STATUS reconciled. No code,
 fixture, manifest, or test changed.
 
 ## Baseline (for the reader)
-- **Branch:** `feat/inventory-report`. **HEAD:** `6323285` ("docs: publish current team
-  handoffs and clean up obsolete guidance", 2026-10-02, docs-only). **Live remote**
-  `origin/feat/inventory-report` == `6323285` (verified via `git ls-remote`).
-- *Historical prior HEAD (label only):* `1524425` ("Publish reviewed M-DE-CORE plan and
-  four handoffs", 2026-10-01) — the docs-only publish commit the earlier docs session
-  reviewed from.
-- The *implementation* code state is as of `5b8a1f7` (the last commit that changed
-  implementation code; both later docs-only commits, `1524425` and `6323285`, did not
-  alter it). The verified executions below (PHEI == 6.0, pytest 79 passed) date to `5b8a1f7`
-  and are *historical* unless re-run.
+- **Branch:** `feat/inventory-report`. **HEAD:** `b4fc87c` ("docs: correct Aliyan handoff
+  schema/path and baseline dates", 2026-10-02, docs-only). **Live remote**
+  `origin/feat/inventory-report` == `b4fc87c` (verified via `git ls-remote`).
+- *Historical prior HEAD (label only):* `6323285` ("docs: publish current team handoffs and
+  clean up obsolete guidance", 2026-10-02) and `1524425` ("Publish reviewed M-DE-CORE plan
+  and four handoffs", 2026-10-01) — both docs-only commits that published the plan and the
+  four handoffs; implementation code was unchanged by them.
+- The *implementation* code state is as of `c548f32` (the last commit that changed
+  implementation code — it added the NVD/reporter/scanner scaffolding); the later commits
+  `f2303ee`, `5b8a1f7`, `1524425`, `6323285`, and `b4fc87c` are docs-only and did not
+  alter it. The executed verifications below (PHEI == 6.0, pytest 79 passed) date to
+  `5b8a1f7` and remain *historical* unless re-run.
 
 ## Intended deliverable & acceptance criteria (M-DE-CORE)
 | Task ID | Owner | Deliverable | Acceptance criteria |
@@ -34,10 +37,11 @@ fixture, manifest, or test changed.
 of synthetic fixtures and no live API.
 
 ## Delivery order (after checkpoint C0)
-> The C0 gate holds **Nick's fixture authoring and the downstream implementation**
-> (reference sample, E2E assertion, viewer run against real data). It does **not**
-> block presenting or reviewing the proposed handoffs to the team — those are already
-> written and consistent and can be shared for review now.
+> The C0 gate holds **Nick's fixture authoring and the downstream *fixture-consuming*
+> steps** (reference sample, E2E assertion, viewer run against real data). It does
+> **not** block Vale *writing* the loader/serializer/CLI against the proposed shape,
+> Christian *drafting* the harness, or presenting/reviewing the handoffs — those are
+> already written and can be shared for review now.
 
 1. **C0:** everyone signs the Mode B field mapping **and** the **proposed input-fixture
    contract** (TASKS.md §C0-prereq — approval *required* before Nick authors fixtures).

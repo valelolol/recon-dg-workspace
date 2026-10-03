@@ -72,6 +72,8 @@ approved contract. So:
   byte-identical).
 Your *code* (loader/serializer/CLI) can be complete before Nick's fixture exists; only the
 **end-to-end execution + generated reference** are gated on his fixtures.
+This matches the C0 scope: C0 blocks the approved-fixture-*consuming* steps, not the code
+drafting.
 
 ## 0. Personal branch
 Confirm clean + integration branch (`git status`, `git branch`). If your tree is dirty or your
