@@ -97,7 +97,7 @@ Scope: C0 gates Nick's fixture authoring and the downstream fixture-consuming st
 | W1-DE-01.F | T-DE-01 | Nick | `examples/fixtures/known_topology.json` | Fixture loads; 3 unique nodes, 2 directed unit-weight edges; labeled synthetic | Round-trips to a `known` graph; no duplicate IDs |
 | W1-DE-02.S | T-DE-02 | Nick | `examples/fixtures/cve_fixture.json`, `docs/limitations.md` | Fixture loads; IDs `SYNTH-2026-xxxx`; limitations note names source + severity-not-in-score limit | Synthetic-labeled; no real identifiers |
 | W1-DE-01.L | T-DE-01 | Vale | `src/parser/parser.py` | `load_known_topo_json()` → graph `edge_availability="known"`; correct nodes/edges/weights | `calculate_phei` on it == 6.0; `parse_requirements` untouched |
-| W1-DE-02.R | T-DE-02 | Vale | `src/engine/risk_analyzer.py`, `src/reporter/report_generator.py` | `calculate_phei` returns the argmax scalar score (6.0); `generate_report` calls PHEI (path-max), not `calculate_systemic_risk` (global-sum); `w_uv` logged as OPEN | Score numerics preserved (6.0) and invariant to severity; no formula change/invented; no path field emitted; severity not in score |
+| W1-DE-02.R | T-DE-02 | Vale | `src/engine/risk_analyzer.py`, `src/reporter/report_generator.py` | `calculate_phei` returns the argmax scalar score (6.0); `generate_report` calls PHEI (path-max), not `calculate_systemic_risk` (global-sum); `w_uv` logged as OPEN | Score numerics preserved (6.0) and invariant to severity; no formula change/invented; no path field emitted; severity not in score. **Complete 2026-10-03 (uncommitted):** `generate_report()` wired to `calculate_phei`; unavailable topology → "unavailable" risk (no fabricated score); `calculate_systemic_risk` kept as legacy; latent `KeyError` in "removed" section fixed (reads `previous_graph`); new `tests/test_report_generator.py` (8 tests). Verification: `python -m pytest tests/test_report_generator.py tests/test_parser.py tests/test_risk_analyzer.py tests/test_inventory_reporter.py tests/test_harness.py -q` → 76 passed; `git diff --check` clean. |
 | W1-DE-03.R | T-DE-03 | Vale | `src/reporter/inventory.py`, `src/cli.py`, `examples/fixtures/sample_risk_report.json` | `sample_risk_report.json`: `input.type=="file"`, `input.format=="synthetic-graph"`, `risk.score==6.0`, `method=="phei"`, 3 findings, synthetic-labeled, no path field | Matches v0.1; Mode A fields/behavior preserved + existing tests pass; offline, deterministic |
 | W1-DE-04.V | T-DE-04 | Aliyan (provisional) | `src/dashboard/view.py` | `view.py <report.json>` → `report.html`: packages, edges, score, findings; **no level labels** | Data-driven; no framework; numeric score + status only |
 | W1-DE-03.T | T-DE-02/03 | Christian | `tests/test_e2e_risk.py`, `docs/E2E_EXPECTED_RESULTS.md` | Passing offline test asserts the 6.0 reference (and no path field) | Deterministic: run twice with the same fixed scan_id and created_at and compare outputs |
@@ -334,11 +334,22 @@ Owner: Vale. Depends: engine (T-DE-02).
   dependency-graph serializer **unimplemented**)
 - [ ] Agree graph construction + scoring semantics; export graph adjacency for dashboard
 - [ ] Generate dependency risk-path summaries using the agreed scoring contract
-- [ ] Produce plain-language risk narratives per component
-- [ ] **AI layer (`src/agent/`):** pluggable model backend (local endpoint or API key),
-  grounded in the structured report + before/after risk diff — **not started**
-- [ ] Deterministic plain-language fallback when no model is configured / generation fails
-- [ ] Tests: `tests/test_reporter.py`, `tests/test_agent.py`
+- [x] Produce plain-language risk narratives per component
+- [x] **AI layer (`src/agent/`):** pluggable model backend (local endpoint or API key),
+  grounded in the structured report + before/after risk diff. **Investigation loop
+  implemented and tested** (2026-10-03; 45 passing tests in `tests/test_agent.py`);
+  an opt-in deps.dev enrichment layer (`tests/test_enrichment.py`, 26 passing)
+  adds the `package_context` tool. Bounded tool loop over normalized OSV-Scanner output,
+  conditional allowlisted tool selection, append-only `EvidenceTrail`, deterministic
+  grounded policy when no model
+  (or when the model is out of band), and `compare_scans` before/after delta. The
+  loop is **not** "OSV-Scanner + LLM summary": every claim is backed by a real field
+  from the OSV-Scanner output and every tool call is recorded. A **real** model backend
+  (llama.cpp vs. user API key — pending decision, see TASKS.md pending-decisions /
+  `docs/STATUS.md`) is **not yet wired** (`used_llm=False` in current runs).
+- [x] Deterministic plain-language fallback when no model is configured / generation fails
++- [x] Tests: `tests/test_agent.py` (22) + `tests/test_report_generator.py` (8)
+  (`tests/test_reporter.py` still to be added alongside the Mode B serializer)
 
 ## Phase 4: Dashboard — December-critical (the visible deliverable) → T-DE-04
 Owner: Team. Depends: engine (T-DE-02) + reporter (T-DE-03).
@@ -358,27 +369,34 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 ## Status
 
-### Current baseline (published HEAD `b4fc87c`, 2026-10-02)
-- **Date:** 2026-10-02 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `b4fc87c`
-  ("docs: correct Aliyan handoff schema/path and baseline dates").
-- **Prior baseline (historical):** `6323285` ("docs: publish current team handoffs and
-  clean up obsolete guidance", 2026-10-02) and `1524425` ("Publish reviewed M-DE-CORE
-  plan and four handoffs", 2026-10-01) — both docs-only commits that published the plan
-  and the four handoffs; implementation code was unchanged by either.
-- **Working tree:** currently **dirty** — **7 files are modified** (this review's
-  documentation corrections) and **nothing is staged**; the edits are uncommitted.
-  (As of the committed tip `b4fc87c` the tree was clean, with those docs committed
-  and pushed.)
-- **Remote:** the local `origin/feat/inventory-report` tracking ref matches HEAD at
-  `b4fc87c`; verified this session (the push succeeded and the local remote-tracking
-  ref equals HEAD).
-- **This session:** documentation only (see `docs/STATUS.md` for the exact file list).
-  Those edits were **committed in `b4fc87c`**.
+### Current baseline (published HEAD `1b4a8d9`, 2026-10-03)
+- **Date:** 2026-10-03 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `1b4a8d9`
+  ("docs: correct last-implementation baseline to c548f32"). The published remote tip is
+  `1b4a8d9`; ahead of it, the **agent layer** (`src/agent/`) and report/report-generator
+  work exist in the working tree but are **not yet committed or pushed**.
+- **Prior baseline (historical):** `b4fc87c` ("docs: correct Aliyan handoff schema/path
+  and baseline dates", 2026-10-02), `6323285` and `1524425` (docs-only handoff/plan
+  publishes) — all docs-only; implementation code was unchanged by any of them. The last
+  commit that changed implementation code is `c548f32` (NVD/reporter/scanner scaffolding).
+- **Working tree:** currently **dirty** — `docs/STATUS.md`, `README.md`, `TASKS.md`,
+  and `src/reporter/report_generator.py` modified (docs alignment + report wiring +
+  removal of dead `generate_report_mock`), plus **new untracked** files:
+  `src/agent/`, `tests/test_agent.py`, `tests/test_report_generator.py`,
+  `tests/data/osv-scanner.json`, and `tests/fixtures/requirements-before.txt`.
+  **Nothing staged, nothing committed.**
+- **Remote:** the local `origin/feat/inventory-report` tracking ref equals the last
+  pushed tip `1b4a8d9`; the uncommitted agent work described above has **not** been
+  pushed.
+- **This session:** implemented + tested the `src/agent/` investigation layer, wired
+  `generate_report` to `calculate_phei` (path-max), removed the dead `generate_report_mock`,
+  and re-aligned `README.md`, `TASKS.md`, and `docs/STATUS.md` to the verified state.
+  Full suite **181 passed, 2 warnings, 29 subtests** (`.venv/bin/python -m pytest tests/ -q`):
+  53 reporter, 45 agent, 26 enrichment, 23 pipeline, 11 NVD integration, 10 parser, 8
+  report generator, 5 risk analyzer.
 
-### Implementation state (last implementation change at HEAD c548f32 — the NVD/reporter/
-scanner scaffolding commit; the state below was last independently confirmed at the
-historical verification point `5b8a1f7` and is unchanged by the handoff commit at
-1524425 and the docs-only commits `6323285` and `b4fc87c`)
+### Implementation state (last implementation change at HEAD `c548f32`; plus uncommitted
+agent-layer work from 2026-10-03, verified by the full suite: 181 passed, 2
+  warnings, 29 subtests (re-run 2026-10-10)
 - **Parser (T-DE-01):** `requirements.txt` done (1 of ~6 manifest formats).
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
@@ -389,7 +407,11 @@ historical verification point `5b8a1f7` and is unchanged by the handoff commit a
 - **Reporter (T-DE-03):** `RiskReport` dataclass + `src/reporter/interface.py` +
   `report_generator.py` present. Inventory serializer implemented; **dependency-graph
   serializer unimplemented**; **no dashboard yet**.
-- **Agent (T-DE-03 AI layer):** empty — not started.
+- **Agent (T-DE-03 AI layer):** implemented + tested this session (2026-10-03) — new
+  `src/agent/` package (bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic
+  grounded policy with no model, `compare_scans`). **45 passing tests** (`tests/test_agent.py`).
+  A real model backend (llama.cpp vs. user API key) is **not yet wired** (pending decision);
+  current runs use the deterministic policy (`used_llm=False`).
 - **Source-audit (T-SA-01/02/03):** `multi_check_wrapper.py` runs and detects the eval
   finding but mislabels `rule_id` (`"blacklist"` instead of `B307`) and has a char-count
   bug (`"1474 results"`); `scan_demo.py` crashes (`NameError: venv_path`);
@@ -398,9 +420,13 @@ historical verification point `5b8a1f7` and is unchanged by the handoff commit a
   B704→B301, 4 tested rules / 8 cases) + new shell/B602 & SQL/B608 example pairs (T-SA-03).
   This is the supporting track, **not** the December deliverable.
 
-> Test counts are **historical** unless re-run: an earlier note recorded "pytest 79 passed";
-> the T-DE-02 NVD integration suite was reported failing in the same window. Do not quote
-> these as current without re-running.
+> Test counts are **historical** unless re-run. The "pytest 79 passed" figure dates to
+> the `5b8a1f7` baseline and has been **superseded**: the full suite now runs
+> **181 passed, 2 warnings, 29 subtests** (re-run 2026-10-10): 53 reporter, 45 agent,
+> 26 enrichment, 23 pipeline, 11 NVD integration, 10 parser, 8 report generator, 5
+> risk analyzer (test_harness collects 0
+> — parked Bandit sub-track). The T-DE-02
+> NVD integration suite currently passes (11).
 
 ## Unresolved technical contradictions (do not guess)
 1. **Exit-code claim:** `examples/source-audit-week1/README.md` states B307 findings

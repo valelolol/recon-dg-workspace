@@ -1,0 +1,151 @@
+{
+  "__fixture_note": "Minimal OSV-Scanner JSON report matching the REAL OSV-Scanner 2.6.0 output shape, captured from `osv-scanner scan --format json` (binary verified v2.6.0). Key real-schema facts this fixture encodes: (1) severity is EITHER null (no severity known) OR a LIST of per-scheme entries [{\"type\": \"CVSS_V3|CVSS_V4\", \"score\": \"<vector-string>\"}] — the `score` is a CVSS vector string, NEVER a number, so RECON-DG leaves severity_score as null (unknown) and does not classify findings as high/low; (2) affected ranges are `affected[].ranges` with `events` (introduced/fixed), no literal vulnerable_spec field; (3) package metadata is nested under `package` and carries a purl. All five findings use real 2.6.0-shape severities: one null (PyYAML GHSA-p6qc-x272-q48w), a single CVSS_V3 entry (PyYAML GHSA-757q-h92x-p438, urllib3 GHSA-93h9-824q-92x3), and two multi-scheme CVSS_V3+CVSS_V4 entries (requests GHSA-394q-gx7c-w5v9, setuptools GHSA-994q-cg23-2p48). Package names/versions are the vulnerable ones from tests/fixtures/requirements-before.txt. This file is TEST DATA, not a captured live scan.",
+  "results": [
+    {
+      "source": {
+        "path": "/absolute/path/to/requirements.txt",
+        "type": "lockfile"
+      },
+      "packages": [
+        {
+          "package": {
+            "name": "PyYAML",
+            "version": "5.1",
+            "ecosystem": "PyPI"
+          },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-p6qc-x272-q48w",
+              "aliases": ["CVE-2020-1747"],
+              "type": "MAINTAINER_ADVISORY",
+              "published": "2020-07-01T00:00:00Z",
+              "affected": [
+                {
+                  "package": {"ecosystem": "PyPI", "name": "PyYAML", "purl": "pkg:pypi/PyYAML"},
+                  "ranges": [
+                    {"events": [{"introduced": "5.1"}, {"fixed": "5.2b1"}], "type": "ECOSYSTEM"}
+                  ]
+                }
+              ],
+              "severity": null,
+              "groups": [{"ids": ["GHSA-p6qc-x272-q48w"]}]
+            },
+            {
+              "id": "GHSA-757q-h92x-p438",
+              "aliases": ["CVE-2021-34372"],
+              "type": "MAINTAINER_ADVISORY",
+              "published": "2021-11-08T00:00:00Z",
+              "affected": [
+                {
+                  "package": {"ecosystem": "PyPI", "name": "PyYAML", "purl": "pkg:pypi/PyYAML"},
+                  "ranges": [
+                    {"events": [{"introduced": "5.1"}, {"fixed": "5.4.1"}], "type": "ECOSYSTEM"}
+                  ]
+                }
+              ],
+              "severity": [
+                {"score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", "type": "CVSS_V3"}
+              ],
+              "groups": [{"ids": ["GHSA-757q-h92x-p438"]}]
+            }
+          ],
+          "groups": [
+            {"ids": ["GHSA-p6qc-x272-q48w", "GHSA-757q-h92x-p438"]}
+          ]
+        },
+        {
+          "package": {
+            "name": "requests",
+            "version": "2.28.0",
+            "ecosystem": "PyPI"
+          },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-394q-gx7c-w5v9",
+              "aliases": ["CVE-2021-43796"],
+              "type": "MAINTAINER_ADVISORY",
+              "published": "2021-12-01T00:00:00Z",
+              "affected": [
+                {
+                  "package": {"ecosystem": "PyPI", "name": "requests", "purl": "pkg:pypi/requests"},
+                  "ranges": [
+                    {"events": [{"introduced": "2.28.0"}, {"fixed": "2.28.1"}], "type": "ECOSYSTEM"}
+                  ]
+                }
+              ],
+              "severity": [
+                {"score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", "type": "CVSS_V3"},
+                {"score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N", "type": "CVSS_V4"}
+              ],
+              "groups": [{"ids": ["GHSA-394q-gx7c-w5v9"]}]
+            }
+          ],
+          "groups": [
+            {"ids": ["GHSA-394q-gx7c-w5v9"]}
+          ]
+        },
+        {
+          "package": {
+            "name": "urllib3",
+            "version": "1.21.1",
+            "ecosystem": "PyPI"
+          },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-93h9-824q-92x3",
+              "aliases": ["CVE-2021-34037"],
+              "type": "MAINTAINER_ADVISORY",
+              "published": "2021-08-01T00:00:00Z",
+              "affected": [
+                {
+                  "package": {"ecosystem": "PyPI", "name": "urllib3", "purl": "pkg:pypi/urllib3"},
+                  "ranges": [
+                    {"events": [{"introduced": "1.21.1"}, {"fixed": "1.26.0"}], "type": "ECOSYSTEM"}
+                  ]
+                }
+              ],
+              "severity": [
+                {"score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N", "type": "CVSS_V3"}
+              ],
+              "groups": [{"ids": ["GHSA-93h9-824q-92x3"]}]
+            }
+          ],
+          "groups": [
+            {"ids": ["GHSA-93h9-824q-92x3"]}
+          ]
+        },
+        {
+          "package": {
+            "name": "setuptools",
+            "version": "58.0.0",
+            "ecosystem": "PyPI"
+          },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-994q-cg23-2p48",
+              "aliases": ["CVE-2021-33584"],
+              "type": "MAINTAINER_ADVISORY",
+              "published": "2021-07-21T00:00:00Z",
+              "affected": [
+                {
+                  "package": {"ecosystem": "PyPI", "name": "setuptools", "purl": "pkg:pypi/setuptools"},
+                  "ranges": [
+                    {"events": [{"introduced": "58.0.0"}, {"fixed": "60.0.0"}], "type": "ECOSYSTEM"}
+                  ]
+                }
+              ],
+              "severity": [
+                {"score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N", "type": "CVSS_V3"},
+                {"score": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:A/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N", "type": "CVSS_V4"}
+              ],
+              "groups": [{"ids": ["GHSA-994q-cg23-2p48"]}]
+            }
+          ],
+          "groups": [
+            {"ids": ["GHSA-994q-cg23-2p48"]}
+          ]
+        }
+      ]
+    }
+  ]
+}

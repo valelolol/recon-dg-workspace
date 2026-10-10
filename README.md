@@ -10,20 +10,27 @@ and (5) explains each finding in plain language via an AI backend.
 **Intended full pipeline (the December deliverable — *planned; not all of it is
 implemented yet*):** the (1)–(5) steps above are the full intended pipeline.
 
-**What works this week (M-DE-CORE):** only two pieces are implemented in the tree —
-the Mode A **inventory serializer** (`src/reporter/inventory.py`) and the **PHEI
-function** (`calculate_phei` in `src/engine/risk_analyzer.py`). The **Mode B**
-dependency-graph serializer and the **synthetic `report.json`** are *planned* deliverables,
-not yet working features. Previous verification results (e.g., PHEI == 6.0 on a
-synthetic 3-node unit chain, and the "pytest 79 passed" count) are **historical**: they
-date to an earlier commit and are not re-run this week. Steps (2) live NVD/OSV, (4) the
-dashboard, and (5) the AI layer are **planned** and not yet running.
+**What works this week (M-DE-CORE):** the Mode A **inventory serializer**
+(`src/reporter/inventory.py`), the **PHEI** path-max function
+(`calculate_phei` in `src/engine/risk_analyzer.py`), the before/after
+**report generator** (`src/reporter/report_generator.py`), and a new **agent
+layer** (`src/agent/`) that runs a bounded, evidence-grounded investigation over
+a normalized OSV-Scanner scan (see "Agent layer" below). The **Mode B**
+dependency-graph serializer and the synthetic reference `report.json` are still
+*planned* deliverables, not yet working features. Earlier verification results
+(e.g., PHEI == 6.0 on a synthetic 3-node unit chain, and the "pytest 79 passed"
+count) are **historical** — they date to an earlier commit. Re-running the full
+suite this week gives **181 passed, 2 warnings, 29 subtests** (test_harness collects 0
+tests for the parked Bandit sub-track). Steps (2) live NVD/OSV, (4) the
+dashboard, and (5) a *real* AI model backend are **planned** and not yet
+running; the agent below runs fully without a model via a deterministic policy.
 
 **Core track (December deliverable):** dependency inventory → CVE enrichment →
 deterministic risk analysis → reporting → dashboard → AI explanations.
-*Planned pipeline — as of Week 1 (M-DE-CORE) only the inventory serializer and the PHEI
-function exist in the tree; the Mode B serializer + synthetic `report.json`, NVD/OSV,
-dashboard, and AI are not implemented.*
+*As of this week the inventory serializer, the PHEI function, the report
+generator, and the agent layer (`src/agent/`) are in the tree and tested; the
+Mode B serializer + synthetic `report.json`, live NVD/OSV, the dashboard, and a
+real AI model backend are not yet implemented.*
 
 **Supporting sub-track:** a Bandit source-code static-analysis prototype that finds
 vulnerabilities *inside the code scanned* (a useful extra signal and a pipeline/harness
@@ -50,6 +57,59 @@ core track.
 | Engine | NVD/OSV + PHEI graph scoring | Bandit static analysis |
 | Location | `src/parser`, `src/models`, `src/engine`, `src/reporter`, `src/agent`, dashboard | `examples/source-audit-week1/`, `src/scanner/` |
 | Output | dependency risk score + CVE findings (risk paths are deferred per the open path-field schema decision) | source-code findings (kept separate) |
+
+## Agent layer
+
+`src/agent/` is the *agentic* heart of the dependency-risk mapper. It is deliberately **not**
+"OSV-Scanner with an LLM summary." The agent:
+
+- operates on the **real** OSV-Scanner output, normalized into the repo's
+  `DependencyGraph` + first-class `Finding` objects (`src/agent/normalizer.py`);
+- runs a **bounded** loop — a `max_turns` hard cap *plus* a natural stopping rule
+  (all high-severity findings investigated, risk computed, summary emitted);
+- makes a **conditional** tool choice each turn, deciding from its own state
+  (which findings exist, which are high-severity, whether topology is known);
+- records **every** tool call — tool name, arguments, and the structured
+  observation — into an append-only **`EvidenceTrail`**. That trail is the
+  observable artifact a reviewer, dashboard, or downstream AI reads to audit *why*
+  each conclusion was drawn;
+- **never invents data.** Every claim about a finding is backed by a field from the
+  OSV-Scanner output (id, advisory, CVSS, affected range, published date).
+
+A pluggable ``llm`` callable may steer tool selection (the product's AI backend),
+but it can only pick from an **allowlisted** tool set and must return valid
+arguments; if it returns anything out of band, the agent falls back to a
+grounded deterministic policy and records that fallback in the trail. This keeps
+the agent fully functional with **no model** (deterministic policy) while a real
+model can steer it when one is available — and keeps the *evidence* grounded
+either way.
+
+| Tool | Args | Observation |
+|------|------|-------------|
+| `findings` | — | all findings (count + ids) |
+| `get_finding` | `vulnerability_id` | one `Finding` as dict |
+| `package_info` | `package_name`, `version` | vulnerabilities for a package node |
+| `package_context` | `package_name`, `version` (opt `ecosystem`, `vulnerability_id`) | deps.dev published context, labelled `generic_published`; strictly additive, review-only |
+| `high_severity` | `threshold` | high-severity findings only |
+| `risk_score` | — | PHEI path-max, or `"unavailable"` |
+| `summary` | — | plain-language narrative |
+| `stop` | `reason` | terminal |
+
+`compare_scans(before, after)` produces the before/after delta (new / resolved /
+unchanged findings + the PHEI risk delta, skipped when topology is unavailable).
+
+**Status.** Implemented and tested (38 passing tests in `tests/test_agent.py`),
+plus an opt-in **deps.dev enrichment** layer (`src/enrichment/`, stdlib-only,
+26 passing tests in `tests/test_enrichment.py`) that exposes a new
+`package_context` tool (published, resolved, labelled `generic_published`;
+additive, never fed to PHEI scoring). It runs fully **without** a model via the
+deterministic policy. On the checked-in flat fixture (`tests/data/osv-scanner.json`:
+5 findings, 4 packages, 0 edges) a 7-turn run reports `risk.status == "unavailable"`,
+`risk.score is None`, with the message *"No score is fabricated; this is an
+inventory-only result"* — no invented edges, no invented score, consistent with
+the inventory-only contract. Wiring a **real** model backend (local llama.cpp
+endpoint vs. user-provided API key) is a pending decision (see `TASKS.md`), not
+not yet implemented. Full suite: **181 passed, 2 warnings, 29 subtests**.
 
 ## Key documents
 

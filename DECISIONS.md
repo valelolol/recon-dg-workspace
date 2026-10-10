@@ -36,3 +36,34 @@ backend, including prioritization and package-connectivity analysis.
   source-audit track only.
 - December's critical path is parser → real NVD/OSV → PHEI on real data → dashboard →
   AI explanations. The source-audit track does not gate the December deliverable.
+
+## 2026-10-03: Agent layer design — bounded, evidence-grounded investigation, not
+"OSV-Scanner + LLM summary"
+
+**Decision:** `src/agent/` implements the investigation loop as a bounded, conditional
+tool loop over normalized OSV-Scanner output, grounded in an allowlisted tool set
+(`findings`, `get_finding`, `package_info`, `high_severity`, `risk_score`, `summary`,
+`stop`). Every call is recorded in an append-only `EvidenceTrail`; the agent never
+invents data, and risk is reported as `unavailable`/`None` when topology is unavailable
+(no fabricated score).
+
+**Rationale:**
+- A raw LLM summary over scan output would be unverifiable and could hallucinate findings
+  or scores — the opposite of the evidence contract this project follows.
+- Bounding the loop (a `max_turns` cap plus a natural stop rule) and restricting tool
+  selection to an allowlist makes the behavior testable and reviewable, with the model
+  acting as a *steering* input, not the source of truth.
+- Recording an `EvidenceTrail` per turn is what lets a reviewer / downstream dashboard /
+  downstream AI audit *why* each conclusion was drawn — the observable artifact that a
+  plain summary cannot provide.
+- An optional pluggable `llm` callable may steer, but out-of-band / invalid choices
+  fall back to a grounded deterministic policy (recorded as evidence), so the agent
+  runs fully without a model and degrades gracefully rather than crashing.
+
+**Consequences / follow-ups:**
+- A **real** model backend is a *pending* decision (local llama.cpp endpoint vs.
+  user-provided API key) and is **not yet wired**; current runs use the deterministic
+  policy (`used_llm=False`).
+- Verified by `tests/test_agent.py` (22 passing) against the checked-in flat fixture
+  (`tests/data/osv-scanner.json`: 5 findings, 4 packages, 0 edges → `risk.status ==
+  "unavailable"`, `risk.score is None`, 7-turn run, no fabricated score).
