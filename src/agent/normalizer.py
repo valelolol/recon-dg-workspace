@@ -115,6 +115,11 @@ class Finding:
     # *unknown*, never "low".
     severity_types: tuple[str, ...] = ()
     severity_vectors: tuple[str, ...] = ()
+    # Scanner-provided remediation versions, taken verbatim from the
+    # ``fixed`` events of ``affected[].ranges[].events``.  Never invented or
+    # "best-ified": empty when the scanner gives no fixed version, which is
+    # rendered downstream as an unknown fix rather than a guessed one.
+    fixed_versions: tuple[str, ...] = ()
     # Preserve the raw OSV-Scanner vulnerability dict for evidence tracing.
     _raw: Any = field(default=None, repr=False)
 
@@ -134,6 +139,7 @@ class Finding:
             "severity_vector": self.severity_vector,
             "severity_types": list(self.severity_types),
             "severity_vectors": list(self.severity_vectors),
+            "fixed_versions": list(self.fixed_versions),
         }
 
     def is_high_severity(self, threshold: float = 7.0) -> bool:
@@ -186,6 +192,37 @@ def _spec_from_range(rng: dict[str, Any]) -> str:
     if introduced is not None:
         return f">={introduced}"
     return ""
+
+
+def _fixed_versions(affected: list[dict[str, Any]]) -> tuple[str, ...]:
+    """Collect the scanner-provided remediation versions, verbatim.
+
+    Reads only ``fixed`` events from ``affected[].ranges[].events`` — the
+    authoritative OSV-Scanner statement of which versions are fixed.  Versions
+    are taken as-is (never "latest"/"best-ified"); duplicates are collapsed
+    preserving first-seen order so the tuple is deterministic.  Returns an
+    empty tuple when the scanner supplies no fixed version — downstream this
+    renders as an unknown fix, never a guessed one.
+    """
+    seen: list[str] = []
+    seen_set = set()
+    for a in (affected or []):
+        if not isinstance(a, dict):
+            continue
+        for r in a.get("ranges") or []:
+            if not isinstance(r, dict):
+                continue
+            for e in r.get("events") or []:
+                if not isinstance(e, dict):
+                    continue
+                f = e.get("fixed")
+                if f is None:
+                    continue
+                f = str(f)
+                if f and f not in seen_set:
+                    seen.append(f)
+                    seen_set.add(f)
+    return tuple(seen)
 
 
 def _vuln_spec(affected: list[dict[str, Any]]) -> Optional[str]:
@@ -327,6 +364,7 @@ def _finding_from(
         severity_vector=primary,
         severity_types=types,
         severity_vectors=vectors,
+        fixed_versions=_fixed_versions(affected),
         _raw=advisory,
     )
 

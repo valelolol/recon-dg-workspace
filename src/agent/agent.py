@@ -764,3 +764,250 @@ def _compare_narrative(before: ScanResult, after: ScanResult,
             parts.append(f"- {f.package_name}@{f.version}: {f.vulnerability_id} "
                          f"(CVSS {f.severity_score})")
     return "\n".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Remediation planning + after-scan verification
+# ---------------------------------------------------------------------------
+
+def _evidence_trail(step_tool: str, args: dict[str, Any],
+                    observation: dict[str, Any], note: str) -> dict[str, Any]:
+    """A single-step :class:`EvidenceTrail` in serialisable form.
+
+    This is the auditable record that *verification ran* (or was requested but
+    had no after scan), together with the comparison counts.  It is constructed
+    from the same :class:`EvidenceTrail` append API the agent loop uses, so a
+    reviewer reading ``report['evidence']['steps']`` can see exactly what was
+    recorded and why.
+    """
+    trail = EvidenceTrail()
+    trail.append(step_tool, args, observation, note)
+    return trail.to_dict()
+
+
+def _plan_action(f: Finding) -> str:
+    """One plain-language recommended action for a finding, grounded in the
+    scanner-provided fixed versions *only*.
+
+    Never invents a target version (no "latest"/"best") and never implies a
+    numeric severity: when the scanner supplied a fixed version the action
+    names it; otherwise it says a target cannot be asserted.
+    """
+    fixed = list(f.fixed_versions)
+    if fixed:
+        return (
+            f"Upgrade {f.package_name} from {f.version} to at least "
+            f"{' or '.join(fixed)} (the version(s) the OSV-Scanner marks as "
+            f"fixed for advisory {f.vulnerability_id})."
+        )
+    return (
+        f"No fixed version was reported by the OSV-Scanner for "
+        f"{f.package_name}@{f.version} (advisory {f.vulnerability_id}); a "
+        f"specific target version cannot be asserted without a "
+        f"scanner-provided fixed version."
+    )
+
+
+def build_remediation_plan(scan: ScanResult) -> dict[str, Any]:
+    """Build a machine-readable remediation plan: one item per baseline
+    finding, using only normalized scanner evidence.
+
+    Each item carries the advisory ID and aliases, the package and installed
+    version, the affected range, the scanner-provided fixed versions (taken
+    verbatim, never invented), the severity status (numeric severity left
+    ``None``; only scheme types and vector strings are preserved), and a plain
+    recommended action.
+
+    This is a pure function: it edits no manifests, installs no packages,
+    performs no network I/O, and never computes or implies a numeric CVSS
+    score or a high/low category.
+    """
+    items: list[dict[str, Any]] = []
+    for f in scan.findings:
+        items.append({
+            "vulnerability_id": f.vulnerability_id,
+            "aliases": list(f.aliases),
+            "package_name": f.package_name,
+            "installed_version": f.version,
+            "ecosystem": f.ecosystem,
+            "affected_range": f.vulnerability_spec,
+            "fixed_versions": list(f.fixed_versions),
+            "has_fixed_version": bool(f.fixed_versions),
+            "severity_score": f.severity_score,  # None — never numeric
+            "severity_vector": f.severity_vector,
+            "severity_types": list(f.severity_types),
+            "severity_vectors": list(f.severity_vectors),
+            "recommended_action": _plan_action(f),
+        })
+    return {
+        "findings_count": len(items),
+        "items": items,
+    }
+
+
+def verify_remediation(
+    before_scan: ScanResult,
+    plan: dict[str, Any],
+    after_scan: Optional[ScanResult] = None,
+    evidence_trail: Optional[EvidenceTrail] = None,
+) -> dict[str, Any]:
+    """Verify a remediation plan against a user-supplied after scan.
+
+    Reuses :func:`compare_scans` for the raw before/after delta (new findings
+    and the PHEI risk delta) and then reconciles each plan item against the
+    after scan on the ``(package_name, version, vulnerability_id)`` key:
+
+      * **No after scan** -> ``status == "not_run"``; no resolution claim is
+        made and no fix is asserted.
+      * A baseline key **present at the same version** in the after scan ->
+        ``unchanged`` / persisting (never counted as fixed).
+      * A baseline key **absent** from the after scan -> ``resolved``.
+      * The same **package + advisory present at a *different* version** ->
+        ``regressed`` (flagged persisting/regressed, never as remediated).
+      * Findings in the after scan that were not in the plan -> counted
+        ``new_count`` via the existing comparison (reported, not attributed
+        to the plan).
+
+    Risk/PHEI is preserved from the existing comparison and is left
+    ``unavailable`` when topology is unavailable — no graph edges or scores
+    are invented.  Verification makes **no resolution claim** without a usable
+    after scan.  If ``evidence_trail`` is supplied an :class:`EvidenceTrail`
+    entry is also appended to it (recording that verification ran and the
+    comparison counts); the returned dict always carries an auditable
+    ``evidence`` entry regardless.
+    """
+    plan_items = plan.get("items", []) if isinstance(plan, dict) else []
+    counts_zero = {
+        "new_count": 0, "resolved_count": 0,
+        "unchanged_count": 0, "regression_count": 0,
+    }
+
+    # ---- No after scan: not_run, no resolution claim. -----------------
+    if after_scan is None:
+        note = (
+            "Remediation plan was built but no user-supplied after scan was "
+            "provided, so verification was not run. No resolution claim is "
+            "made and no fix is asserted."
+        )
+        args = {"status": "not_run", "after_scan_supplied": False}
+        result = {
+            "status": "not_run",
+            "resolution_claim": False,
+            "summary": dict(counts_zero),
+            "resolved": [],
+            "unchanged": [],
+            "regressed": [],
+            "new": [],
+            "evidence": _evidence_trail(
+                "verify_remediation", args,
+                {"status": "not_run", "after_scan_supplied": False,
+                 "counts": dict(counts_zero)},
+                note,
+            ),
+        }
+        # Also append to the caller's trail when one is supplied, so the
+        # "no after scan" state is auditable in the agent's full trail.
+        if evidence_trail is not None:
+            evidence_trail.append(
+                "verify_remediation", args,
+                {"status": "not_run", "after_scan_supplied": False,
+                 "counts": dict(counts_zero)},
+                note,
+            )
+        return result
+
+    # ---- After scan supplied: reconcile plan items against it. ----------
+    delta = compare_scans(before_scan, after_scan)
+
+    after_keys = {
+        (f.package_name, f.version, f.vulnerability_id)
+        for f in after_scan.findings
+    }
+    after_by_pkg_adv: dict[tuple[str, str], list[Finding]] = {}
+    for f in after_scan.findings:
+        after_by_pkg_adv.setdefault(
+            (f.package_name, f.vulnerability_id), []).append(f)
+
+    resolved_items: list[dict[str, Any]] = []
+    unchanged_items: list[dict[str, Any]] = []
+    regressed_items: list[dict[str, Any]] = []
+
+    for item in plan_items:
+        pkg = item.get("package_name")
+        ver = item.get("installed_version")
+        adv = item.get("vulnerability_id")
+        # Still present at the *same* installed version -> persists, not fixed.
+        same_version = (pkg, ver, adv) in after_keys
+        # Same advisory (same package), at *any* after version -> regressed.
+        same_pkg_adv_versions = [
+            f.version for f in after_by_pkg_adv.get((pkg, adv), [])
+        ]
+
+        if same_version:
+            unchanged_items.append({
+                "vulnerability_id": adv,
+                "package_name": pkg,
+                "installed_version": ver,
+                "after_version": ver,
+                "status": "unchanged",
+            })
+        elif same_pkg_adv_versions:
+            regressed_items.append({
+                "vulnerability_id": adv,
+                "package_name": pkg,
+                "installed_version": ver,
+                "after_version": sorted(same_pkg_adv_versions)[0],
+                "regressed_versions": sorted(set(same_pkg_adv_versions)),
+                "status": "regressed",
+            })
+        else:
+            resolved_items.append({
+                "vulnerability_id": adv,
+                "package_name": pkg,
+                "installed_version": ver,
+                "status": "resolved",
+            })
+
+    counts = {
+        "new_count": int(delta.get("new_count", 0)),
+        "resolved_count": len(resolved_items),
+        "unchanged_count": len(unchanged_items),
+        "regression_count": len(regressed_items),
+    }
+    note = (
+        "Remediation plan verified against a user-supplied after scan. "
+        f"Counts: {counts}. A finding is resolved only when its baseline "
+        "(package, version, vulnerability_id) is absent from the after scan; "
+        f"unchanged findings are never counted as resolved and findings "
+        f"persisting at a different version are flagged as regressed. No fix "
+        f"is asserted beyond what the after scan demonstrates."
+    )
+    args = {"status": "verified", "after_scan_supplied": True,
+            "counts": counts}
+    result = {
+        "status": "verified",
+        "resolution_claim": True,
+        "summary": dict(counts),
+        "resolved": resolved_items,
+        "unchanged": unchanged_items,
+        "regressed": regressed_items,
+        "new": delta.get("new", []),
+        "before_risk": delta.get("before_risk"),
+        "after_risk": delta.get("after_risk"),
+        "risk_delta": delta.get("risk_delta"),
+        "evidence": _evidence_trail("verify_remediation", args,
+                                    {"status": "verified",
+                                     "after_scan_supplied": True,
+                                     "counts": counts},
+                                    note),
+    }
+    # Also append to the caller's trail when one is supplied (e.g. the agent's
+    # own trail), so the verification shows up in the full audit trail.
+    if evidence_trail is not None:
+        evidence_trail.append(
+            "verify_remediation", args,
+            {"status": "verified", "after_scan_supplied": True,
+             "counts": counts},
+            note,
+        )
+    return result

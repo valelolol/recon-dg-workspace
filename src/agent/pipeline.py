@@ -65,6 +65,11 @@ Return shape (uniform on success *and* failure — callers may rely on these key
     used_llm            -- whether an LLM was supplied (not whether it drove)
     report              -- on failure only: ``None`` sentinel meaning "no report
                            was produced because the scan was unusable".
+    remediation         -- on success, a dict with ``plan`` (the baseline remediation
+                           plan) and ``verification`` (reconciled against an
+                           after scan only when ``after_scan_report`` was supplied;
+                           ``None`` when no after scan is supplied, so no resolution
+                           claim is ever made without one).
 
 Note: on *success* the returned dict *is* the agent report (with the extra
 ``scanner_*`` / ``input_path`` keys layered on); on *failure* it is a failure
@@ -76,7 +81,11 @@ from __future__ import annotations
 import subprocess
 from typing import Any, Callable, Optional
 
-from src.agent.agent import Agent
+from src.agent.agent import (
+    Agent,
+    build_remediation_plan,
+    verify_remediation,
+)
 from src.agent.normalizer import normalize_scan
 from src.agent.scan_runner import run_scan, run_scan_from_json
 
@@ -138,6 +147,7 @@ def _run_agent(
     enrichment_enabled: bool = False,
     enrichment_fn: Optional[Callable[..., dict[str, Any]]] = None,
     max_enrichment_calls: int = 5,
+    after_scan_report: Optional[str] = None,
 ) -> dict[str, Any]:
     """Common body of ``investigate`` / ``investigate_from_json``.
 
@@ -146,6 +156,13 @@ def _run_agent(
     normaliser or the agent — we never normalise or investigate a scan we
     cannot trust.  On a usable scan we normalise, run the agent, and layer the
     scanner metadata onto the agent report.
+
+    When ``after_scan_report`` is supplied (a saved OSV-Scanner JSON report for
+    a *subsequent* run), the baseline scan is turned into a remediation plan
+    and that plan is verified against the after scan via :func:`verify_remediation`;
+    the resulting ``remediation`` dict is layered onto the report.  A missing /
+    unusable after report simply leaves verification ``not_run`` — it never
+    blocks the baseline investigation and never makes a resolution claim.
     """
     used_llm = llm is not None
 
@@ -191,6 +208,72 @@ def _run_agent(
     report["scan_mode"] = "offline_json" if scanner_result.offline_scan else "live"
     report["scanner_exit_code"] = scanner_result.exit_code
     report["scanner_error"] = None
+
+    # Optional after-scan verification (bounded, evidence-grounded).  The plan
+    # is built from the baseline scan and reconciled against the after scan only
+    # when the caller explicitly supplies an after report path.  An unusable
+    # after report fails closed to ``not_run`` and makes no resolution claim.
+    if after_scan_report is None:
+        report["remediation"] = None
+    else:
+        plan = build_remediation_plan(scan)
+        after_run = run_scan_from_json(after_scan_report, binary="osv-scanner")
+        if after_run.success:
+            after_payload = after_run.json_payload
+            # scan_runner guarantees a usable dict payload with ``results`` when
+            # ``success`` is True; assert the invariant so the type checker
+            # narrows to a non-None dict and the normaliser receives one.
+            assert after_payload is not None, (
+                "scan_runner sets json_payload whenever success is True"
+            )
+            after_scan = normalize_scan(after_payload)
+            report["remediation"] = {
+                "plan": plan,
+                "verification": verify_remediation(scan, plan, after_scan),
+            }
+        else:
+            # Malformed / missing after report: fail closed, no resolution
+            # claim.  The baseline report is preserved untouched.
+            report["remediation"] = {
+                "plan": plan,
+                "verification": {
+                    "status": "not_run",
+                    "resolution_claim": False,
+                    "reason": (
+                        f"after-scan report at {after_scan_report!r} is not "
+                        f"usable ({after_run.error!r}); no verification was "
+                        "run and no resolution claim is made."
+                    ),
+                    "summary": {"new_count": 0, "resolved_count": 0,
+                                "unchanged_count": 0, "regression_count": 0},
+                    "resolved": [], "unchanged": [], "regressed": [], "new": [],
+                    "evidence": {
+                        "steps": [
+                            {
+                                "turn": 0,
+                                "tool": "verify_remediation",
+                                "args": {
+                                    "status": "not_run",
+                                    "after_scan_supplied": True,
+                                    "after_scan_error": after_run.error or "",
+                                },
+                                "observation": {
+                                    "status": "not_run",
+                                    "after_scan_supplied": True,
+                                    "counts": {"new_count": 0, "resolved_count": 0,
+                                                "unchanged_count": 0,
+                                                "regression_count": 0},
+                                },
+                                "note": (
+                                    "After-scan report could not be loaded or "
+                                    "validated; verification was not run and no "
+                                    "resolution claim is made."
+                                ),
+                            }
+                        ]
+                    },
+                },
+            }
     return report
 
 
@@ -208,6 +291,7 @@ def investigate(
     enrichment_fn: Optional[Callable[..., dict[str, Any]]] = None,
     max_enrichment_calls: int = 5,
     run_fn: Optional[_RunFn] = None,
+    after_scan_report: Optional[str] = None,
 ) -> dict[str, Any]:
     """Scan a *requirements manifest* with OSV-Scanner and run the investigation.
 
@@ -235,6 +319,14 @@ def investigate(
             (defaults to the deps.dev client in ``src.enrichment``).
         max_enrichment_calls: Hard cap on enrichment lookups.
         run_fn: Injected ``subprocess.run``-shim (tests only).
+    after_scan_report: Optional path to a saved OSV-Scanner JSON report for a
+        *subsequent* run.  When supplied, the baseline scan is turned into a
+        remediation plan and that plan is verified against the after scan
+        (see :func:`verify_remediation`); the result is under ``report['remediation']``.
+        When omitted (the default) verification is not run and
+        ``remediation`` is ``None`` — no resolution claim is ever made without
+        an explicit after scan.  A missing/malformed after report fails closed
+        to ``not_run`` and makes no resolution claim.
 
     Returns:
         The uniform report dict (see module docstring).
@@ -252,6 +344,7 @@ def investigate(
         package_info_source=package_info_source,
         enrichment_enabled=enrichment_enabled, enrichment_fn=enrichment_fn,
         max_enrichment_calls=max_enrichment_calls,
+        after_scan_report=after_scan_report,
     )
 
 
@@ -266,6 +359,7 @@ def investigate_from_json(
     enrichment_enabled: bool = False,
     enrichment_fn: Optional[Callable[..., dict[str, Any]]] = None,
     max_enrichment_calls: int = 5,
+    after_scan_report: Optional[str] = None,
 ) -> dict[str, Any]:
     """Investigate a *pre-existing* OSV-Scanner JSON report (no binary needed).
 
@@ -282,6 +376,11 @@ def investigate_from_json(
         max_turns / severity_threshold / package_info_source: Agent options.
         enrichment_enabled / enrichment_fn / max_enrichment_calls: deps.dev
             enrichment options (same contract as :func:`investigate`).
+        after_scan_report: Optional path to a saved OSV-Scanner JSON report for a
+            *subsequent* run; when supplied, the baseline scan is turned into a
+            remediation plan and verified against it (see the :func:`investigate`
+            docstring for the ``remediation`` return shape and the fail-closed
+            semantics).
 
     Returns:
         The uniform report dict (see module docstring).
@@ -293,4 +392,5 @@ def investigate_from_json(
         package_info_source=package_info_source,
         enrichment_enabled=enrichment_enabled, enrichment_fn=enrichment_fn,
         max_enrichment_calls=max_enrichment_calls,
+        after_scan_report=after_scan_report,
     )

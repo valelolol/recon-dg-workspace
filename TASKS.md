@@ -337,8 +337,16 @@ Owner: Vale. Depends: engine (T-DE-02).
 - [x] Produce plain-language risk narratives per component
 - [x] **AI layer (`src/agent/`):** pluggable model backend (local endpoint or API key),
   grounded in the structured report + before/after risk diff. **Investigation loop
-  implemented and tested** (2026-10-03; 45 passing tests in `tests/test_agent.py`);
-  an opt-in deps.dev enrichment layer (`tests/test_enrichment.py`, 26 passing)
+  implemented and tested** (2026-10-03; 45 passing tests in `tests/test_agent.py`)
+  **plus a remediation stage** (uncommitted in the working tree): `build_remediation_plan`
+  emits one item per baseline finding using only normalized scanner evidence — scanner-provided
+  fixed versions verbatim (never invented), `severity_score` left `None` (no numeric CVSS
+  score or high/low category), and a plain recommended action that names a fixed version
+  only when the scanner supplies one; `verify_remediation` reconciles the plan against a
+  user-supplied after scan (no network) and makes **no resolution claim** with no after
+  scan (`status == "not_run"`); malformed/missing/unusable after reports fail closed to
+  `not_run`.  An opt-in deps.dev
+  enrichment layer (`tests/test_enrichment.py`, 26 passing)
   adds the `package_context` tool. Bounded tool loop over normalized OSV-Scanner output,
   conditional allowlisted tool selection, append-only `EvidenceTrail`, deterministic
   grounded policy when no model
@@ -348,7 +356,8 @@ Owner: Vale. Depends: engine (T-DE-02).
   (llama.cpp vs. user API key — pending decision, see TASKS.md pending-decisions /
   `docs/STATUS.md`) is **not yet wired** (`used_llm=False` in current runs).
 - [x] Deterministic plain-language fallback when no model is configured / generation fails
-+- [x] Tests: `tests/test_agent.py` (22) + `tests/test_report_generator.py` (8)
+- [x] Tests: `tests/test_agent.py` (45) + `tests/test_remediation.py` (24, remediation
+  planning + after-scan verification, uncommitted) + `tests/test_report_generator.py` (8)
   (`tests/test_reporter.py` still to be added alongside the Mode B serializer)
 
 ## Phase 4: Dashboard — December-critical (the visible deliverable) → T-DE-04
@@ -369,34 +378,42 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 ## Status
 
-### Current baseline (published HEAD `1b4a8d9`, 2026-10-03)
-- **Date:** 2026-10-03 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `1b4a8d9`
-  ("docs: correct last-implementation baseline to c548f32"). The published remote tip is
-  `1b4a8d9`; ahead of it, the **agent layer** (`src/agent/`) and report/report-generator
-  work exist in the working tree but are **not yet committed or pushed**.
-- **Prior baseline (historical):** `b4fc87c` ("docs: correct Aliyan handoff schema/path
-  and baseline dates", 2026-10-02), `6323285` and `1524425` (docs-only handoff/plan
-  publishes) — all docs-only; implementation code was unchanged by any of them. The last
-  commit that changed implementation code is `c548f32` (NVD/reporter/scanner scaffolding).
-- **Working tree:** currently **dirty** — `docs/STATUS.md`, `README.md`, `TASKS.md`,
-  and `src/reporter/report_generator.py` modified (docs alignment + report wiring +
-  removal of dead `generate_report_mock`), plus **new untracked** files:
-  `src/agent/`, `tests/test_agent.py`, `tests/test_report_generator.py`,
-  `tests/data/osv-scanner.json`, and `tests/fixtures/requirements-before.txt`.
-  **Nothing staged, nothing committed.**
+### Current baseline (published HEAD `f1c59a8`, 2026-10-10)
+- **Date:** 2026-10-10 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `f1c59a8`
+  ("Implement evidence-grounded agent and scanner pipeline"). This commit is the published
+  remote tip and **does** include the `src/agent/` investigation layer, `src/enrichment/`,
+  `tests/data/osv-scanner.json`, `tests/test_agent.py`, `tests/test_report_generator.py`,
+  `tests/test_enrichment.py`, and `tests/test_pipeline.py`. Ahead of it, the **remediation
+  stage** (`build_remediation_plan` / `verify_remediation` in `src/agent/agent.py`, the
+  `_fixed_versions` extraction in `src/agent/normalizer.py`, and the `after_scan_report`
+  parameter in `src/agent/pipeline.py`) plus `tests/test_remediation.py` exist in the
+  working tree but are **not yet committed or pushed**.
+- **Prior baseline (historical):** `1b4a8d9` ("docs: correct last-implementation baseline
+  to c548f32", 2026-10-03), `b4fc87c` ("docs: correct Aliyan handoff schema/path",
+  2026-10-02), and the docs-only publishes — implementation code was unchanged by those.
+  The last commit that changed implementation code *in the published tree* is `c548f32`;
+  `f1c59a8` then added the agent/enrichment/pipeline implementation.
+- **Working tree:** currently **dirty** — `src/agent/agent.py`, `src/agent/normalizer.py`,
+  `src/agent/pipeline.py`, and `README.md` modified (remediation stage + docs alignment),
+  plus **new untracked** file: `tests/test_remediation.py` (24 tests). **Nothing staged,
+  nothing committed.**
 - **Remote:** the local `origin/feat/inventory-report` tracking ref equals the last
-  pushed tip `1b4a8d9`; the uncommitted agent work described above has **not** been
-  pushed.
-- **This session:** implemented + tested the `src/agent/` investigation layer, wired
-  `generate_report` to `calculate_phei` (path-max), removed the dead `generate_report_mock`,
-  and re-aligned `README.md`, `TASKS.md`, and `docs/STATUS.md` to the verified state.
-  Full suite **181 passed, 2 warnings, 29 subtests** (`.venv/bin/python -m pytest tests/ -q`):
-  53 reporter, 45 agent, 26 enrichment, 23 pipeline, 11 NVD integration, 10 parser, 8
-  report generator, 5 risk analyzer.
+  pushed tip `f1c59a8`; the uncommitted remediation work described above has **not**
+  been pushed.
+- **This session:** implemented + tested the **remediation stage** — a pure
+  `build_remediation_plan` (one item per baseline finding; scanner-provided fixed
+  versions verbatim; severity score left `None` / evidence-only; no network, no installs)
+  and a `verify_remediation` reconciliation against a user-supplied after scan (no after
+  scan → `not_run`, no resolution claim; same-version persists as `unchanged`, absent =
+  `resolved`, same advisory at a different version = `regressed`; unusable after report
+  fails closed). Added 24 tests in `tests/test_remediation.py` and re-aligned
+  `README.md`, `TASKS.md`, and `docs/STATUS.md`. Full suite
+  **205 passed, 2 warnings, 29 subtests** (`.venv/bin/python -m pytest tests/ -q`):
+  53 reporter, 45 agent, 26 enrichment, 23 pipeline, **24 remediation**, 11 NVD
+  integration, 10 parser, 8 report generator, 5 risk analyzer.
 
-### Implementation state (last implementation change at HEAD `c548f32`; plus uncommitted
-agent-layer work from 2026-10-03, verified by the full suite: 181 passed, 2
-  warnings, 29 subtests (re-run 2026-10-10)
+### Implementation state (published HEAD `f1c59a8`; plus uncommitted remediation work,
+verified by the full suite: 205 passed, 2 warnings, 29 subtests (re-run 2026-10-10)
 - **Parser (T-DE-01):** `requirements.txt` done (1 of ~6 manifest formats).
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
@@ -407,11 +424,16 @@ agent-layer work from 2026-10-03, verified by the full suite: 181 passed, 2
 - **Reporter (T-DE-03):** `RiskReport` dataclass + `src/reporter/interface.py` +
   `report_generator.py` present. Inventory serializer implemented; **dependency-graph
   serializer unimplemented**; **no dashboard yet**.
-- **Agent (T-DE-03 AI layer):** implemented + tested this session (2026-10-03) — new
-  `src/agent/` package (bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic
-  grounded policy with no model, `compare_scans`). **45 passing tests** (`tests/test_agent.py`).
-  A real model backend (llama.cpp vs. user API key) is **not yet wired** (pending decision);
-  current runs use the deterministic policy (`used_llm=False`).
+- **Agent (T-DE-03 AI layer):** implemented + tested — new `src/agent/` package
+  (bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic grounded policy
+  with no model, `compare_scans`). **45 passing tests** (`tests/test_agent.py`).
+  Plus **remediation** (uncommitted in the working tree): `build_remediation_plan`
+  (pure; one item per finding; fixed versions verbatim; severity left `None` /
+  evidence-only) + `verify_remediation` (user-supplied after scan; no after scan →
+  `not_run`, no resolution claim; unusable after report fails closed). **24 passing
+  tests** (`tests/test_remediation.py`). A real model backend (llama.cpp vs. user API
+  key) is **not yet wired** (pending decision); current runs use the deterministic
+  policy (`used_llm=False`).
 - **Source-audit (T-SA-01/02/03):** `multi_check_wrapper.py` runs and detects the eval
   finding but mislabels `rule_id` (`"blacklist"` instead of `B307`) and has a char-count
   bug (`"1474 results"`); `scan_demo.py` crashes (`NameError: venv_path`);
@@ -422,8 +444,9 @@ agent-layer work from 2026-10-03, verified by the full suite: 181 passed, 2
 
 > Test counts are **historical** unless re-run. The "pytest 79 passed" figure dates to
 > the `5b8a1f7` baseline and has been **superseded**: the full suite now runs
-> **181 passed, 2 warnings, 29 subtests** (re-run 2026-10-10): 53 reporter, 45 agent,
-> 26 enrichment, 23 pipeline, 11 NVD integration, 10 parser, 8 report generator, 5
+> **205 passed, 2 warnings, 29 subtests** (re-run 2026-10-10): 53 reporter, 45 agent,
+> 26 enrichment, 23 pipeline, **24 remediation**, 11 NVD integration, 10 parser, 8
+> report generator, 5
 > risk analyzer (test_harness collects 0
 > — parked Bandit sub-track). The T-DE-02
 > NVD integration suite currently passes (11).

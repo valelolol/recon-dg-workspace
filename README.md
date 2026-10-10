@@ -20,7 +20,7 @@ dependency-graph serializer and the synthetic reference `report.json` are still
 *planned* deliverables, not yet working features. Earlier verification results
 (e.g., PHEI == 6.0 on a synthetic 3-node unit chain, and the "pytest 79 passed"
 count) are **historical** — they date to an earlier commit. Re-running the full
-suite this week gives **181 passed, 2 warnings, 29 subtests** (test_harness collects 0
+suite this week gives **205 passed, 2 warnings, 29 subtests** (test_harness collects 0
 tests for the parked Bandit sub-track). Steps (2) live NVD/OSV, (4) the
 dashboard, and (5) a *real* AI model backend are **planned** and not yet
 running; the agent below runs fully without a model via a deterministic policy.
@@ -98,7 +98,38 @@ either way.
 `compare_scans(before, after)` produces the before/after delta (new / resolved /
 unchanged findings + the PHEI risk delta, skipped when topology is unavailable).
 
-**Status.** Implemented and tested (38 passing tests in `tests/test_agent.py`),
+The agent layer also carries a **remediation** stage, wired through the pipeline
+(`src/agent/pipeline.py`, `investigate` / `investigate_from_json` with an optional
+`after_scan_report`):
+
+- **`build_remediation_plan(scan)`** — a *pure* function (no manifest edits, no
+  installs, no network, no scoring) that emits one item per baseline finding.  Each
+  item preserves the advisory ID + aliases, the package, the installed version, the
+  affected range, the scanner-provided **fixed versions verbatim** (never
+  "latest"/"best" and never invented), an explicit `has_fixed_version` flag, and the
+  severity *evidence only* (`severity_score` left `None`; scheme types + vector
+  strings preserved).  It never computes or implies a numeric CVSS score or a
+  high/low category.  A plain recommended action names the scanner's fixed version
+  when one exists and otherwise says a specific target cannot be asserted.
+- **`verify_remediation(before_scan, plan, after_scan=None)`** — reconciles that
+  plan against a **user-supplied** after scan (no network; the caller supplies the
+  scan).  With **no after scan** it returns `status == "not_run"` and makes **no
+  resolution claim** and asserts no fix.  With an after scan it classifies each
+  plan item on the `(package, version, vulnerability_id)` key: same version in the
+  after scan = `unchanged` (never counted as fixed); key absent = `resolved`; same
+  advisory at a *different* version = `regressed`.  Findings new in the after scan
+  that were not in the plan are counted via the existing comparison and reported as
+  `new_count`, **not** attributed to the plan.  Risk/PHEI is preserved from the
+  comparison and is left `unavailable` when topology is unavailable — no edges or
+  scores are invented.  Verification appends a step to the caller's `EvidenceTrail`
+  (and always carries its own auditable `evidence`) so that "verification ran
+  (or was requested but had no after scan)" is on the record.
+- A **malformed, missing, or unusable** after report fails closed to
+  `status == "not_run"` and makes no resolution claim; the baseline investigation is
+  always preserved.
+
+**Status.** Implemented and tested (45 passing tests in `tests/test_agent.py`
+plus 24 in `tests/test_remediation.py`),
 plus an opt-in **deps.dev enrichment** layer (`src/enrichment/`, stdlib-only,
 26 passing tests in `tests/test_enrichment.py`) that exposes a new
 `package_context` tool (published, resolved, labelled `generic_published`;
@@ -109,7 +140,7 @@ deterministic policy. On the checked-in flat fixture (`tests/data/osv-scanner.js
 inventory-only result"* — no invented edges, no invented score, consistent with
 the inventory-only contract. Wiring a **real** model backend (local llama.cpp
 endpoint vs. user-provided API key) is a pending decision (see `TASKS.md`), not
-not yet implemented. Full suite: **181 passed, 2 warnings, 29 subtests**.
+not yet implemented. Full suite: **205 passed, 2 warnings, 29 subtests**.
 
 ## Key documents
 

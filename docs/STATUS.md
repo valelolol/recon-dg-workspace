@@ -1,24 +1,28 @@
 # STATUS — Recon-DG
 
-**Date:** 2026-10-03 (UTC)
+**Date:** 2026-10-10 (UTC)
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
-**Published baseline:** `1b4a8d9` ("docs: correct last-implementation baseline to
-c548f32", 2026-10-03, docs-only) — the current live tip of
-`feat/inventory-report` *as of the last push*. The working tree ahead of that tip
-also contains the new `src/agent/` layer (uncommitted; see "This session" below).
-*Historical prior states (label only, not the current state):* the last commit that
-changed implementation code is `c548f32` (NVD/reporter/scanner scaffolding); the
-later commits `f2303ee`, `5b8a1f7`, `1524425`, `6323285`, `b4fc87c`, and `1b4a8d9`
-are docs-only and did not alter the code. The executed verifications below
-(PHEI == 6.0, "pytest 79 passed") were run at the historical point `5b8a1f7`
-and remain *historical* unless re-run.
-**This session (2026-10-03):** the **agent layer** was implemented and tested —
-a new `src/agent/` package (`agent.py`, `normalizer.py`, `scan_runner.py`,
-`__init__.py`) plus tests and fixtures; `src/reporter/report_generator.py` was
-wired to the canonical `calculate_phei` (path-max), the legacy `generate_report_mock`
-(dead code — returned a fabricated placeholder string) was removed, and the report
-path is no longer a stub. **Working tree is dirty and uncommitted** (this session
+**Published baseline:** `f1c59a8` ("Implement evidence-grounded agent and scanner
+pipeline", 2026-10-10) — the current live tip of `feat/inventory-report`. It **includes**
+the `src/agent/` investigation layer, `src/enrichment/`, `tests/data/osv-scanner.json`,
+`tests/test_agent.py`, `tests/test_report_generator.py`, `tests/test_enrichment.py`, and
+`tests/test_pipeline.py`. The working tree ahead of that tip also contains the **remediation
+stage** (uncommitted; see "This session" below).
+*Historical prior states (label only, not the current state):* `1b4a8d9` ("docs: correct
+last-implementation baseline to c548f32", 2026-10-03, docs-only); `b4fc87c` (2026-10-02) and
+the other docs-only publishes did not change implementation code; `c548f32` added NVD/reporter/
+scanner scaffolding; `f1c59a8` then added the agent/enrichment/pipeline implementation. The
+executed verifications below (PHEI == 6.0, "pytest 79 passed") were run at the historical point
+`5b8a1f7` and remain *historical* unless re-run.
+**This session (2026-10-10):** the **remediation stage** was implemented and tested — a pure
+`build_remediation_plan` (one item per baseline finding, scanner-provided fixed versions
+verbatim, severity left `None` / evidence-only, no network / installs / scoring) and
+`verify_remediation` (reconciles the plan against a user-supplied after scan; no after scan →
+`not_run` with no resolution claim; same version persists as `unchanged`, key absent →
+`resolved`, same advisory at a different version → `regressed`; unusable after report fails
+closed). Added `tests/test_remediation.py` (24 tests) and re-aligned `README.md`,
+`TASKS.md`, and `docs/STATUS.md`. **Working tree is dirty and uncommitted** (this session
 intentionally stops before staging/commit/push per the repo's completion routine).
 
 ## Scope
@@ -30,21 +34,30 @@ dashboard and AI explanations grounded in the findings. Inventory-only input mus
 produce invented dependency edges; risk scoring requires explicitly "known" topology.
 Bandit source auditing is a supporting sub-track, **not** the December deliverable.
 
-## Current state (HEAD `1b4a8d9` + uncommitted agent work)
+## Current state (HEAD `f1c59a8` + uncommitted remediation work)
 
-- **Agent layer (`src/agent/`) — implemented and tested this session:** a new package
-  (`agent.py`, `normalizer.py`, `scan_runner.py`, `__init__.py`) runs a bounded,
+- **Agent layer (`src/agent/`) — implemented (published in `f1c59a8`) and tested:** a
+  package (`agent.py`, `normalizer.py`, `scan_runner.py`, `__init__.py`) runs a bounded,
   evidence-grounded investigation over normalized OSV-Scanner output (45 passing
   tests in `tests/test_agent.py`; tested against the checked-in
   `tests/data/osv-scanner.json` fixture). It is *not* "OSV-Scanner with an LLM
   summary": a pluggable `llm` hook may steer tool selection but is restricted to an
   allowlisted tool set (`findings`, `get_finding`, `package_info`, `package_context`,
-  `high_severity`, `risk_score`, `summary`, `stop`) and every call is recorded in an append-only
-  `EvidenceTrail`; out-of-band choices fall back to a grounded deterministic policy
-  (recorded). On the flat fixture (5 findings, 4 packages, 0 edges) a run reports
+  `high_severity`, `risk_score`, `summary`, `stop`) and every call is recorded in an
+  append-only `EvidenceTrail`; out-of-band choices fall back to a grounded deterministic
+  policy (recorded). On the flat fixture (5 findings, 4 packages, 0 edges) a run reports
   `risk.status == "unavailable"` and `risk.score is None` with *"No score is
   fabricated; this is an inventory-only result."* A **real** model backend (llama.cpp
   vs. user API key) is a pending decision — not yet wired.
+- **Remediation stage (`src/agent/`, uncommitted in the working tree):** a pure
+  `build_remediation_plan` (one item per baseline finding; scanner-provided fixed
+  versions verbatim, never "latest"/"best"; `severity_score` left `None` — no numeric
+  CVSS score or high/low category; scheme types + vector strings preserved as evidence;
+  a plain recommended action) plus `verify_remediation` (reconciles the plan against a
+  user-supplied after scan, no network; no after scan → `status == "not_run"` with
+  no resolution claim; same version persists as `unchanged`, key absent → `resolved`,
+  same advisory at a different version → `regressed`; unusable after report fails
+  closed to `not_run`). Verified by 24 passing tests in `tests/test_remediation.py`.
 - **Onboarding / handoffs:** rewritten for complete beginners on individual machines
   (Windows PowerShell and Linux/macOS routes in `docs/TEAM_ONBOARDING.md`).
   The current week's **active** assignments are the M-DE-CORE handoffs. The two older
@@ -70,17 +83,21 @@ Bandit source auditing is a supporting sub-track, **not** the December deliverab
   **not** exist in the tree. The reference `report.json` is **not** checked in. This is a
   prerequisite for Christian's E2E assertion and Aliyan's viewer — see the handoffs.
 
-## Evidence-supported implementation progress (implementation state at HEAD `c548f32`
-plus uncommitted agent-layer work from 2026-10-03)
+## Evidence-supported implementation progress (implementation state at HEAD `f1c59a8`
+plus uncommitted remediation work, 2026-10-10)
 
-- **Agent (`src/agent/`, new this session):** bounded, evidence-grounded investigation
-  loop. `normalizer` turns OSV-Scanner JSON into a `DependencyGraph` + `Finding`
-  objects; `scan_runner` builds/executes the OSV-Scanner CLI via injection (no real
-  binary required); `agent` runs the tool loop, records an `EvidenceTrail`, and exposes
-  `compare_scans`. **Verified this session** (`tests/test_agent.py`, 45 passed):
-  deterministic with no model; an LLM hook can only pick allowlisted tools and its
-  out-of-band/invalid choices fall back to the grounded policy (recorded); risk is
-  `unavailable`/`None` on a flat graph (no fabricated score).
+- **Agent (`src/agent/`, published in `f1c59a8`):** bounded, evidence-grounded
+  investigation loop. `normalizer` turns OSV-Scanner JSON into a `DependencyGraph` +
+  `Finding` objects (including the scanner-provided `fixed_versions` extraction);
+  `scan_runner` builds/executes the OSV-Scanner CLI via injection (no real binary
+  required); `agent` runs the tool loop, records an `EvidenceTrail`, and exposes
+  `compare_scans`. **Verified** (`tests/test_agent.py`, 45 passed): deterministic with
+  no model; an LLM hook can only pick allowlisted tools and its out-of-band/invalid
+  choices fall back to the grounded policy (recorded); risk is `unavailable`/`None` on
+  a flat graph (no fabricated score).
+- **Remediation (`src/agent/`, uncommitted in the working tree):** `build_remediation_plan`
+  + `verify_remediation` (see the "Current state" and "Verified" sections). Verified by
+  24 passing tests in `tests/test_remediation.py`.
 - **Parser (T-DE-01):** `requirements.txt` done + `build_mock_graph()` (3-node unit
   chain A→B→C, edge weights 1.0). Known-topology loader **not yet built**
   (W1-DE-01.L, Vale).
@@ -101,7 +118,7 @@ plus uncommitted agent-layer work from 2026-10-03)
   Nick (T-SA-02) and Christian (T-SA-03) own the corrections — see the T-SA-02 /
   T-SA-03 sections of `TASKS.md` (the source-audit handoff files were removed this week).
 
-## Blockers (as of HEAD `1b4a8d9` + uncommitted agent work)
+## Blockers (as of HEAD `f1c59a8` + uncommitted remediation work)
 
 - Mode B (dependency-graph serializer) does not exist yet — required to emit the 6.0 report
   (W1-DE-03.R).
@@ -114,8 +131,8 @@ plus uncommitted agent-layer work from 2026-10-03)
   Bandit harness.
 - No live NVD/OSV end-to-end run this session (findings are synthetic fixtures).
 - Dashboard framework and Docker are not started (out of scope this week). The AI
-  layer's *investigation loop* (`src/agent/`) is now implemented and tested (22
-  passing tests, deterministic policy, no real model); wiring a **real** model
+  layer's *investigation loop* (`src/agent/`) is implemented and tested (45 passing
+  tests, deterministic policy, no real model); wiring a **real** model
   backend (llama.cpp endpoint vs. user API key) is a pending decision, not yet done.
 
 ## Pending decisions (unchanged)
@@ -155,14 +172,22 @@ plus uncommitted agent-layer work from 2026-10-03)
 
 ## Verified / Proposed / Unverified
 
-- **Verified (executed, 2026-10-03, working tree with uncommitted agent work):**
-  - Full pytest suite: **181 passed, 2 warnings, 29 subtests**
+- **Verified (executed, 2026-10-10, working tree with uncommitted remediation work):**
+  - Full pytest suite: **205 passed, 2 warnings, 29 subtests**
     (`.venv/bin/python -m pytest tests/ -q`). Per-file:
     test_inventory_reporter 53, test_agent 45, test_enrichment 26,
-    test_pipeline 23, test_nvd_integration 11, test_parser 10,
-    test_report_generator 8, test_risk_analyzer 5. `tests/test_harness.py`
-    collects **0** tests (the parked Bandit sub-track; the two `TestCase`/`TestHarness`
-    classes define `__init__`).
+    test_pipeline 23, **test_remediation 24**, test_nvd_integration 11,
+    test_parser 10, test_report_generator 8, test_risk_analyzer 5.
+    `tests/test_harness.py` collects **0** tests (the parked Bandit sub-track; the two
+    `TestCase`/`TestHarness` classes define `__init__`).
+  - **Remediation (`src/agent/`, uncommitted):** 24 passing tests in
+    `tests/test_remediation.py`. `build_remediation_plan` emits one item per baseline
+    finding using only normalized scanner evidence (fixed versions verbatim, `severity_score`
+    left `None`, evidence-only severity, no numeric score or high/low category);
+    `verify_remediation` returns `not_run` with no resolution claim when no after scan is
+    supplied, and reconciles a user-supplied after scan (same-version persists as
+    `unchanged`, absent = `resolved`, same advisory at a different version = `regressed`,
+    new after-scan findings reported as `new_count` not attributed to the plan).
   - **Agent (`src/agent/`):** 45 passing tests in `tests/test_agent.py`. A deterministic
     (no-model) run over the flat fixture (`tests/data/osv-scanner.json`: 5 findings,
     4 packages, 0 edges) completes in 7 turns (`findings`, `get_finding` ×3, `risk_score`,
@@ -182,7 +207,7 @@ plus uncommitted agent-layer work from 2026-10-03)
   - `calculate_phei` == 6.0 on a **one-off synthetic** 3-node unit chain A→B→C
     (2 unit-weight edges × 3 nodes = 6.0). PHEI is invariant to CVE severity.
   - The historical "pytest 79 passed" / PHEI==6.0 runs date to baseline `5b8a1f7`
-    and are superseded by the 109-passed count above.
+    and are superseded by the 205-passed count above (full suite, re-run 2026-10-10).
 - **Proposed (M-DE-CORE, not yet in repo):** known-topology loader, Mode B serializer,
   `src/cli.py`, `src/dashboard/view.py`, the two input fixtures,
   `examples/fixtures/sample_risk_report.json`, `tests/test_e2e_risk.py`,

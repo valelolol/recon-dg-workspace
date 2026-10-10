@@ -66,6 +66,28 @@ development tool and is not a runtime dependency of recon-dg.
 `compare_scans(before, after)` produces the before/after delta (new / resolved /
 unchanged findings + the PHEI risk delta, skipped when topology is unavailable).
 
+The agent layer also carries a **remediation** stage (`build_remediation_plan` +
+`verify_remediation` in `agent.py`):
+- `build_remediation_plan(scan)` is pure — one item per baseline finding using only
+  normalized scanner evidence: the advisory ID + aliases, package, installed version,
+  the affected range, the scanner-provided **fixed versions verbatim** (never invented
+  / never "latest"), an explicit `has_fixed_version` flag, and severity *evidence only*
+  (`severity_score` left `None` — never a numeric CVSS score or a high/low category;
+  scheme types + vector strings preserved). A plain recommended action names a fixed
+  version only when the scanner supplies one.
+- `verify_remediation(before_scan, plan, after_scan=None)` reconciles the plan against
+  a **user-supplied** after scan (no network; the caller supplies the scan). No after
+  scan → `status == "not_run"` with **no resolution claim**. With an after scan, each
+  plan item is classified on the `(package, version, vulnerability_id)` key: same
+  version = `unchanged` (never counted as fixed), key absent = `resolved`, same advisory
+  at a different version = `regressed`. New after-scan findings not in the plan are
+  reported as `new_count`, not attributed to the plan. Risk/PHEI is preserved from
+  the comparison and left `unavailable` when topology is unavailable. Verification
+  appends a step to the caller's `EvidenceTrail` (and always carries its own auditable
+  `evidence`).
+- A malformed / missing / unusable after report fails closed to `status == "not_run"`
+  and makes no resolution claim; the baseline investigation is always preserved.
+
 ## Architecture Decisions
 
 ### **Scoring Formula Resolution (2026-09-17)**
@@ -117,6 +139,8 @@ The `src/reporter/` module provides:
 - **Tests:** `tests/test_inventory_reporter.py`, `tests/test_report_generator.py`
   (reporter), and `tests/test_agent.py` (agent layer, see above), plus
   `tests/test_enrichment.py` (deps.dev enrichment, stdlib-only, no network at
-  import time). The full suite currently runs **151 passed, 2 warnings**
-  (2026-10-08): 53 reporter, 38 agent, 26 enrichment, 11 NVD integration,
-  10 parser, 8 report generator, 5 risk analyzer.
+  import time) and `tests/test_remediation.py` (remediation planning + after-scan
+  verification, 24 tests, uncommitted). The full suite currently runs **205
+  passed, 2 warnings, 29 subtests** (re-run 2026-10-10): 53 reporter, 45 agent,
+  26 enrichment, 23 pipeline, 24 remediation, 11 NVD integration, 10 parser, 8
+  report generator, 5 risk analyzer.
