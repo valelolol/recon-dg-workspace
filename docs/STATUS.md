@@ -3,26 +3,38 @@
 **Date:** 2026-10-10 (UTC)
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
-**Published baseline:** `f1c59a8` ("Implement evidence-grounded agent and scanner
-pipeline", 2026-10-10) — the current live tip of `feat/inventory-report`. It **includes**
-the `src/agent/` investigation layer, `src/enrichment/`, `tests/data/osv-scanner.json`,
-`tests/test_agent.py`, `tests/test_report_generator.py`, `tests/test_enrichment.py`, and
-`tests/test_pipeline.py`. The working tree ahead of that tip also contains the **remediation
-stage** (uncommitted; see "This session" below).
-*Historical prior states (label only, not the current state):* `1b4a8d9` ("docs: correct
-last-implementation baseline to c548f32", 2026-10-03, docs-only); `b4fc87c` (2026-10-02) and
-the other docs-only publishes did not change implementation code; `c548f32` added NVD/reporter/
-scanner scaffolding; `f1c59a8` then added the agent/enrichment/pipeline implementation. The
-executed verifications below (PHEI == 6.0, "pytest 79 passed") were run at the historical point
-`5b8a1f7` and remain *historical* unless re-run.
-**This session (2026-10-10):** the **remediation stage** was implemented and tested — a pure
-`build_remediation_plan` (one item per baseline finding, scanner-provided fixed versions
-verbatim, severity left `None` / evidence-only, no network / installs / scoring) and
-`verify_remediation` (reconciles the plan against a user-supplied after scan; no after scan →
-`not_run` with no resolution claim; same version persists as `unchanged`, key absent →
-`resolved`, same advisory at a different version → `regressed`; unusable after report fails
-closed). Added `tests/test_remediation.py` (24 tests) and re-aligned `README.md`,
-`TASKS.md`, and `docs/STATUS.md`. **Working tree is dirty and uncommitted** (this session
+**Published baseline:** `6129e14` ("feat(agent): add evidence-grounded remediation
+verification", 2026-10-10) — the current live tip of `feat/inventory-report`. It
+**includes** the `src/agent/` investigation layer, the **remediation stage**
+(`build_remediation_plan` / `verify_remediation`), `src/enrichment/`,
+`tests/data/osv-scanner.json`, `tests/test_agent.py`,
+`tests/test_report_generator.py`, `tests/test_enrichment.py`,
+`tests/test_pipeline.py`, and `tests/test_remediation.py`. The working tree ahead
+of that tip also contains a **provisional, uncommitted explanation + dashboard
+layer** (see "This session" below).
+*Historical prior states (label only, not the current state):* `f1c59a8`
+("Implement evidence-grounded agent and scanner pipeline" — added the
+agent/enrichment/pipeline implementation; now superseded by `6129e14` which commits
+the remediation stage); `1b4a8d9` (docs-only); `b4fc87c` (docs-only) and the other
+docs-only publishes did not change implementation code; `c548f32` added NVD/reporter/
+scanner scaffolding. The executed verifications below (PHEI == 6.0, the older
+"pytest 205 passed" count) were run at the historical point before `6129e14` and
+remain *historical* unless re-run.
+**This session (2026-10-10):** verified and extended the **explanation** and
+**dashboard** paths (a bounded step toward the December AI-explainations and
+dashboard deliverables) and closed two test gaps. (1) The existing
+`tests/test_explanation.py` (20) drove the local-model client only through an
+injected `transport` seam (no real network); the new `tests/test_explanation_http.py`
+(7) stands up a **real** local `/v1/chat/completions` `http.server` and drives the
+client with `transport=None` (real `urllib`), proving the request is *sent* to the
+configurable endpoint and that every failure path (no config, non-2xx, malformed/
+empty body, network/timeout, `max_calls` cap) falls back deterministically **per
+finding**. (2) No dashboard test existed; the new `tests/test_dashboard.py` (9)
+spins up the real server on loopback and issues real GETs, verifying the page, the
+report, `not_run` verification (no resolution claim), the remediation plan, additive
+labelled explanations, and that findings/risk/severity are unchanged and no
+credentials leak. Full suite is now **241 passed, 29 subtests, 2 warnings**
+(re-run 2026-10-10). **Working tree is dirty and uncommitted** (this session
 intentionally stops before staging/commit/push per the repo's completion routine).
 
 ## Scope
@@ -34,7 +46,7 @@ dashboard and AI explanations grounded in the findings. Inventory-only input mus
 produce invented dependency edges; risk scoring requires explicitly "known" topology.
 Bandit source auditing is a supporting sub-track, **not** the December deliverable.
 
-## Current state (HEAD `f1c59a8` + uncommitted remediation work)
+## Current state (HEAD `6129e14` + uncommitted provisional explanation + dashboard layer)
 
 - **Agent layer (`src/agent/`) — implemented (published in `f1c59a8`) and tested:** a
   package (`agent.py`, `normalizer.py`, `scan_runner.py`, `__init__.py`) runs a bounded,
@@ -49,7 +61,7 @@ Bandit source auditing is a supporting sub-track, **not** the December deliverab
   `risk.status == "unavailable"` and `risk.score is None` with *"No score is
   fabricated; this is an inventory-only result."* A **real** model backend (llama.cpp
   vs. user API key) is a pending decision — not yet wired.
-- **Remediation stage (`src/agent/`, uncommitted in the working tree):** a pure
+- **Remediation stage (`src/agent/`) — implemented and published in `6129e14`:** a pure
   `build_remediation_plan` (one item per baseline finding; scanner-provided fixed
   versions verbatim, never "latest"/"best"; `severity_score` left `None` — no numeric
   CVSS score or high/low category; scheme types + vector strings preserved as evidence;
@@ -58,6 +70,29 @@ Bandit source auditing is a supporting sub-track, **not** the December deliverab
   no resolution claim; same version persists as `unchanged`, key absent → `resolved`,
   same advisory at a different version → `regressed`; unusable after report fails
   closed to `not_run`). Verified by 24 passing tests in `tests/test_remediation.py`.
+- **Provisional explanation layer (`src/explanation/`, uncommitted):** a grounded
+  deterministic explainer (default; `explain_finding` / `explain_findings`) that cites
+  only facts already on the finding and never fabricates a numeric CVSS score, version,
+  or CVE. Plus an optional OpenAI-compatible local-model client
+  (`src/explanation/local_model.py`) targeting a single `/v1/chat/completions` endpoint
+  via stdlib `urllib`, configured only by `OPENAI_BASE_URL` / `OPENAI_API_KEY` (no
+  credentials or endpoint secrets committed). `add_explanations` is additive: it adds
+  `report["ai_explanations"]` (one `{"text", "source"}` entry per finding) and
+  `report["explanation_source"]` (counts model vs deterministic; never echoes the key/
+  endpoint). Deterministic fallback is guaranteed and labelled per finding on any
+  failure (no config, network/timeout, non-2xx, malformed body, empty completion,
+  `max_calls` cap). Verified by `tests/test_explanation.py` (20) +
+  `tests/test_explanation_http.py` (7, a real local `/v1/chat/completions` server
+  driven by real `urllib` requests — no injected transport seam).
+- **Provisional dashboard (`src/web/`, uncommitted):** a minimal read-only stdlib
+  `http.server` dashboard (no third-party deps) serving `dashboard.html` at `/` and the
+  structured report at `/report.json` on local loopback. It does **not** re-run scans,
+  edit manifests, or imply a fix was verified. It renders findings, the risk
+  limitations (`risk.status == "unavailable"` → "no score is fabricated"), the
+  remediation plan (scanner-provided fixed versions verbatim), and the after-scan
+  verification state **including `not_run`** (a red card with a zero count summary and
+  no resolution claim). Verified by `tests/test_dashboard.py` (9, real loopback HTTP
+  GETs to `/` and `/report.json`).
 - **Onboarding / handoffs:** rewritten for complete beginners on individual machines
   (Windows PowerShell and Linux/macOS routes in `docs/TEAM_ONBOARDING.md`).
   The current week's **active** assignments are the M-DE-CORE handoffs. The two older

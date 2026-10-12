@@ -12,6 +12,8 @@ Current security methods are reactive, assessing only known CVEs and failing to 
 | `src/models` | Defines the directed, weighted graph data structures representing component dependencies, their relationships, and associated metadata. |
 | `src/engine` | Implements the core risk-scoring algorithms (NVD API integration, OSV fallback, rate-limiting, caching) and PHEI path-maximum scoring formula. |
 | `src/reporter` | Generates structured JSON reports, human-readable summaries, and LLM explanations with deterministic fallback behavior. |
+| `src/explanation` | Optional AI explanation layer: a grounded deterministic explainer (default) plus an OpenAI-compatible local-model client (env-only credentials, per-finding deterministic fallback, additive `ai_explanations` field). Uncommitted; toward the December AI-explainations step. |
+| `src/web` | Minimal read-only dashboard: serves `dashboard.html` and `report.json` via stdlib `http.server` (no third-party deps). Uncommitted; toward the December dashboard step (full Flask+D3 is T-DE-04). |
 
 ## Graph Schema
 
@@ -139,8 +141,13 @@ The `src/reporter/` module provides:
 - **Tests:** `tests/test_inventory_reporter.py`, `tests/test_report_generator.py`
   (reporter), and `tests/test_agent.py` (agent layer, see above), plus
   `tests/test_enrichment.py` (deps.dev enrichment, stdlib-only, no network at
-  import time) and `tests/test_remediation.py` (remediation planning + after-scan
-  verification, 24 tests, uncommitted). The full suite currently runs **205
-  passed, 2 warnings, 29 subtests** (re-run 2026-10-10): 53 reporter, 45 agent,
-  26 enrichment, 23 pipeline, 24 remediation, 11 NVD integration, 10 parser, 8
-  report generator, 5 risk analyzer.
+  import time), `tests/test_remediation.py` (remediation planning + after-scan
+  verification, 24 tests), and — for the provisional uncommitted layer —
+  `tests/test_explanation.py` (20), `tests/test_explanation_http.py` (7, a real
+  local `/v1/chat/completions` server driven by real `urllib` requests), and
+  `tests/test_dashboard.py` (9, real loopback HTTP GETs to `/` and
+  `/report.json`). The full suite currently runs **241 passed, 29 subtests, 2
+  warnings** (re-run 2026-10-10): 53 reporter, 45 agent, 26 enrichment, 23
+  pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
+  5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard (test_harness
+  collects 0 for the parked Bandit sub-track).
