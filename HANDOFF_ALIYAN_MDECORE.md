@@ -1,8 +1,8 @@
-# HANDOFF — Aliyan (provisional): M-DE-CORE static viewer spike
+# HANDOFF — Aliyan (provisional): M-DE-CORE static viewer spike → T-DE-04 (Flask+D3)
 
 ## Your assignment
 
-Build a **provisional static viewer** (`src/dashboard/view.py`) that renders `report.json` as `report.html`. This is a spike toward the full Phase 4 dashboard (Flask+D3).
+Build a **provisional static viewer** (`src/dashboard/view.py`) that renders `report.json` as `report.html`. This is a spike toward the full Phase 4 dashboard (T-DE-04: Flask+D3). It is **not** the final dashboard.
 
 ## What to produce
 

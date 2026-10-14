@@ -1,8 +1,10 @@
-# HANDOFF — Nick: M-DE-CORE fixtures + limitations note
+# HANDOFF — Nick: M-DE-CORE demo fixtures (synthetic only, not central milestone)
 
 ## Your assignment
 
 Create **two synthetic input fixtures** for the Mode B dependency-graph report. These are **fictional** — they are not real CVEs or real packages. They exist only to exercise the pipeline without live API calls.
+
+**Important:** These fixtures are **demo-only** per the synthetic data rule (TASKS.md: "synthetic graph/advisory data is only for clearly labeled offline tests or a separate demo. It is **never** scanner evidence."). They are **not** the central product milestone. The central milestone is Vale's Mode B pipeline (loader → serializer → CLI → reference output). Your work supports that milestone as a labeled demo input.
 
 ## What to produce
 

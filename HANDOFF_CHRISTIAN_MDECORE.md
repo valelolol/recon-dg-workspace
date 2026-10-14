@@ -1,8 +1,10 @@
-# HANDOFF — Christian: M-DE-CORE E2E tests + expected results
+# HANDOFF — Christian: M-DE-CORE E2E verification test for the central pipeline
 
 ## Your assignment
 
 Write an **offline, deterministic** end-to-end test that asserts the Mode B `report.json` output matches a fixed reference. This test runs without any network calls.
+
+**This is the verification layer for Vale's central milestone (W1-DE-03.R).** Your test proves the pipeline produces the correct reference output. The test is the acceptance gate for the one-week core deliverable.
 
 ## What to produce
 
@@ -57,4 +59,3 @@ A short doc listing:
 
 - The test must be **deterministic**: use fixed `scan_id` and `created_at` values.
 - No `TestCase`/`TestHarness` classes (they break pytest collection). Use plain `def test_...` functions.
-- The `test_harness.py` file was removed (Bandit track). Your test is the E2E test for the core track.
