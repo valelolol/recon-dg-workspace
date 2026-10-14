@@ -3,15 +3,20 @@
 **Date:** 2026-10-10 (UTC)
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
-**Published baseline:** `6129e14` ("feat(agent): add evidence-grounded remediation
-verification", 2026-10-10) — the current live tip of `feat/inventory-report`. It
-**includes** the `src/agent/` investigation layer, the **remediation stage**
-(`build_remediation_plan` / `verify_remediation`), `src/enrichment/`,
+**Published baseline:** `24c99b6` ("docs: align documentation with accepted
+scanner-centered scope", 2026-10-10) — the current live tip of `feat/inventory-report`.
+`6129e14` ("feat(agent): add evidence-grounded remediation verification", 2026-10-10)
+is the last commit that changed implementation code. `24c99b6` is a docs-only commit.
+The published baseline **includes** the `src/agent/` investigation layer, the **remediation
+stage** (`build_remediation_plan` / `verify_remediation`), `src/enrichment/`,
 `tests/data/osv-scanner.json`, `tests/test_agent.py`,
 `tests/test_report_generator.py`, `tests/test_enrichment.py`,
 `tests/test_pipeline.py`, and `tests/test_remediation.py`. The working tree ahead
 of that tip also contains a **provisional, uncommitted explanation + dashboard
-layer** (see "This session" below).
+layer** (see "This session" below): 10 untracked files (`src/explanation/` ×3,
+`src/web/` ×5, `tests/test_dashboard.py`, `tests/test_explanation.py`,
+`tests/test_explanation_http.py`) that are **unpublished** — not staged, not committed,
+not pushed.
 *Historical prior states (label only, not the current state):* `f1c59a8`
 ("Implement evidence-grounded agent and scanner pipeline" — added the
 agent/enrichment/pipeline implementation; now superseded by `6129e14` which commits
@@ -44,7 +49,6 @@ uses actual dependency relationships when available, and helps developers priori
 findings via deterministic PHEI risk analysis. The December prototype includes a clear
 dashboard and AI explanations grounded in the findings. Inventory-only input must not
 produce invented dependency edges; risk scoring requires explicitly "known" topology.
-Bandit source auditing is a supporting sub-track, **not** the December deliverable.
 
 ## Current state (HEAD `6129e14` + uncommitted provisional explanation + dashboard layer)
 
@@ -95,10 +99,7 @@ Bandit source auditing is a supporting sub-track, **not** the December deliverab
   GETs to `/` and `/report.json`).
 - **Onboarding / handoffs:** rewritten for complete beginners on individual machines
   (Windows PowerShell and Linux/macOS routes in `docs/TEAM_ONBOARDING.md`).
-  The current week's **active** assignments are the M-DE-CORE handoffs. The two older
-  source-audit handoffs (`HANDOFF_NICK.md` / `HANDOFF_CHRISTIAN.md`) were **removed**
-  this week (Bandit sub-track **parked / non-gating this week** — preserved in git
-  history, task descriptions remain in `TASKS.md`).
+  The current week's **active** assignments are the M-DE-CORE handoffs.
   `README.md` and `docs/WEEKLY.md` direct readers to the shared onboarding and the
   M-DE-CORE handoffs first.
 - **M-DE-CORE plan:** committed in `TASKS.md` (Mode B field mapping + proposed
@@ -106,11 +107,6 @@ Bandit source auditing is a supporting sub-track, **not** the December deliverab
   loader, Mode B serializer, `src/cli.py`, viewer, reference output, E2E test) is
   **not in the tree yet**. The agent layer (above) *is* in the tree — it is a separate,
   already-built deliverable, not part of the pending M-DE-CORE Mode B work.
-- **Shared-contract statements** are aligned across docs: rule = JSON `test_id` (never
-  `test_name`); `rc=5` does not exist (Bandit 1.9.4: `rc=0`=clean, `rc=1`=findings,
-  `rc>=2`=error); "clean" is composite (`rc=0` AND valid JSON AND empty `results` AND
-  empty `errors`); `-ll` is a valid severity filter that omits low severity and is
-  omitted here; 4 tested rules / 8 cases; `os.system` is B605, not B602.
 - **PHEI return value:** `calculate_phei` returns **only the scalar score** (6.0 for the
   3-node unit chain); **no** path field is emitted, rendered, or asserted. The numeric
   result is the "maximum path score," not an argmax path. No `top_risk_path`.
@@ -146,12 +142,6 @@ plus uncommitted remediation work, 2026-10-10)
   any graph with edges** (requires `edge_availability == "unavailable"`). The before/after
   **report generator** is implemented (no more stub). Mode B
   `serialize_dependency_graph` **not started**. No `src/cli.py` and no `src/dashboard/` yet.
-- **Source-audit (T-SA-01/02/03):** unchanged this week; supporting / non-gating.
-  `scan_demo.py` crashes (`NameError: venv_path`); `multi_check_wrapper.py` mislabels
-  `rule_id` (`"blacklist"`) and uses the nonexistent `rc=5`; `tests/test_harness.py`
-  does not run correctly (wrong examples path, invalid `-ll`, expects B704 for pickle).
-  Nick (T-SA-02) and Christian (T-SA-03) own the corrections — see the T-SA-02 /
-  T-SA-03 sections of `TASKS.md` (the source-audit handoff files were removed this week).
 
 ## Blockers (as of HEAD `f1c59a8` + uncommitted remediation work)
 
@@ -161,9 +151,6 @@ plus uncommitted remediation work, 2026-10-10)
   E2E assertion and Aliyan's viewer. Must be produced by Vale (W1-DE-03.R).
 - `httpx` is imported by `nvd_client.py` but undeclared in any manifest (separate fix;
   not needed for the core path this week).
-- `tests/test_harness.py` collects **0 tests** (pytest cannot collect `TestCase`/
-  `TestHarness` — both define `__init__`); the "79 passed" total does not cover the
-  Bandit harness.
 - No live NVD/OSV end-to-end run this session (findings are synthetic fixtures).
 - Dashboard framework and Docker are not started (out of scope this week). The AI
   layer's *investigation loop* (`src/agent/`) is implemented and tested (45 passing
@@ -181,10 +168,6 @@ plus uncommitted remediation work, 2026-10-10)
 2. **AI backend:** local model (llama.cpp) vs. user-provided API key?
 3. **Dashboard stack:** Flask + D3.js (recommended) vs. FastAPI + React? (Full T-DE-04
    dashboard out of scope this week; only a provisional static-viewer spike is proposed.)
-4. **Bandit course requirement.** Is the source-audit sub-track a course deliverable this
-   week? Status: **UNKNOWN** (no mandate found in repo). Treated as non-gating.
-5. **Scanner exit-code semantics** (see TASKS.md unresolved #1): the scanner itself
-   uses its own exit codes (0/1/2); Bandit's `rc=1` = findings is separate.
 
 ## Next bounded task
 
@@ -208,13 +191,11 @@ plus uncommitted remediation work, 2026-10-10)
 ## Verified / Proposed / Unverified
 
 - **Verified (executed, 2026-10-10, working tree with uncommitted remediation work):**
-  - Full pytest suite: **205 passed, 2 warnings, 29 subtests**
-    (`.venv/bin/python -m pytest tests/ -q`). Per-file:
+  - Full pytest suite: **241 passed, 29 subtests, 2 warnings**
+    (reported test result; `.venv/bin/python -m pytest tests/ -q`). Per-file:
     test_inventory_reporter 53, test_agent 45, test_enrichment 26,
     test_pipeline 23, **test_remediation 24**, test_nvd_integration 11,
     test_parser 10, test_report_generator 8, test_risk_analyzer 5.
-    `tests/test_harness.py` collects **0** tests (the parked Bandit sub-track; the two
-    `TestCase`/`TestHarness` classes define `__init__`).
   - **Remediation (`src/agent/`, uncommitted):** 24 passing tests in
     `tests/test_remediation.py`. `build_remediation_plan` emits one item per baseline
     finding using only normalized scanner evidence (fixed versions verbatim, `severity_score`
@@ -242,7 +223,7 @@ plus uncommitted remediation work, 2026-10-10)
   - `calculate_phei` == 6.0 on a **one-off synthetic** 3-node unit chain A→B→C
     (2 unit-weight edges × 3 nodes = 6.0). PHEI is invariant to CVE severity.
   - The historical "pytest 79 passed" / PHEI==6.0 runs date to baseline `5b8a1f7`
-    and are superseded by the 205-passed count above (full suite, re-run 2026-10-10).
+    and are superseded by the 241-passed count above (reported result).
 - **Proposed (M-DE-CORE, not yet in repo):** known-topology loader, Mode B serializer,
   `src/cli.py`, `src/dashboard/view.py`, the two input fixtures,
   `examples/fixtures/sample_risk_report.json`, `tests/test_e2e_risk.py`,
@@ -257,7 +238,7 @@ plus uncommitted remediation work, 2026-10-10)
   Deferred: `packages[].risk_score` (node-level PHEI undefined). `risk.status` uses the
   spec enum `available`/`unavailable`.
 - **Unverified / pending:** that the new Mode B serializer emits 6.0 end-to-end
-  (not yet built); severity-in-score (open, Vale); Bandit course mandate (UNKNOWN);
+  (not yet built); severity-in-score (open, Vale);
   that the reference sample (once produced) byte-matches Christian's determinism check (run twice with identical scan_id and created_at, then compare outputs).
 
 > Test counts in this file are **historical** unless re-run and re-recorded. No completion

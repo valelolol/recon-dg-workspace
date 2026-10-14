@@ -149,5 +149,4 @@ The `src/reporter/` module provides:
   `/report.json`). The full suite currently runs **241 passed, 29 subtests, 2
   warnings** (re-run 2026-10-10): 53 reporter, 45 agent, 26 enrichment, 23
   pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
-  5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard (test_harness
-  collects 0 for the parked Bandit sub-track).
+  5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard.

@@ -23,7 +23,9 @@ dependency-graph serializer and the synthetic reference `report.json` are still
 (e.g., PHEI == 6.0 on a synthetic 3-node unit chain, and the "pytest 79 passed"
 count) are **historical** — they date to an earlier commit. Re-running the full
 Re-running the full suite this week gives **241 passed, 29 subtests, 2
-warnings** (test_harness collects 0 tests for the parked Bandit sub-track).
+warnings** (re-run 2026-10-10): 53 reporter, 45 agent, 26 enrichment, 23
+pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
+5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard.
 A **provisional** stdlib-only dashboard (`src/web/`) and a **provisional**
 explanation layer (`src/explanation/` — a grounded deterministic explainer plus
 an optional OpenAI-compatible local-model client) are now in the tree (uncommitted)
@@ -39,11 +41,6 @@ generator, and the agent layer (`src/agent/`) are in the tree and tested; the
 Mode B serializer + synthetic `report.json`, live NVD/OSV, the dashboard, and a
 real AI model backend are not yet implemented.*
 
-**Supporting sub-track:** a Bandit source-code static-analysis prototype that finds
-vulnerabilities *inside the code scanned* (a useful extra signal and a pipeline/harness
-exercise). It must stay separate from dependency findings and must not displace the
-core track.
-
 ## Getting started (read this first)
 
 - **`docs/TEAM_ONBOARDING.md`** — how to clone the repo and set up **your own computer**
@@ -53,17 +50,7 @@ core track.
 - **`docs/WEEKLY.md`** — this week's (M-DE-CORE) focus, acceptance criteria, and the
   **current** M-DE-CORE handoffs. It tells you which handoff is *active this week*.
 - **`TASKS.md`** — the task register (stable IDs), phase plans, and the shared
-  source-audit contract.
 - **`docs/STATUS.md`** — the current state (date, branch/HEAD, working-tree state).
-
-## Two tracks — do not conflate
-
-| | Core (December deliverable) | Supporting (source-audit) |
-|---|---|---|
-| **Question** | Which dependencies are risky, and how bad? | What vulnerabilities does the code contain? |
-| **Engine** | OSV-Scanner + PHEI graph scoring | Bandit static analysis |
-| **Location** | `src/parser`, `src/models`, `src/engine`, `src/reporter`, `src/agent`, dashboard | `examples/source-audit-week1/`, `src/scanner/` |
-| **Output** | dependency risk score + CVE findings (risk paths are deferred per the open path-field schema decision) | source-code findings (kept separate) |
 
 **Synthetic data rule:** synthetic graph/advisory data is only for clearly labeled offline tests or a separate demo. It is **never** scanner evidence. Real scanner output (OSV-Scanner JSON) is the only valid input for the agent and PHEI scoring.
 
@@ -213,7 +200,7 @@ the final deliverable:
 
 - [docs/TEAM_ONBOARDING.md](docs/TEAM_ONBOARDING.md) — beginner setup on your own machine (read first)
 - [AGENTS.md](AGENTS.md) — startup/completion routine, evidence rules, routing
-- [TASKS.md](TASKS.md) — task register, phase plans, shared source-audit contract
+- [TASKS.md](TASKS.md) — task register, phase plans
 - [docs/STATUS.md](docs/STATUS.md) — current state (date, branch/HEAD, working tree)
 - [docs/WEEKLY.md](docs/WEEKLY.md) — weekly focus and acceptance criteria
 - **Current (M-DE-CORE, this week — active first):**
@@ -221,37 +208,7 @@ the final deliverable:
   - `HANDOFF_CHRISTIAN_MDECORE.md` — Christian · offline tests + expected results (T-DE-02/03)
   - `HANDOFF_VALE_MDECORE.md` — Vale · loader, PHEI/report integration, reference output (T-DE-01/02/03)
   - `HANDOFF_ALIYAN_MDECORE.md` — Aliyan (provisional) · static viewer spike (T-DE-04)
-- **Supporting (source-audit, parked / non-gating this week — NOT the December deliverable):**
-  - The Bandit handoff files (`HANDOFF_NICK.md` / `HANDOFF_CHRISTIAN.md`) were removed this week.
-    Their task descriptions remain in `TASKS.md` (T-SA-01 / T-SA-02 / T-SA-03) and the shared
-    contract in `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md`. Read those only if you
-    are on the source-audit track.
-- [examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md](examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md)
-  — source-audit roadmap (includes the verified shared contract)
+- [docs/WEEKLY.md](docs/WEEKLY.md) — weekly focus and acceptance criteria
 
 > **Read the current handoff first.** `docs/WEEKLY.md` says which handoff is active
-> for the current week; the `HANDOFF_*_MDECORE.md` files are this week's. The older
-> source-audit handoffs (`HANDOFF_NICK.md` / `HANDOFF_CHRISTIAN.md`) were removed this
-> week (Bandit track **parked / non-gating this week**); their content lives in
-> `TASKS.md` and the Month-1 roadmap. Do not treat it as the December deliverable.
-
-## Verified shared contract (source audit)
-
-Read `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md` §"Shared contract"
-before touching scanner, config, or harness code:
-
-- **Rule ID lives in JSON `test_id`, never `test_name`** (whose value varies by
-  rule/version).
-- **Exit codes:** `rc=5` does not exist; `0` = clean, `1` = findings, `2` = internal
-  error, `3` = unknown. Any `rc >= 2` is an **error**, never "0 vulnerabilities."
-- **A clean scan is composite:** `rc=0` **and** valid JSON **and** empty `results`
-  **and** empty `errors`. `rc=0` alone is not proof of success (a missing file also
-  returns `rc=0` with `errors` populated).
-- **CLI:** `bandit -f json -t <bare_rule_id> <file.py>`. `-ll` is a *valid* severity
-  filter (medium-or-higher only) and is omitted so low-severity findings are measured.
-- **Rules:** B307 = eval/exec, B301 = pickle deserialization, B602 = shell command
-  injection (NOT `os.system` — that is B605), B608 = SQL injection, B704 =
-  markupsafe XSS (NOT deserialization).
-- **Eight cases, four tested rules:** the harness (T-SA-03) tests B307, B301, B602,
-  B608 — each vulnerable and secure (4 × 2 = 8). B704 is not tested in the 8-case
-  harness.
+> for the current week; the `HANDOFF_*_MDECORE.md` files are this week's.

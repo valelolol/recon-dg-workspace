@@ -20,14 +20,6 @@ recon-dg is a **dependency risk mapper**. One command must, for a given project:
 scoring requires an explicitly "known" topology; with inventory-only input the edges
 array stays empty and risk is unavailable.
 
-### The two scanner tracks — do NOT conflate them
-- **Core (December deliverable):** dependency/CVE assessment over the graph —
-  `src/parser`, `src/models`, `src/engine`, `src/reporter`, `src/agent`, dashboard.
-- **Supporting sub-track (Week 1):** source-code static analysis via Bandit —
-  `examples/source-audit-week1/`, `src/scanner/`. It finds vulns *inside the code you*
-  *scan* (a useful extra signal and a good pipeline/harness exercise). It is **not**
-  the December deliverable and must stay **separate** from dependency findings.
-
 **Synthetic data rule:** synthetic graph/advisory data is only for clearly labeled offline tests or a separate demo. It is **never** scanner evidence. Real scanner output (OSV-Scanner JSON) is the only valid input for the agent and PHEI scoring.
 
 ### December-critical path (in order)
@@ -51,11 +43,6 @@ the tree — treat it as not done until verified.
 | T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | In progress | T-DE-01, T-DE-02 |
 | T-DE-04 | Dashboard: graph + risk + per-package view | Core | Aliyan (provisional) | Not started | T-DE-02, T-DE-03 |
 | T-DE-05 | Docker packaging + local compose | Core | Team | Not started | T-DE-04 |
-| T-SA-01 | Scanner pipeline (Bandit) → correct report | Supporting | Vale | In progress (unverified) | shared contract (done) |
-| T-SA-02 | Check config + security-checks docs | Supporting | Nick | In progress (unverified) | shared contract (done) |
-| T-SA-03 | Harness + example pairs + results table | Supporting | Christian | In progress (unverified) | T-SA-01, T-SA-02 |
-
-Bandit handoff files (`HANDOFF_NICK.md`, `HANDOFF_CHRISTIAN.md`) were removed this week — the Bandit track is **parked / non-gating this week** and is not the December deliverable. Task descriptions remain in this file (T-SA-02 / T-SA-03 below) and the shared contract lives in `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md` §"Shared contract".
 
 ## M-DE-CORE — One-Week Core Dependency-Risk Report
 
@@ -101,11 +88,10 @@ Scope: C0 gates Nick's fixture authoring and the downstream fixture-consuming st
 | W1-DE-01.F | T-DE-01 | Nick | `examples/fixtures/known_topology.json` | Fixture loads; 3 unique nodes, 2 directed unit-weight edges; labeled synthetic | Round-trips to a `known` graph; no duplicate IDs |
 | W1-DE-02.S | T-DE-02 | Nick | `examples/fixtures/cve_fixture.json`, `docs/limitations.md` | Fixture loads; IDs `SYNTH-2026-xxxx`; limitations note names source + severity-not-in-score limit | Synthetic-labeled; no real identifiers |
 | W1-DE-01.L | T-DE-01 | Vale | `src/parser/parser.py` | `load_known_topo_json()` → graph `edge_availability="known"`; correct nodes/edges/weights | `calculate_phei` on it == 6.0; `parse_requirements` untouched |
-| W1-DE-02.R | T-DE-02 | Vale | `src/engine/risk_analyzer.py`, `src/reporter/report_generator.py` | `calculate_phei` returns the argmax scalar score (6.0); `generate_report` calls PHEI (path-max), not `calculate_systemic_risk` (global-sum); `w_uv` logged as OPEN | Score numerics preserved (6.0) and invariant to severity; no formula change/invented; no path field emitted; severity not in score. **Complete 2026-10-03 (uncommitted):** `generate_report()` wired to `calculate_phei`; unavailable topology → "unavailable" risk (no fabricated score); `calculate_systemic_risk` kept as legacy; latent `KeyError` in "removed" section fixed (reads `previous_graph`); new `tests/test_report_generator.py` (8 tests). Verification: `python -m pytest tests/test_report_generator.py tests/test_parser.py tests/test_risk_analyzer.py tests/test_inventory_reporter.py tests/test_harness.py -q` → 76 passed; `git diff --check` clean. |
+| W1-DE-02.R | T-DE-02 | Vale | `src/engine/risk_analyzer.py`, `src/reporter/report_generator.py` | `calculate_phei` returns the argmax scalar score (6.0); `generate_report` calls PHEI (path-max), not `calculate_systemic_risk` (global-sum); `w_uv` logged as OPEN | Score numerics preserved (6.0) and invariant to severity; no formula change/invented; no path field emitted; severity not in score. **Complete 2026-10-03 (uncommitted):** `generate_report()` wired to `calculate_phei`; unavailable topology → "unavailable" risk (no fabricated score); `calculate_systemic_risk` kept as legacy; latent `KeyError` in "removed" section fixed (reads `previous_graph`); new `tests/test_report_generator.py` (8 tests). Verification: `python -m pytest tests/test_report_generator.py tests/test_parser.py tests/test_risk_analyzer.py tests/test_inventory_reporter.py -q` → 76 passed; `git diff --check` clean. |
 | W1-DE-03.R | T-DE-03 | Vale | `src/reporter/inventory.py`, `src/cli.py`, `examples/fixtures/sample_risk_report.json` | `sample_risk_report.json`: `input.type=="file"`, `input.format=="synthetic-graph"`, `risk.score==6.0`, `method=="phei"`, 3 findings, synthetic-labeled, no path field | Matches v0.1; Mode A fields/behavior preserved + existing tests pass; offline, deterministic |
 | W1-DE-04.V | T-DE-04 | Aliyan (provisional) | `src/dashboard/view.py` | `view.py <report.json>` → `report.html`: packages, edges, score, findings; **no level labels** | Data-driven; no framework; numeric score + status only |
 | W1-DE-03.T | T-DE-02/03 | Christian | `tests/test_e2e_risk.py`, `docs/E2E_EXPECTED_RESULTS.md` | Passing offline test asserts the 6.0 reference (and no path field) | Deterministic: run twice with the same fixed scan_id and created_at and compare outputs |
-| — | T-SA-01/02/03 | — | (unchanged) | — | **Non-gating this week; course requirement UNKNOWN (pending confirmation).** |
 
 **Resolved field mapping (all spec-supported; see STATUS.md Verified/Proposed/Unverified):**
 - `input = { type: file, filename: "known_topology.json", format:
@@ -220,93 +206,6 @@ fixtures. Approval = an explicit user decision; do not treat this as agreed unti
 > **Not a loader promise:** nothing in the tree currently accepts this shape. `load_known_topo_json()`
 > is *proposed* (W1-DE-01.L, Vale) and does not exist yet. This contract only defines what Nick's
 > input fixtures *should* look like once the shape is approved.
-
-## Supporting sub-track: Source-Audit / Bandit (Week 1, NOT the December core)
-
-Kept separate from dependency findings. See `examples/source-audit-week1/` and
-`src/scanner/bandit_config.py`. Month-1 scope:
-
-- **T-SA-01 Vale** — scanner: one command `python scan_demo.py <input> <output.json>`
-  writes valid JSON; each finding has `rule_id` (from `test_id`, never `test_name`),
-  `filename`, `line_number`, 1-line evidence, severity, confidence, `fix_suggestion`.
-  Move the working wrapper into `src/scanner/`. Move the working logic into the canonical
-  module rather than leaving it only in `examples/`.
-  - [ ] Fix the `NameError` in `scan_demo.py` (`venv_path` defined once at top of `main()`).
-  - [ ] Rewrite the Bandit command: drop `-r .` and `-ll`; use
-    `[bandit, "-f", "json", "-t", check_id, str(source_path)]`.
-  - [ ] Exit-code semantics: `rc=1` = findings, `rc=0` = clean, `rc>=2` = error.
-  - [ ] Read `test_id`, not `test_name`, into `Finding.rule_id`.
-  - [ ] Add the evidence snippet from the finding's `line_range`.
-  - [ ] Run all four checks (B307, B301, B602, B608); aggregate into one report.
-  - [ ] Verify against the eval pair (B307 found / safe pair clean) and the pickle
-    pair (B301 found / safe pair clean); confirm `rule_id` = `"B307"`/`"B301"`.
-  - Evidence: **unverified** — `scan_demo.py` currently crashes (`NameError: venv_path`);
-    `multi_check_wrapper.py` runs and catches the eval finding but writes
-    `rule_id="blacklist"` and uses rc=5. Claims below are *not* from a fresh run this
-    session.
-
-- **T-SA-02 Nick** — `bandit_config.py` rule mapping + `docs/security-checks.md`:
-  correct shell→B602, deserialization→B301, B704=markupsafe XSS (not deser); write
-  per-check expectations (catches / doesn't catch / false-positives / one-line fix).
-  (No active handoff file — Bandit track is **parked / non-gating this week**; the T-SA-02 description is this section, and the shared contract is in `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md`.)
-  - [ ] B608 block: SQL **only** → `["B608:sql-injection"]`; rename to
-    "SQL Injection" (shell is a separate check, B602).
-  - [ ] B704 block: this is **markupsafe XSS**, not deserialization. Delete it (3
-    categories) or replace with the real `B704:markupsafe-unsafe` entry (4th category).
-  - [ ] B602 block: keep the rules; rename `name` to "Shell Command Injection".
-  - [ ] B301 block: correct — keep.
-  - [ ] `CVE_EXAMPLES`: move the deser CVEs from the B704 key to B301.
-  - [ ] `MITIGATION_PATTERNS`: fix the B704 key the same way.
-  - [ ] `docs/security-checks.md`: Category 2 Shell `B608 → B602` (Bandit rule →
-    `B602:subprocess-popen-no-shell-false`); Category 3 Deserialization `B704 → B301`
-    (Bandit rule → `B301:python-unsafe-deserialization`); fix the summary table.
-  - [ ] Record Bandit/Python version and the "rc=5 doesn't exist / rc=1=findings"
-    contract in `docs/limitations.md`.
-  - Evidence: **unverified** — config and docs still carry the backwards mapping; not
-    run this session.
-
-- **T-SA-03 Christian** — `tests/test_harness.py` + example pairs + results table:
-  fix path / `-ll` flag / B704→B301; assert on `test_id` (never `test_name`); add
-  shell/B602 + SQL/B608 pairs; cover the 4 tested rules (B307, B301, B602, B608)
-  as 8 vulnerable/secure cases, plus unsupported-rule→error; build the evidence
-  table; prove the 3 Month-1 checks (vuln→finding, safe→none, unsupported→error).
-  (No active handoff file — Bandit track is **parked / non-gating this week**; the T-SA-03 description is this section, and the shared contract is in `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md`.)
-  - [ ] Fix examples path: `Path(__file__).parent.parent / "examples" /
-    "source-audit-week1"`.
-  - [ ] Fix `run_scanner`: drop `-ll`, drop `check=True`, read `test_id`, handle
-    exit codes per the contract (rc≥2 → raise error).
-  - [ ] Write `status` key and call `_calculate_status`.
-  - [ ] Register 8 cases (4 rules × vulnerable/secure): B307, B301, B602, B608.
-  - [ ] Add `vulnerable_example_shell.py`/`safer_example_shell.py` (B602) and
-    `vulnerable_example_sql.py`/`safer_example_sql.py` (B608).
-  - [ ] Run harness; table shows TP/FP/FN/TN and accuracy; `test_results.json` has
-    per-row `status`; rc≥2 reported as error, never as "0 vulns."
-  - Evidence: **unverified** — harness does not run (wrong examples path + invalid
-    `-ll` + expects B704 for pickle).
-
-### Shared source-audit contract (single source of truth)
-- **Rule = JSON `test_id`.** `test_name` is **not** a reliable rule ID — its value
-  varies by rule/version (e.g. `blacklist` for B307/B301,
-  `subprocess_popen_with_shell_equals_true` for B602,
-  `hardcoded_sql_expressions` for B608). Never read the rule from `test_name`.
-- **Exit codes — `rc=5` does NOT exist:** `0`=clean (missing file → rc=0 with `errors`
-  populated) · `1`=**findings** · `2`=internal error · `3`=unknown.
-- **Any rc ≥ 2 = error state — report it; NEVER turn it into "0 vulnerabilities."**
-- **"Clean" is composite, not just `rc=0`:** a scan is clean only when the process
-  result AND the JSON agree — `rc=0` **and** valid JSON **and** an empty `results`
-  list **and** no entries in `errors`. A missing file also returns `rc=0` (with
-  `errors` populated), so `rc=0` alone is **not** proof of success.
-- **CLI shape (bare rule IDs only):** `bandit -f json -t B602 /path/to/file.py`
-  (`-c` is `--config-file` (INI), not a rule. `-ll` *is* a valid severity filter —
-  it reports **medium-or-higher** only and **omits low-severity findings** — so it
-  is omitted here; use no severity flag when low-severity findings must be measured.)
-- **Canonical rule table (Bandit 1.9.4, verified):** B307=eval/exec, B301=pickle
-  deserialization, B602=shell command injection (NOT `os.system` — that is B605),
-  B608=SQL injection, B704=markupsafe XSS (NOT deserialization).
-- **Four tested rules vs eight cases:** the 8-case harness (T-SA-03) tests the four
-  rules B307, B301, B602, B608 — each vulnerable and secure (4 × 2 = 8). B704 is a
-  fifth rule in the table but is **not** tested in the 8-case harness; do not
-  describe the harness as "5 rules."
 
 ## Phase 1: Parser (Multi-format Manifest Support) — December-critical → T-DE-01
 Owner: Vale. Depends: shared `DependencyGraph` IR (T-DE-03 schema).
@@ -461,29 +360,15 @@ explanation + dashboard layer, verified by the full suite: 241 passed, 29 subtes
   explainer plus an optional OpenAI-compatible local-model client (env-only config,
   per-finding deterministic fallback) — tested by `tests/test_explanation.py` (20) and
   `tests/test_explanation_http.py` (7).
-- **Source-audit (T-SA-01/02/03):** `multi_check_wrapper.py` runs and detects the eval
-  finding but mislabels `rule_id` (`"blacklist"` instead of `B307`) and has a char-count
-  bug (`"1474 results"`); `scan_demo.py` crashes (`NameError: venv_path`);
-  `test_harness.py` does not run. Corrections in flight — **Nick** = rule mapping +
-  `docs/security-checks.md` (T-SA-02); **Christian** = harness (path, `-ll` flag,
-  B704→B301, 4 tested rules / 8 cases) + new shell/B602 & SQL/B608 example pairs (T-SA-03).
-  This is the supporting track, **not** the December deliverable.
 
 > Test counts are **historical** unless re-run. The "pytest 79 passed" figure dates to
 > the `5b8a1f7` baseline and has been **superseded**: the full suite now runs
 > **241 passed, 29 subtests, 2 warnings** (re-run 2026-10-10): 53 reporter, 45 agent,
 > 26 enrichment, 23 pipeline, **24 remediation**, 11 NVD integration, 10 parser, 8
 > report generator, 5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9
-> dashboard (test_harness collects 0 — parked Bandit sub-track). The T-DE-02
+> dashboard (20 explanation, 7 explanation-HTTP, 9 dashboard). The T-DE-02
 > NVD integration suite currently passes (11).
 
 ## Unresolved technical contradictions (do not guess)
-1. **Exit-code claim:** `examples/source-audit-week1/README.md` states B307 findings
-   produce "exit code 5". The shared contract (and Bandit 1.9.4) says rc=5 does not
-   exist; rc=1 = findings. Which semantics the *scanner* itself (not Bandit) will use is
-   not decided. **Unresolved.**
-2. **Test-count discrepancy:** WEEK1 doc says "79 passed"; TASKS status says
-   "7 of 79" failing; an earlier note says 68 pass / 7 fail. No test run this session
-   can confirm. **Unverified.**
-3. **Dashboard stack:** Flask+D3 (recommended in TASKS/ARCHITECTURE) vs. other options.
+1. **Dashboard stack:** Flask+D3 (recommended in TASKS/ARCHITECTURE) vs. other options.
    **Unresolved — needs user decision (see docs/WEEKLY.md).**

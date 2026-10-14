@@ -37,7 +37,7 @@
   TASKS.md, DECISIONS.md, and relevant ARCHITECTURE.md sections.
 - RECON-DG's primary track is dependency inventory, vulnerability
   enrichment, deterministic risk analysis, and reporting.
-- The Bandit source-audit demonstration is a separate supporting
+- The source-audit demonstration was a separate supporting
   track. Do not let it displace the primary task without instruction.
 - Distinguish implemented, tested, planned, and unverified behavior.
 - Resolve material conflicts between documents and code explicitly.
