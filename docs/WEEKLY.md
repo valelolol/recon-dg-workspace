@@ -1,4 +1,4 @@
-# WEEKLY — September 28 – October 4, 2026
+# WEEKLY — September 28 – October 4, 2026 (M-DE-CORE core track)
 
 ## Focus
 Move the **core** T-DE-01/02/03 path from "PHEI implemented" to "a small, demonstrable core
@@ -8,19 +8,18 @@ The docs reviewed in this session (2026-10-01, reviewed at HEAD `1524425`; publi
 HEAD `6323285`; corrected/baseline-updated at HEAD `b4fc87c`, 2026-10-02) are the
 *documentation-only*
 state: handoffs rewritten for complete beginners, README/TASKS/STATUS reconciled. No code,
-fixture, manifest, or test changed.
+fixture, manifest, or test changed. The latest docs-only commit is `5ea1154` (2026-10-17).
 
 ## Baseline (for the reader)
-- **Branch:** `feat/inventory-report`. **HEAD:** `b4fc87c` ("docs: correct Aliyan handoff
-  schema/path and baseline dates", 2026-10-02, docs-only). **Live remote**
-  `origin/feat/inventory-report` == `b4fc87c` (verified via `git ls-remote`).
+- **Branch:** `feat/inventory-report`. **HEAD:** `5ea1154` ("refine M-DE-CORE handoffs", 2026-10-17, docs-only). **Live remote**
+  `origin/feat/inventory-report` == `5ea1154` (verified via `git ls-remote`).
 - *Historical prior HEAD (label only):* `6323285` ("docs: publish current team handoffs and
   clean up obsolete guidance", 2026-10-02) and `1524425` ("Publish reviewed M-DE-CORE plan
   and four handoffs", 2026-10-01) — both docs-only commits that published the plan and the
   four handoffs; implementation code was unchanged by them.
-- The *implementation* code state is as of `c548f32` (the last commit that changed
-  implementation code — it added the NVD/reporter/scanner scaffolding); the later commits
-  `f2303ee`, `5b8a1f7`, `1524425`, `6323285`, and `b4fc87c` are docs-only and did not
+- The *implementation* code state is as of `6129e14` (the last commit that changed
+  implementation code — it added the evidence-grounded remediation verification); the later commits
+  `f2303ee`, `5b8a1f7`, `1524425`, `6323285`, `b4fc87c`, and `5ea1154` are docs-only and did not
   alter it. The executed verifications below (PHEI == 6.0, pytest 79 passed) date to
   `5b8a1f7` and remain *historical* unless re-run.
 
@@ -53,15 +52,16 @@ of synthetic fixtures and no live API.
 Nothing waits on a finished CLI; the reference sample is the single shared artifact the
 later three roles depend on.
 
-## Blockers (as of Oct 2, HEAD `6323285`)
+## Blockers (as of Oct 17, HEAD `5ea1154`)
 - **No reference `report.json` / `examples/fixtures/` in the tree.** This is the single
   gating prerequisite for Christian's byte-assertion and Aliyan's viewer. Must be produced
   by Vale (W1-DE-03.R). Without it, their "first checkpoints" are static-only.
 - Dashboard, AI layer, and Docker not started (T-DE-04 / T-DE-03 AI-layer item / T-DE-05).
-- Mode B serializer missing (required for the 6.0 report).
 - `httpx` undeclared in any manifest (not needed for the core path).
 - **Historical** (not re-run this session): `tests/test_nvd_integration.py` previously
   failing.
+- **Mode B serializer is now implemented** (6129e14) but not yet verified end-to-end
+  against a real project (no `examples/fixtures/` to run against).
 
 ## Handoffs (beginner-friendly, one manageable assignment each)
 Active this week (M-DE-CORE core deliverable):

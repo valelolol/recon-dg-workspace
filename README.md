@@ -21,8 +21,7 @@ a normalized OSV-Scanner scan (see "Agent layer" below). The **Mode B**
 dependency-graph serializer and the synthetic reference `report.json` are still
 *planned* deliverables, not yet working features. Earlier verification results
 (e.g., PHEI == 6.0 on a synthetic 3-node unit chain, and the "pytest 79 passed"
-count) are **historical** — they date to an earlier commit. Re-running the full
-Re-running the full suite this week gives **241 passed, 29 subtests, 2
+count) are **historical** — they date to an earlier commit. Re-running the full suite this week gives **241 passed, 29 subtests, 2
 warnings** (re-run 2026-10-10): 53 reporter, 45 agent, 26 enrichment, 23
 pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
 5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard.
