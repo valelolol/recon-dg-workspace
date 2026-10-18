@@ -8,18 +8,18 @@ The docs reviewed in this session (2026-10-01, reviewed at HEAD `1524425`; publi
 HEAD `6323285`; corrected/baseline-updated at HEAD `b4fc87c`, 2026-10-02) are the
 *documentation-only*
 state: handoffs rewritten for complete beginners, README/TASKS/STATUS reconciled. No code,
-fixture, manifest, or test changed. The latest docs-only commit is `5ea1154` (2026-10-17).
+fixture, manifest, or test changed. The latest docs-only commit is `a873a90` (2026-10-17).
 
 ## Baseline (for the reader)
-- **Branch:** `feat/inventory-report`. **HEAD:** `5ea1154` ("refine M-DE-CORE handoffs", 2026-10-17, docs-only). **Live remote**
-  `origin/feat/inventory-report` == `5ea1154` (verified via `git ls-remote`).
+- **Branch:** `feat/inventory-report`. **HEAD:** `a873a90` ("docs: reconcile docs; fix README duplication; update WEEKLY; remove stale Mode-B blocker", 2026-10-17, docs-only). **Live remote**
+  `origin/feat/inventory-report` == `a873a90` (verified via `git ls-remote`).
 - *Historical prior HEAD (label only):* `6323285` ("docs: publish current team handoffs and
   clean up obsolete guidance", 2026-10-02) and `1524425` ("Publish reviewed M-DE-CORE plan
   and four handoffs", 2026-10-01) — both docs-only commits that published the plan and the
   four handoffs; implementation code was unchanged by them.
 - The *implementation* code state is as of `6129e14` (the last commit that changed
   implementation code — it added the evidence-grounded remediation verification); the later commits
-  `f2303ee`, `5b8a1f7`, `1524425`, `6323285`, `b4fc87c`, and `5ea1154` are docs-only and did not
+  the later commits `f2303ee`, `5b8a1f7`, `1524425`, `6323285`, `b4fc87c`, `5ea1154`, and `a873a90` are docs-only
   alter it. The executed verifications below (PHEI == 6.0, pytest 79 passed) date to
   `5b8a1f7` and remain *historical* unless re-run.
 

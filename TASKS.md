@@ -282,9 +282,9 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 ## Status
 
-### Current baseline (published HEAD `6129e14`, 2026-10-10)
-- **Date:** 2026-10-10 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `6129e14`
-  ("feat(agent): add evidence-grounded remediation verification") — this commit is
+### Current baseline (published HEAD `a873a90`, 2026-10-17)
+- **Date:** 2026-10-17 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `a873a90`
+  ("docs: reconcile docs; fix README duplication; update WEEKLY; remove stale Mode-B blocker") — this commit is
   the published remote tip (`origin/feat/inventory-report`) and **includes** the
   `src/agent/` investigation layer, the **remediation stage**
   (`build_remediation_plan` / `verify_remediation` in `src/agent/agent.py`, the
@@ -315,10 +315,10 @@ Owner: Team. Depends: dashboard (T-DE-04).
     and the verification state **including `not_run`** (no resolution claim).
   - **new untracked** tests: `tests/test_explanation.py` (20),
     `tests/test_explanation_http.py` (7), `tests/test_dashboard.py` (9).
-- **Remote:** `origin/feat/inventory-report` equals `6129e14`. The uncommitted
+Remote: `origin/feat/inventory-report` equals `a873a90`.
   explanation/web modules and their tests described above have **not** been pushed
   (and are not staged or committed).
-- **This session:** verified + extended the **explanation** and **dashboard**
+This session: reconciled docs against accepted scope; resolved dashboard-stack contradiction (README already stated stdlib http.server).
   paths (the "provisional" step toward T-DE-04 / AI-explainations) and closed two
   test gaps. (1) *Explanation:* the existing `test_explanation.py` drove the
   local-model client only through an injected `transport` seam (no real network);
@@ -370,5 +370,5 @@ explanation + dashboard layer, verified by the full suite: 241 passed, 29 subtes
 > NVD integration suite currently passes (11).
 
 ## Unresolved technical contradictions (do not guess)
-1. **Dashboard stack:** Flask+D3 (recommended in TASKS/ARCHITECTURE) vs. other options.
+- Dashboard stack: README (line 161) states deviation from Flask+D3 → provisional stdlib `src/web/` (http.server). TASKS/ARCHITECTURE still reference Flask+D3 as the December target; this is a *provisional* deviation, not a final decision.
    **Unresolved — needs user decision (see docs/WEEKLY.md).**

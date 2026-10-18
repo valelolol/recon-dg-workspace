@@ -1,10 +1,9 @@
 # STATUS — Recon-DG
 
-**Date:** 2026-10-10 (UTC)
-**Host:** vale-llm
+**Date:** 2026-10-17 (UTC)
+**Host:** vale-laptop
 **Branch:** `feat/inventory-report`
-**Published baseline:** `24c99b6` ("docs: align documentation with accepted
-scanner-centered scope", 2026-10-10) — the current live tip of `feat/inventory-report`.
+**Published baseline:** `a873a90` ("docs: reconcile docs; fix README duplication; update WEEKLY; remove stale Mode-B blocker", 2026-10-17) — the current live tip of `feat/inventory-report`.
 `6129e14` ("feat(agent): add evidence-grounded remediation verification", 2026-10-10)
 is the last commit that changed implementation code. `24c99b6` is a docs-only commit.
 The published baseline **includes** the `src/agent/` investigation layer, the **remediation
@@ -25,9 +24,7 @@ docs-only publishes did not change implementation code; `c548f32` added NVD/repo
 scanner scaffolding. The executed verifications below (PHEI == 6.0, the older
 "pytest 205 passed" count) were run at the historical point before `6129e14` and
 remain *historical* unless re-run.
-**This session (2026-10-10):** verified and extended the **explanation** and
-**dashboard** paths (a bounded step toward the December AI-explainations and
-dashboard deliverables) and closed two test gaps. (1) The existing
+**This session (2026-10-17):** reconciled docs against accepted scope; resolved dashboard-stack contradiction (README already stated stdlib http.server). (1) The existing
 `tests/test_explanation.py` (20) drove the local-model client only through an
 injected `transport` seam (no real network); the new `tests/test_explanation_http.py`
 (7) stands up a **real** local `/v1/chat/completions` `http.server` and drives the
