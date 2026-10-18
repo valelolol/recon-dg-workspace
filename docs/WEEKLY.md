@@ -1,7 +1,7 @@
-# WEEKLY — September 28 – October 4, 2026 (M-DE-CORE core track)
+# WEEKLY — September 28 – October 4, 2026 (M-DE-CORE demo track)
 
 ## Focus
-Move the **core** T-DE-01/02/03 path from "PHEI implemented" to "a small, demonstrable core
+Move the **demo** T-DE-01/02/03 path from "PHEI implemented" to "a small, demonstrable demo
 dependency-risk report" using clearly-labeled synthetic fixtures and **no live API calls**.
 No completion percentages are quoted; status is per task ID.
 The docs reviewed in this session (2026-10-01, reviewed at HEAD `1524425`; published at
@@ -64,7 +64,7 @@ later three roles depend on.
   against a real project (no `examples/fixtures/` to run against).
 
 ## Handoffs (beginner-friendly, one manageable assignment each)
-Active this week (M-DE-CORE core deliverable):
+Active this week (M-DE-CORE demo deliverable):
 - **Vale (M-DE-CORE loader/serializer/integration):** `HANDOFF_VALE_MDECORE.md`.
 - **Nick (M-DE-CORE fixtures):** `HANDOFF_NICK_MDECORE.md`.
 - **Christian (M-DE-CORE E2E + expected results):** `HANDOFF_CHRISTIAN_MDECORE.md`.

@@ -44,7 +44,7 @@ the tree — treat it as not done until verified.
 | T-DE-04 | Dashboard: graph + risk + per-package view | Core | Aliyan (provisional) | Not started | T-DE-02, T-DE-03 |
 | T-DE-05 | Docker packaging + local compose | Core | Team | Not started | T-DE-04 |
 
-## M-DE-CORE — One-Week Core Dependency-Risk Report
+## M-DE-CORE — One-Week Demo Dependency-Risk Report
 
 > **Status:** the *plan* below is committed (HEAD `b4fc87c`). The *implementation* it
 > describes (known-topology loader, Mode B serializer, `src/cli.py`, viewer, reference
