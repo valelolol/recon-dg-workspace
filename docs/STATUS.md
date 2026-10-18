@@ -3,11 +3,11 @@
 **Date:** 2026-10-17 (CDT)
 **Host:** vale-laptop
 **Branch:** `feat/inventory-report`
-**Published baseline:** `6cd2e46` (\"docs: remove stale M-DE-CORE present-tense claims, label demo work historical\", 2026-10-17) — the current live tip of `feat/inventory-report`.
+**Published baseline:** `1878329` (\"docs: update STATUS.md to accurate current status — remove stale f1c59a8/blocker claims, label M-DE-CORE historical\", 2026-10-17) — the current live tip of `feat/inventory-report`.
 `6129e14` (\"feat(agent): add evidence-grounded remediation verification\", 2026-10-10)
 is the last commit that changed implementation code. `24c99b6` is a docs-only commit.
 The published baseline **includes** the `src/agent/` investigation layer, the **remediation
-stage** (`build_remediation_plan` / `verify_remediation`), `src/enrichment/`,
+stage** (`build_remediation_plan` / `verify_remediation`, published in `6129e14`), `src/enrichment/`,
 `tests/data/osv-scanner.json`, `tests/test_agent.py`,
 `tests/test_report_generator.py`, `tests/test_enrichment.py`,
 `tests/test_pipeline.py`, and `tests/test_remediation.py`. The working tree ahead
@@ -34,7 +34,7 @@ findings via deterministic PHEI risk analysis. The December prototype includes a
 dashboard and AI explanations grounded in the findings. Inventory-only input must not
 produce invented dependency edges; risk scoring requires explicitly \"known\" topology.
 
-## Current state (HEAD `6cd2e46` + uncommitted provisional explanation + dashboard layer)
+## Current state (HEAD `1878329` + uncommitted provisional explanation + dashboard layer)
 
 - **Agent layer (`src/agent/`) — implemented (published in `f1c59a8`) and tested:** a
   package (`agent.py`, `normalizer.py`, `scan_runner.py`, `__init__.py`) runs a bounded,
@@ -97,8 +97,8 @@ produce invented dependency edges; risk scoring requires explicitly \"known\" to
   **not** exist in the tree. The reference `report.json` is **not** checked in. This is a
   prerequisite for Christian's E2E assertion and Aliyan's viewer — see the handoffs.
 
-## Evidence-supported implementation progress (implementation state at HEAD `6cd2e46`
-plus uncommitted remediation work, 2026-10-10)
+## Evidence-supported implementation progress (implementation state at HEAD `1878329`
+plus published remediation, 2026-10-10)
 
 - **Agent (`src/agent/`, published in `f1c59a8`):** bounded, evidence-grounded
   investigation loop. `normalizer` turns OSV-Scanner JSON into a `DependencyGraph` +
@@ -109,7 +109,7 @@ plus uncommitted remediation work, 2026-10-10)
   no model; an LLM hook can only pick allowlisted tools and its out-of-band/invalid
   choices fall back to the grounded policy (recorded); risk is `unavailable`/`None` on
   a flat graph (no fabricated score).
-- **Remediation (`src/agent/`, uncommitted in the working tree):** `build_remediation_plan`
+- **Remediation (`src/agent/`, published in `6129e14`):** `build_remediation_plan`
   + `verify_remediation` (see the \"Current state\" and \"Verified\" sections). Verified by
   24 passing tests in `tests/test_remediation.py`.
 - **Parser (T-DE-01):** `requirements.txt` done + `build_mock_graph()` (3-node unit
@@ -126,19 +126,24 @@ plus uncommitted remediation work, 2026-10-10)
   **report generator** is implemented (no more stub). Mode B
   `serialize_dependency_graph` **not started**. No `src/cli.py` and no `src/dashboard/` yet.
 
-## Blockers (as of HEAD `6cd2e46` + uncommitted remediation work)
+## Current blockers (as of HEAD `1878329`)
 
-- Mode B (dependency-graph serializer) does not exist yet — required to emit the 6.0 report
-  (W1-DE-03.R).
-- **No reference `report.json` / `examples/fixtures/`** — required for Christian's byte-identity
-  E2E assertion and Aliyan's viewer. Must be produced by Vale (W1-DE-03.R).
-- `httpx` is imported by `nvd_client.py` but undeclared in any manifest (separate fix;
+- `httpx` is imported by `src/engine/nvd_client.py` but undeclared in any manifest (separate fix;
   not needed for the core path this week).
 - No live NVD/OSV end-to-end run this session (findings are synthetic fixtures).
 - Dashboard framework and Docker are not started (out of scope this week). The AI
   layer's *investigation loop* (`src/agent/`) is implemented and tested (45 passing
   tests, deterministic policy, no real model); wiring a **real** model
   backend (llama.cpp endpoint vs. user API key) is a pending decision, not yet done.
+- No reference `report.json` / `examples/fixtures/` produced (required for Christian's
+  byte-identity E2E assertion and Aliyan's viewer).
+
+## Historical planning (M-DE-CORE demo; not current blockers)
+
+- Mode B (dependency-graph serializer) does not exist yet — required to emit the 6.0 report
+  (W1-DE-03.R). This is part of the historical M-DE-CORE demo plan, not a current blocker.
+- Known-topology loader (W1-DE-01.L) not yet built.
+- `src/cli.py` and `src/dashboard/` not yet started.
 
 ## Pending decisions (unchanged)
 
@@ -173,14 +178,14 @@ plus uncommitted remediation work, 2026-10-10)
 
 ## Verified / Proposed / Unverified
 
-- **Verified (executed, 2026-10-17, working tree with uncommitted remediation work):**
+- **Verified (executed, 2026-10-17, published remediation in `6129e14`):**
   - Full pytest suite: **241 passed, 29 subtests, 0 warnings**
     (reported test result; `.venv/bin/python -m pytest tests/ -q`). Per-file:
     test_inventory_reporter 53, test_agent 45, test_enrichment 26,
     test_pipeline 22, **test_remediation 24**, test_nvd_integration 11,
     test_parser 10, test_report_generator 8, test_risk_analyzer 5,
     test_explanation 20, test_explanation_http 7, test_dashboard 9.
-  - **Remediation (`src/agent/`, uncommitted):** 24 passing tests in
+  - **Remediation (`src/agent/`, published in `6129e14`):** 24 passing tests in
     `tests/test_remediation.py`. `build_remediation_plan` emits one item per baseline
     finding using only normalized scanner evidence (fixed versions verbatim, `severity_score`
     left `None`, evidence-only severity, no numeric score or high/low category);
