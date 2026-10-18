@@ -31,7 +31,7 @@ backend, including prioritization and package-connectivity analysis.
 
 **Consequences:**
 - December's critical path is parser → real NVD/OSV → PHEI on real data → dashboard →
-  AI explanations. The source-audit track does not gate the December deliverable.
+  AI explanations.
 
 ## 2026-10-03: Agent layer design — bounded, evidence-grounded investigation, not
 "OSV-Scanner + LLM summary"

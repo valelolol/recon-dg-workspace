@@ -12,7 +12,7 @@ AI backend.
 **Intended full pipeline (the December deliverable — *planned; not all of it is
 implemented yet*):** the (1)–(5) steps above are the full intended pipeline.
 
-**What works this week (M-DE-CORE):** the Mode A **inventory serializer**
+**What worked in the historical M-DE-CORE demo week (Sep 28–Oct 4, 2026):** the Mode A **inventory serializer**
 (`src/reporter/inventory.py`), the **PHEI** path-max function
 (`calculate_phei` in `src/engine/risk_analyzer.py`), the before/after
 **report generator** (`src/reporter/report_generator.py`), and a new **agent
@@ -21,7 +21,7 @@ a normalized OSV-Scanner scan (see "Agent layer" below). The **Mode B**
 dependency-graph serializer and the synthetic reference `report.json` are still
 *planned* deliverables, not yet working features. Earlier verification results
 (e.g., PHEI == 6.0 on a synthetic 3-node unit chain, and the "pytest 79 passed"
-count) are **historical** — they date to an earlier commit. Re-running the full suite this week gives **241 passed, 29 subtests, 2
+count) are **historical** — they date to an earlier commit. Re-running the full suite (2026-10-10) gives **241 passed, 29 subtests, 2
 warnings** (re-run 2026-10-10): 53 reporter, 45 agent, 26 enrichment, 23
 pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
 5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard.
@@ -35,7 +35,7 @@ planned; the agent below runs fully without a model via a deterministic policy.
 
 **Core track (December deliverable):** dependency inventory → OSV-Scanner scan →
 deterministic risk analysis → reporting → dashboard → AI explanations.
-*As of this week the inventory serializer, the PHEI function, the report
+*As of the historical M-DE-CORE demo week (Sep 28–Oct 4, 2026) the inventory serializer, the PHEI function, the report
 generator, and the agent layer (`src/agent/`) are in the tree and tested; the
 Mode B serializer + synthetic `report.json`, live NVD/OSV, the dashboard, and a
 real AI model backend are not yet implemented.*
@@ -203,7 +203,7 @@ the final deliverable:
 - [TASKS.md](TASKS.md) — task register, phase plans
 - [docs/STATUS.md](docs/STATUS.md) — current state (date, branch/HEAD, working tree)
 - [docs/WEEKLY.md](docs/WEEKLY.md) — weekly focus and acceptance criteria
-|- **Current handoffs (M-DE-CORE, for reference):**
+|- **Historical handoffs (M-DE-CORE demo week, for reference):**
   - `HANDOFF_NICK_MDECORE.md` — Nick · fixtures + limitations note (T-DE-01/02)
   - `HANDOFF_CHRISTIAN_MDECORE.md` — Christian · offline tests + expected results (T-DE-02/03)
   - `HANDOFF_VALE_MDECORE.md` — Vale · loader, PHEI/report integration, reference output (T-DE-01/02/03)
@@ -211,4 +211,4 @@ the final deliverable:
 - [docs/WEEKLY.md](docs/WEEKLY.md) — historical weekly focus and acceptance criteria
 
 > **Read the handoff list above (for reference).** `docs/WEEKLY.md` is now historical;
-> the `HANDOFF_*_MDECORE.md` files are this week's (complete) handoffs.
+> the `HANDOFF_*_MDECORE.md` files are the M-DE-CORE demo week's (complete) handoffs.

@@ -124,7 +124,7 @@ git branch -vv
 
 ## 6. Start a personal branch from the integration baseline
 
-For the current week (M-DE-CORE) the integration baseline is **`feat/inventory-report`**.
+For the M-DE-CORE demo week (Sep 28–Oct 4, 2026) the integration baseline is **`feat/inventory-report`**.
 Create and switch to your own branch **before editing anything**:
 
 **Windows (PowerShell)**

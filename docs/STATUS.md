@@ -96,14 +96,13 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   GETs to `/` and `/report.json`).
 - **Onboarding / handoffs:** rewritten for complete beginners on individual machines
   (Windows PowerShell and Linux/macOS routes in `docs/TEAM_ONBOARDING.md`).
-  The current week's **active** assignments are the M-DE-CORE handoffs.
   `README.md` and `docs/WEEKLY.md` direct readers to the shared onboarding and the
-  M-DE-CORE handoffs first.
+  M-DE-CORE handoffs first (historical demo track; Sep 28–Oct 4, 2026).
 - **M-DE-CORE plan:** committed in `TASKS.md` (Mode B field mapping + proposed
   input-fixture contract, §C0-prereq). The **implementation** it assigns (known-topology
   loader, Mode B serializer, `src/cli.py`, viewer, reference output, E2E test) is
   **not in the tree yet**. The agent layer (above) *is* in the tree — it is a separate,
-  already-built deliverable, not part of the pending M-DE-CORE Mode B work.
+  already-built deliverable, not part of the M-DE-CORE demo plan (historical; not yet built).
 - **PHEI return value:** `calculate_phei` returns **only the scalar score** (6.0 for the
   3-node unit chain); **no** path field is emitted, rendered, or asserted. The numeric
   result is the "maximum path score," not an argmax path. No `top_risk_path`.
@@ -166,9 +165,9 @@ plus uncommitted remediation work, 2026-10-10)
 3. **Dashboard stack:** Flask + D3.js (recommended) vs. FastAPI + React? (Full T-DE-04
    dashboard out of scope this week; only a provisional static-viewer spike is proposed.)
 
-## Next bounded task
+## Next bounded task (historical M-DE-CORE plan; not yet executed)
 
-- **M-DE-CORE checkpoint.** Sign the Mode B field-mapping contract and the **proposed
+- **M-DE-CORE checkpoint (historical, not yet executed).** Sign the Mode B field-mapping contract and the **proposed
   input-fixture contract** (TASKS.md §C0-prereq — approval required before Nick authors
   fixtures), then Vale implements the known-topology loader (W1-DE-01.L) + Mode B
   serializer (W1-DE-03.R) to emit the 6.0 reference `report.json`. Only after that
@@ -221,7 +220,7 @@ plus uncommitted remediation work, 2026-10-10)
     (2 unit-weight edges × 3 nodes = 6.0). PHEI is invariant to CVE severity.
   - The historical "pytest 79 passed" / PHEI==6.0 runs date to baseline `5b8a1f7`
     and are superseded by the 241-passed count above (reported result).
-- **Proposed (M-DE-CORE, not yet in repo):** known-topology loader, Mode B serializer,
+- **Proposed (M-DE-CORE demo, not yet in repo):** known-topology loader, Mode B serializer,
   `src/cli.py`, `src/dashboard/view.py`, the two input fixtures,
   `examples/fixtures/sample_risk_report.json`, `tests/test_e2e_risk.py`,
   `docs/E2E_EXPECTED_RESULTS.md`. **No out-of-spec fields are emitted this week:**
