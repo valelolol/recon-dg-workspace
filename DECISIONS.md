@@ -24,16 +24,12 @@ backend, including prioritization and package-connectivity analysis.
 **Rationale:** The repo contains two distinct scanner tracks that were being conflated:
 - **Core (December deliverable):** dependency/CVE assessment over the graph —
   `src/parser`, `src/models`, `src/engine`, `src/reporter`, `src/agent`, dashboard.
-- **Supporting sub-track (Week 1):** source-code static analysis via Bandit —
-  `examples/source-audit-week1/`, `src/scanner/`. A useful signal (vulns *in* the code)
-  and a good pipeline/harness exercise, but **not** the deliverable.
+- **Source-audit (removed from scope):** source-code static analysis via Bandit was a
+  useful signal (vulns *in* the code) and a good pipeline/harness exercise, but **not**
+  the deliverable. It was removed from the project scope; the referenced files
+  (`examples/source-audit-week1/`, `src/scanner/`) no longer exist.
 
 **Consequences:**
-- Source-audit findings must stay **separate** from dependency findings.
-- The source-audit rule-mapping correction (shell→B602, deserialization→B301, B704=
-  markupsafe XSS, not deserialization; rule ID is in `test_id` never `test_name`, which is
-  always `"blacklist"`; rc=1 means findings, rc>=2 means error, no rc=5) applies to the
-  source-audit track only.
 - December's critical path is parser → real NVD/OSV → PHEI on real data → dashboard →
   AI explanations. The source-audit track does not gate the December deliverable.
 

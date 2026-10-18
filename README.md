@@ -46,8 +46,9 @@ real AI model backend are not yet implemented.*
   (Git + Python checks, a personal branch, a virtual environment, and how to validate
   your JSON fixtures). It defines the ten terms you will meet and gives separate
   PowerShell / terminal routes.
-- **`docs/WEEKLY.md`** — this week's (M-DE-CORE) focus, acceptance criteria, and the
-  **current** M-DE-CORE handoffs. It tells you which handoff is *active this week*.
+- **`docs/WEEKLY.md`** — historical M-DE-CORE demo-track focus, acceptance criteria,
+  and the handoff list for that week (now complete); current project status is in
+  **`docs/STATUS.md`**.
 - **`TASKS.md`** — the task register (stable IDs), phase plans, and the shared
 - **`docs/STATUS.md`** — the current state (date, branch/HEAD, working-tree state).
 
@@ -202,12 +203,12 @@ the final deliverable:
 - [TASKS.md](TASKS.md) — task register, phase plans
 - [docs/STATUS.md](docs/STATUS.md) — current state (date, branch/HEAD, working tree)
 - [docs/WEEKLY.md](docs/WEEKLY.md) — weekly focus and acceptance criteria
-- **Current (M-DE-CORE, this week — active first):**
+|- **Current handoffs (M-DE-CORE, for reference):**
   - `HANDOFF_NICK_MDECORE.md` — Nick · fixtures + limitations note (T-DE-01/02)
   - `HANDOFF_CHRISTIAN_MDECORE.md` — Christian · offline tests + expected results (T-DE-02/03)
   - `HANDOFF_VALE_MDECORE.md` — Vale · loader, PHEI/report integration, reference output (T-DE-01/02/03)
   - `HANDOFF_ALIYAN_MDECORE.md` — Aliyan (provisional) · static viewer spike (T-DE-04)
-- [docs/WEEKLY.md](docs/WEEKLY.md) — weekly focus and acceptance criteria
+- [docs/WEEKLY.md](docs/WEEKLY.md) — historical weekly focus and acceptance criteria
 
-> **Read the current handoff first.** `docs/WEEKLY.md` says which handoff is active
-> for the current week; the `HANDOFF_*_MDECORE.md` files are this week's.
+> **Read the handoff list above (for reference).** `docs/WEEKLY.md` is now historical;
+> the `HANDOFF_*_MDECORE.md` files are this week's (complete) handoffs.

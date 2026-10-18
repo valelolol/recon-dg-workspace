@@ -1,4 +1,8 @@
-# WEEKLY — September 28 – October 4, 2026 (M-DE-CORE demo track)
+# WEEKLY — September 28 – October 4, 2026 (M-DE-CORE demo track) — *historical*
+
+## Historical note
+*This file covers the M-DE-CORE demo track (Sep 28–Oct 4, 2026). The M-DE-CORE handoff
+work is complete; current status is in `docs/STATUS.md`.*
 
 ## Focus
 Move the **demo** T-DE-01/02/03 path from "PHEI implemented" to "a small, demonstrable demo
@@ -64,7 +68,7 @@ later three roles depend on.
   against a real project (no `examples/fixtures/` to run against).
 
 ## Handoffs (beginner-friendly, one manageable assignment each)
-Active this week (M-DE-CORE demo deliverable):
+Handoffs from this week's M-DE-CORE demo track (historical):
 - **Vale (M-DE-CORE loader/serializer/integration):** `HANDOFF_VALE_MDECORE.md`.
 - **Nick (M-DE-CORE fixtures):** `HANDOFF_NICK_MDECORE.md`.
 - **Christian (M-DE-CORE E2E + expected results):** `HANDOFF_CHRISTIAN_MDECORE.md`.
