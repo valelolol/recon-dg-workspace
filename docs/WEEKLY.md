@@ -52,7 +52,7 @@ of synthetic fixtures and no live API.
 Nothing waits on a finished CLI; the reference sample is the single shared artifact the
 later three roles depend on.
 
-## Blockers (as of Oct 17, HEAD `5ea1154`)
+## Blockers (as of Oct 17, HEAD `a873a90`)
 - **No reference `report.json` / `examples/fixtures/` in the tree.** This is the single
   gating prerequisite for Christian's byte-assertion and Aliyan's viewer. Must be produced
   by Vale (W1-DE-03.R). Without it, their "first checkpoints" are static-only.
