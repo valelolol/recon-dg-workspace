@@ -1,10 +1,10 @@
-# HANDOFF — Vale: M-DE-CORE central milestone — Mode B pipeline (loader, serializer, CLI, reference output)
+# HANDOFF — Vale: M-DE-CORE provisional demo pipeline (Mode B)
 
 ## Your assignment
 
 Build the **Mode B** pipeline: a known-topology loader, a dependency-graph serializer that produces a `report.json` with `risk.score == 6.0`, and a CLI entry point.
 
-**This is the central product milestone for the one-week core.** The synthetic fixtures (Nick) feed into this pipeline; the E2E test (Christian) verifies it; the static viewer (Aliyan) renders it. Your deliverable is the actual runnable pipeline that the product ships.
+**This is a demo/test exercise only.** The synthetic fixtures (Nick) feed into this pipeline; the E2E test (Christian) verifies it; the static viewer (Aliyan) renders it. Your deliverable is the actual runnable pipeline that the product ships.
 
 ## What to produce
 

@@ -1,10 +1,10 @@
-# HANDOFF — Christian: M-DE-CORE E2E verification test for the central pipeline
+# HANDOFF — Christian: M-DE-CORE E2E verification test for the demo pipeline
 
 ## Your assignment
 
 Write an **offline, deterministic** end-to-end test that asserts the Mode B `report.json` output matches a fixed reference. This test runs without any network calls.
 
-**This is the verification layer for Vale's central milestone (W1-DE-03.R).** Your test proves the pipeline produces the correct reference output. The test is the acceptance gate for the one-week core deliverable.
+**This is the verification layer for Vale's demo pipeline (W1-DE-03.R).** Your test proves the pipeline produces the correct reference output. The test is the acceptance gate for the one-week core deliverable.
 
 ## What to produce
 

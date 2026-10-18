@@ -9,7 +9,7 @@ Build a **provisional static viewer** (`src/dashboard/view.py`) that renders `re
 ### 1. `src/dashboard/view.py`
 
 A Python script: `python src/dashboard/view.py <report.json> report.html` that:
-- Reads a `report.json` (the 6.0 reference from Vale).
+- Reads a `report.json` (any valid report, including the 6.0 reference from Vale).
 - Renders a static HTML page showing:
   - The risk score (numeric, **no** LOW/MED/HIGH/CRITICAL labels)
   - Packages and edges (simple list/table)
