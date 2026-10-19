@@ -44,7 +44,7 @@ the tree — treat it as not done until verified.
 | T-DE-04 | Dashboard: graph + risk + per-package view | Core | Aliyan (provisional) | Not started | T-DE-02, T-DE-03 |
 | T-DE-05 | Docker packaging + local compose | Core | Team | Not started | T-DE-04 |
 
-## M-DE-CORE — One-Week Demo Dependency-Risk Report
+## M-DE-CORE — One-Week Demo Dependency-Risk Report (historical; not current track)
 
 > **Status:** the *plan* below is committed (HEAD `b4fc87c`). The *implementation* it
 > describes (known-topology loader, Mode B serializer, `src/cli.py`, viewer, reference
@@ -371,4 +371,5 @@ explanation + dashboard layer, verified by the full suite: 241 passed, 29 subtes
 
 ## Unresolved technical contradictions (do not guess)
 - Dashboard stack: README (line 161) states deviation from Flask+D3 → provisional stdlib `src/web/` (http.server). TASKS/ARCHITECTURE still reference Flask+D3 as the December target; this is a *provisional* deviation, not a final decision.
+- Professor recommendations (agent handoffs with context blocks, evidence-grounded solutions, user approval before code changes, ML/model support, architecture diagrams) are **proposed design work pending team/sponsor agreement**; they are not implemented. The current remediation behavior is read-only (no manifest edits, no package installs, no execution of project code; no resolution claim without an after-scan).
    **Unresolved — needs user decision (see docs/WEEKLY.md).**

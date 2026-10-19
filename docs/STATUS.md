@@ -1,9 +1,9 @@
 # STATUS — Recon-DG
 
 **Date:** 2026-10-17 (CDT)
-**Host:** vale-laptop
+**Host:** vale-llm
 **Branch:** `feat/inventory-report`
-**Published baseline:** `1878329` (\"docs: update STATUS.md to accurate current status — remove stale f1c59a8/blocker claims, label M-DE-CORE historical\", 2026-10-17) — the current live tip of `feat/inventory-report`.
+**Published baseline:** `1878329` (\"docs: update STATUS.md to accurate current status — remove stale f1c59a8/blocker claims, label M-DE-CORE historical\", 2026-10-17) — an earlier status snapshot; the current live tip of `feat/inventory-report` is `7e8d4c4`.
 `6129e14` (\"feat(agent): add evidence-grounded remediation verification\", 2026-10-10)
 is the last commit that changed implementation code. `24c99b6` is a docs-only commit.
 The published baseline **includes** the `src/agent/` investigation layer, the **remediation
