@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RECON-DG — Dependency Risk Report</title>
+<style>
+  :root{
+    --bg:#0f1216; --card:#161b22; --edge:#2a3340; --text:#d6dbe2;
+    --muted:#8a94a3; --accent:#4da3ff; --ok:#3fb96f; --warn:#ffb52a;
+    --bad:#ff5e62; --det:#7c8b9e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,
+    'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);
+    line-height:1.45;padding:24px}
+  h1{margin:0 0 4px;font-size:1.4rem;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:.9rem;margin:0 0 20px}
+  .wrap{max-width:1080px;margin:0 auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;margin-bottom:20px}
+  .card{background:var(--card);border:1px solid var(--edge);border-radius:10px;
+    padding:14px 16px}
+  .card .k{color:var(--muted);font-size:.72rem;text-transform:uppercase;
+    letter-spacing:.06em;margin:0 0 6px}
+  .card .v{font-size:1.1rem;font-weight:600;word-break:break-word}
+  .card .v.muted{color:var(--muted);font-weight:400;font-size:.9rem}
+  .section{margin-bottom:22px}
+  .section h2{font-size:1rem;margin:0 0 12px;color:var(--accent);
+    text-transform:none;letter-spacing:0}
+  .finding{background:var(--card);border:1px solid var(--edge);border-radius:10px;
+    padding:14px 16px;margin-bottom:10px}
+  .finding .pkg{font-weight:700;font-size:1.02rem;margin:0 0 6px}
+  .finding .meta{color:var(--muted);font-size:.88rem;margin:0 0 8px}
+  .badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.7rem;
+    font-weight:600;letter-spacing:.04em;text-transform:uppercase;border:1px solid}
+  .badge.model{color:#7fd4ff;border-color:#2e6faa;background:#0e2333}
+  .badge.det{color:var(--det);border-color:#3a4552;background:#10151c}
+  .explanation{background:#10151c;border-left:3px solid var(--accent);
+    padding:10px 12px;border-radius:0 8px 8px 0;margin-top:8px;font-size:.93rem}
+  .explanation.det .lbl{color:var(--muted)}
+  .note{font-size:.85rem;color:var(--muted);margin-top:4px}
+  .verif{background:var(--card);border:1px solid var(--edge);border-radius:10px;
+    padding:14px 16px}
+  .verif.not_run{border-color:#6b4446;background:#1b1417}
+  .verif.verified{border-color:#2e6f46;background:#101812}
+  .count{display:inline-block;margin:0 6px 0 0;padding:2px 8px;border-radius:6px;
+    background:#1a2029;color:#e8ecf2;font-size:.85rem;font-weight:600}
+  .footer{margin-top:28px;color:var(--muted);font-size:.8rem;
+    border-top:1px solid var(--edge);padding-top:14px}
+  .error{color:var(--bad)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{background:#10151c;border:1px solid var(--edge);border-radius:6px;
+    padding:3px 9px;font-size:.82rem;color:var(--muted)}
+  .chips .chip.pk{color:var(--text);background:#151c26;border-color:#2f4560}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <h1>RECON-DG — Dependency Risk Report</h1>
+  <p class="sub" id="subtitle">Loading report…</p>
+  <div class="section" id="summary"></div>
+  <div class="section" id="topology"></div>
+  <div class="section" id="findings"></div>
+  <div class="section" id="remediation"></div>
+  <div class="section" id="verification"></div>
+  <div id="ai-note"></div>
+  <div class="footer" id="footer"></div>
+</div>
+<script>
+function el(tag, attrs){
+  const n=document.createElement(tag);
+  if(attrs){for(const [k,v] of Object.entries(attrs)) n[k]=v;}
+  return n;
+}
+function textEl(tag, s, attrs){const n=el(tag,attrs); n.textContent=s; return n;}
+function badge(kind){
+  const b=el('span',['class','badge '+(kind||'det')]); b.textContent=kind; return b;
+}
+function esc(s){return s==null?'':String(s);}
+function fmtScore(v){return v==null?'—':Number(v).toFixed(2);}
+
+let report=null;
+
+function render(){
+  const app=document.getElementById('app');
+  if(!report){app.innerHTML='';return;}
+  const src=report.source_path||'';
+  const mode=report.scan_mode||'';
+  const sub=document.getElementById('subtitle');
+  sub.textContent=`source: ${src||'(unnamed)'} · ${mode||'unknown mode'} · `
+    +`${report.turns_used||0}/${report.max_turns||0} turns · `
+    +`${report.used_llm?'LLM supplied (may still fall back to deterministic policy)':'no LLM supplied'}`;
+
+  // Summary cards
+  const sum=document.getElementById('summary'); sum.innerHTML='';
+  const risk=report.risk||{};
+  const riskStatus=risk.status||'unknown';
+  const riskText=risk.score==null?
+    (riskStatus==='unavailable'?'unavailable':'unreported')
+    :fmtScore(risk.score);
+  const cards=[
+    ['Findings', String(report.findings_count||report.findings.length||0)],
+    ['High severity', String(report.high_severity_count||0)],
+    ['Systemic risk (PHEI)', riskStatus==='unavailable'?'unavailable':riskText],
+    ['Severity threshold', report.severity_threshold?fmtScore(report.severity_threshold):'—'],
+  ];
+  const g=el('div',['class','grid']);
+  cards.forEach(([k,v],i)=>{
+    const c=el('div',['class','card']);
+    if(i===2 && riskStatus==='unavailable') c.style.borderColor='#4a3a3f';
+    c.appendChild(textEl('div',['class','k'],k));
+    c.appendChild(textEl('div',['class','v '+(i===2?'muted':'')], v));
+    g.appendChild(c);
+  });
+  sum.appendChild(g);
+  const rn=el('div',['class','note']);
+  rn.textContent=(risk.message||'')+(riskScoreMsg(risk));
+  sum.appendChild(rn);
+
+  // Topology
+  const top=document.getElementById('topology'); top.innerHTML='';
+  top.appendChild(textEl('h2',null,'Dependency topology'));
+  const pkgs=new Set((report.findings||[]).map(f=>f.package_name+'@'+f.version));
+  const chips=el('div',['class','chips']);
+  pkgs.forEach(p=>chips.appendChild(textEl('span',['class','chip pk'],p)));
+  top.appendChild(chips);
+  const tnote=el('div',['class','note']);
+  if(riskStatus==='unavailable'){
+    tnote.textContent='No dependency relationships were reported (inventory-only input). '+
+      'No score is fabricated; PHEI requires a known topology.';
+  } else {
+    tnote.textContent='Risk scoring uses the known dependency topology '+
+      '(PHEI path-max). Per-finding findings are shown below.';
+  }
+  top.appendChild(tnote);
+
+  // Findings
+  const fsec=document.getElementById('findings'); fsec.innerHTML='';
+  fsec.appendChild(textEl('h2',null,'Findings ('+(report.findings_count||0)+')'));
+  (report.findings||[]).forEach((f,idx)=>{
+    const c=el('div',['class','finding']);
+    c.appendChild(textEl('div',['class','pkg'],
+      f.package_name+'@'+f.version));
+    const meta=el('div',['class','meta']);
+    const adv=f.vulnerability_id||'';
+    const mparts=[];
+    mparts.push(adv+(f.aliases&&f.aliases.length?' ('+f.aliases.join(', ')+')':''));
+    mparts.push(f.ecosystem?'('+f.ecosystem+')':'');
+    if(f.published) mparts.push('published '+f.published);
+    if(f.vulnerability_spec) mparts.push('affected '+f.vulnerability_spec);
+    meta.textContent=mparts.join(' · ');
+    c.appendChild(meta);
+    // severity (never fabricates a number)
+    let sev;
+    if(f.severity_score!=null){sev='CVSS '+fmtScore(f.severity_score);}
+    else {sev='no numeric CVSS score reported (severity unspecified)';}
+    if(f.severity_vector) sev+=' · vector: '+f.severity_vector;
+    c.appendChild(textEl('div',['class','note'],sev));
+    if(f.fixed_versions&&f.fixed_versions.length){
+      const fv=el('div',['class','note']);
+      fv.textContent='scanner-provided fixed versions: '+f.fixed_versions.join(', ');
+      c.appendChild(fv);
+    }
+    // explanation (AI) with source badge
+    const expl=(report.ai_explanations||[])[idx]||{};
+    const box=el('div',['class','explanation '+(expl.source==='model'?'':'det')]);
+    box.appendChild(textEl('span',['class','lbl','note'],
+      expl.source==='model'?'AI (local model):':'deterministic fallback:'));
+    const t=el('span');
+    t.textContent=expl.text||'';
+    box.appendChild(t);
+    c.appendChild(box);
+    fsec.appendChild(c);
+  });
+  if(!(report.findings||[]).length){
+    fsec.appendChild(textEl('p',['class','note'],'No findings in this report.'));
+  }
+
+  // Remediation
+  const rsec=document.getElementById('remediation'); rsec.innerHTML='';
+  const remediation=report.remediation||null;
+  if(remediation&&remediation.plan&&remediation.plan.items&&remediation.plan.items.length){
+    rsec.appendChild(textEl('h2',null,'Remediation plan'));
+    const plan=remediation.plan;
+    plan.items.forEach(it=>{
+      const c=el('div',['class','finding']);
+      c.appendChild(textEl('div',['class','pkg'],
+        it.package_name+'@'+it.installed_version+' — '+it.vulnerability_id));
+      c.appendChild(textEl('div',['class','note'],'affected '+
+        (it.affected_range||'unspecified')));
+      c.appendChild(textEl('div',['class','note'],
+        'recommended: '+(it.recommended_action||'none provided')));
+      const fv=it.fixed_versions;
+      if(fv&&fv.length){
+        c.appendChild(textEl('div',['class','note'],
+          'fixed versions (scanner): '+fv.join(', ')));
+      }
+      rsec.appendChild(c);
+    });
+  } else {
+    rsec.appendChild(textEl('p',['class','note'],'No remediation plan in this report '
+      '(no findings, or no baseline plan produced).'));
+  }
+
+  // Verification
+  const vsec=document.getElementById('verification'); vsec.innerHTML='';
+  if(remediation&&remediation.verification){
+    vsec.appendChild(textEl('h2',null,'After-scan verification'));
+    const v=remediation.verification;
+    const status=v.status||'unknown';
+    const card=el('div',['class','verif '+(status==='verified'?'verified':'not_run')]);
+    card.appendChild(el('div',['class','note'],'status: '+status));
+    if(status==='verified'){
+      card.appendChild(textEl('div',null,'resolution claimed: true — verified against a user-supplied after scan.'));
+      const s=v.summary||{};
+      const cnt=(label,val)=>{const d=el('div',['class','count']); d.textContent=label+' '+val; return d;};
+      const row=el('div',['class','note']);
+      row.appendChild(cnt('new', s.new_count||0));
+      row.appendChild(cnt('resolved', s.resolved_count||0));
+      row.appendChild(cnt('unchanged', s.unchanged_count||0));
+      row.appendChild(cnt('regressed', s.regression_count||0));
+      card.appendChild(row);
+    } else { // not_run (or unknown)
+      const msg=v.reason||'Verification was not run and no resolution claim is made.';
+      card.appendChild(textEl('div',['class','note'],
+        'No after scan was supplied (or it was unusable). '+msg));
+      const s=v.summary||{};
+      const counts=['new','resolved','unchanged','regressed'].map(x=>x+' '+(s[x]||0));
+      card.appendChild(textEl('div',['class','note'],'counts: '+counts.join(', ')));
+    }
+    vsec.appendChild(card);
+  } else {
+    vsec.appendChild(textEl('p',['class','note'],'No after-scan verification '
+      '(after_scan_report was not supplied for this report).'));
+  }
+
+  // AI note
+  const srcInfo=report.explanation_source||{};
+  const anote=el('p',['class','note']);
+  anote.textContent=
+    'Explanations are additive and review-only. '
+    +(srcInfo.total?
+       `Source: ${srcInfo.model} model, ${srcInfo.deterministic} deterministic.`:'')
+    +(' The model (when used) restates only scanner-grounded facts; '
+      'do not treat it as authoritative. Severity and risk values are scanner-grounded '+
+      'and are never modified by the AI layer.');
+  document.getElementById('ai-note').appendChild(anote);
+}
+function riskScoreMsg(risk){
+  return risk.score!=null? (' (score '+risk.score+')'):'';
+}
+fetch('/report.json',{headers:{'Accept':'application/json'}})
+  .then(r=>{if(!r.ok)throw new Error('status '+r.status);return r.json();})
+  .then(j=>{report=j; render();})
+  .catch(e=>{
+    document.getElementById('subtitle').innerHTML=
+      '<span class="error">Failed to load report: '+esc(e.message)+'</span>';
+    document.getElementById('ai-note').innerHTML='';
+  });
+</script>
+</body>
+</html>
