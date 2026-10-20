@@ -282,9 +282,9 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 ## Status
 
-### Current baseline (published HEAD `a873a90`, 2026-10-17)
-- **Date:** 2026-10-17 (UTC). **Branch:** `feat/inventory-report`. **HEAD:** `a873a90`
-  ("docs: reconcile docs; fix README duplication; update WEEKLY; remove stale Mode-B blocker") — this commit is
+### Current baseline (published HEAD `83b10fb`, 2026-10-19)
+- **Date:** 2026-10-19 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `83b10fb`
+  ("feat: add opt-in explanations and read-only dashboard") — this commit is
   the published remote tip (`origin/feat/inventory-report`) and **includes** the
   `src/agent/` investigation layer, the **remediation stage**
   (`build_remediation_plan` / `verify_remediation` in `src/agent/agent.py`, the
@@ -293,49 +293,28 @@ Owner: Team. Depends: dashboard (T-DE-04).
   `tests/data/osv-scanner.json`, and the tests `tests/test_agent.py`,
   `tests/test_report_generator.py`, `tests/test_enrichment.py`,
   `tests/test_pipeline.py`, and `tests/test_remediation.py` (24 tests).
-- **Prior baseline (historical):** `1b4a8d9` ("docs: correct last-implementation
-  baseline to c548f32", 2026-10-03), `b4fc87c` ("docs: correct Aliyan handoff
-  schema/path", 2026-10-02), `f1c59a8` (added the agent/enrichment/pipeline
-  implementation — now *superseded* by `6129e14` which commits the remediation
-  stage), and the docs-only publishes — implementation code was unchanged by the
-  docs-only ones. The last commit that changed implementation code in the published
-  tree is `6129e14`.
-- **Working tree:** tracked files **unmodified** at HEAD. The **uncommitted**
-  work (nothing staged, nothing committed) is the *provisional*
-  explanation + dashboard layer, added this session:
-  - **new untracked** `src/explanation/` — `__init__.py` (additive `add_explanations`),
-    `deterministic.py` (grounded explainer, no network/model), `local_model.py`
-    (optional OpenAI-compatible local model client: env-only
-    `OPENAI_BASE_URL` / `OPENAI_API_KEY`, stdlib `urllib`, per-finding deterministic
-    fallback on any failure, bounded `max_calls` cap, no credentials committed).
-  - **new untracked** `src/web/` — `__init__.py`, `__main__.py`, `server.py`,
-    `dashboard.html`: a minimal *read-only* stdlib `http.server` dashboard (no
-    third-party deps) serving `dashboard.html` at `/` and the report at
-    `/report.json`, rendering findings, risk limitations, the remediation plan,
-    and the verification state **including `not_run`** (no resolution claim).
-  - **new untracked** tests: `tests/test_explanation.py` (20),
-    `tests/test_explanation_http.py` (7), `tests/test_dashboard.py` (9).
-Remote: `origin/feat/inventory-report` equals `a873a90`.
-  explanation/web modules and their tests described above have **not** been pushed
-  (and are not staged or committed).
-This session: reconciled docs against accepted scope; resolved dashboard-stack contradiction (README already stated stdlib http.server).
-  paths (the "provisional" step toward T-DE-04 / AI-explainations) and closed two
-  test gaps. (1) *Explanation:* the existing `test_explanation.py` drove the
-  local-model client only through an injected `transport` seam (no real network);
-  `test_explanation_http.py` (7) stands up a **real** local `/v1/chat/completions`
-  `http.server` and calls the client with `transport=None` (real `urllib`), proving
-  the request is *sent* to the configurable endpoint and that every failure path
-  (no config, non-2xx, malformed/empty body, network/timeout, `max_calls` cap)
-  falls back deterministically **per finding**. (2) *Dashboard:* no dashboard test
-  existed; `test_dashboard.py` (9) spins up the real server on loopback and issues
-  real GETs, verifying the page, the report, `not_run`, the remediation plan,
-  additive labelled explanations, and that findings/risk/severity are unchanged
-  and no credentials leak.
+- **Explanation + dashboard (committed 83b10fb):** `src/explanation/` (3 files:
+  `__init__.py`, `deterministic.py`, `local_model.py`) — a grounded deterministic
+  explainer plus an optional OpenAI-compatible local-model client (env-only
+  `OPENAI_BASE_URL` / `OPENAI_API_KEY`, stdlib `urllib`, per-finding deterministic
+  fallback on any failure, bounded `max_calls` cap, no credentials committed).
+  `src/web/` (4 files: `__init__.py`, `__main__.py`, `server.py`,
+  `dashboard.html`): a minimal *read-only* stdlib `http.server` dashboard (no
+  third-party deps) serving `dashboard.html` at `/` and the report at
+  `/report.json`, rendering findings, risk limitations, the remediation plan,
+  and the verification state **including `not_run`** (no resolution claim).
+  Tests: `tests/test_explanation.py` (20), `tests/test_explanation_http.py` (7),
+  `tests/test_dashboard.py` (10). All **committed** in 83b10fb and pushed to
+  `origin/feat/inventory-report`.
+- **Prior baseline (historical):** `a873a90` (2026-10-17), `1b4a8d9` (2026-10-03),
+  `b4fc87c` (2026-10-02), `f1c59a8` (agent/enrichment/pipeline implementation),
+  `6129e14` (remediation stage, last implementation commit before 83b10fb).
+- **Working tree:** tracked files **unmodified** at HEAD. No untracked files remain
+  (the explanation/dashboard files are committed in 83b10fb).
+- **Test count:** 248 passed, 29 subtests (2026-10-19).
 
 
-### Implementation state (published HEAD `6129e14`; plus uncommitted provisional
-explanation + dashboard layer, verified by the full suite: 241 passed, 29 subtests,
-2 warnings (re-run 2026-10-10))
+### Implementation state (published HEAD `83b10fb`; explanation + dashboard committed)
 - **Parser (T-DE-01):** `requirements.txt` done (1 of ~6 manifest formats).
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
@@ -343,8 +322,8 @@ explanation + dashboard layer, verified by the full suite: 241 passed, 29 subtes
   (`src/engine/nvd_client.py`) but **not yet run end-to-end** against a real project.
 - **Reporter (T-DE-03):** `RiskReport` dataclass + `src/reporter/interface.py` +
   `report_generator.py` present. Inventory serializer implemented; **dependency-graph
-  serializer unimplemented**. A **provisional** read-only dashboard (`src/web/`) is
-  uncommitted (see above) — a stdlib `http.server` + `dashboard.html`, serving the
+  serializer unimplemented**. The **read-only stdlib dashboard** (`src/web/`) is
+  **committed** (83b10fb) — a stdlib `http.server` + `dashboard.html`, serving the
   report and its page; the full Flask+D3 dashboard (T-DE-04) is still not started.
 - **Agent (T-DE-03 AI layer):** implemented + tested — new `src/agent/` package
   (bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic grounded policy
@@ -355,8 +334,8 @@ explanation + dashboard layer, verified by the full suite: 241 passed, 29 subtes
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
   fails closed). **24 passing tests** (`tests/test_remediation.py`). A real model
   backend (llama.cpp vs. user API key) is **not yet wired** (pending decision);
-  current runs use the deterministic policy (`used_llm=False`). A **provisional**
-  explanation layer (`src/explanation/`, uncommitted) provides a grounded deterministic
+  current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
+  (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
   explainer plus an optional OpenAI-compatible local-model client (env-only config,
   per-finding deterministic fallback) — tested by `tests/test_explanation.py` (20) and
   `tests/test_explanation_http.py` (7).

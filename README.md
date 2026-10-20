@@ -26,13 +26,14 @@ October 17 results are separate historical runs. The October 10 full-suite
 re-run gives **241 passed, 29 subtests, 2 warnings** (2026-10-10): 53 reporter, 45 agent, 26 enrichment, 23
 pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
 5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard.
-A **provisional** stdlib-only dashboard (`src/web/`) and a **provisional**
-explanation layer (`src/explanation/` — a grounded deterministic explainer plus
-an optional OpenAI-compatible local-model client) are now in the tree (uncommitted)
-and verified by real loopback HTTP tests. The **full Flask+D3** dashboard and a
-*real* local model remain **planned** and not yet running. Steps (2) live
-NVD/OSV, (4) the full dashboard, and (5) a real AI model backend are still
-planned; the agent below runs fully without a model via a deterministic policy.
+The **stdlib-only dashboard** (`src/web/`) and the **explanation layer**
+(`src/explanation/` — a grounded deterministic explainer plus an optional
+OpenAI-compatible local-model client) are **committed** (83b10fb, 2026-10-19)
+and verified by real loopback HTTP tests (248 passed, 29 subtests, 2026-10-19).
+The **full Flask+D3** dashboard and a *real* local model remain **planned**
+and not yet running. Steps (2) live NVD/OSV, (4) the full dashboard, and (5)
+a real AI model backend are still planned; the agent below runs fully without
+a model via a deterministic policy.
 
 **Core track (December deliverable):** dependency inventory → OSV-Scanner scan →
 deterministic risk analysis → reporting → dashboard → AI explanations.
@@ -142,12 +143,12 @@ the inventory-only contract. Wiring a **real** model backend (local llama.cpp
 endpoint vs. user-provided API key) is a pending decision (see `TASKS.md`) and is
 not yet implemented. Full suite: **241 passed, 29 subtests, 2 warnings**.
 
-## Provisional dashboard & explanation layer (in the tree; uncommitted)
+## Implemented explanation layer and read-only dashboard (committed 83b10fb)
 
 The December deliverable includes a dashboard (step 4) and AI explanations (step
-5). Two **provisional, uncommitted** implementations are now in the tree and
-verified by real loopback-HTTP tests — these are toward the December target, not
-the final deliverable:
+5). The **stdlib-only dashboard** (`src/web/`) and the **explanation layer**
+(`src/explanation/`) are **committed** (83b10fb, 2026-10-19) and verified by
+real loopback HTTP tests (248 passed, 29 subtests, 2026-10-19):
 
 - **Dashboard (`src/web/`) — stdlib-only `http.server`, no third-party deps.**
   `python -m src.web [--report FILE] [--port N] [--host HOST] [--model ON/OFF]`
@@ -159,7 +160,7 @@ the final deliverable:
   the remediation plan (scanner-provided fixed versions verbatim), and the
   after-scan verification state **including `not_run`** (a red card with a zero
   count summary and no resolution claim). Verified by `tests/test_dashboard.py`
-  (9 passing tests, real HTTP GETs to `/` and `/report.json`).
+  (10 passing tests, real HTTP GETs to `/` and `/report.json`).
   **Deviation from the recommended stack:** this is *not* Flask + D3. Flask is
   not installed in this environment and is not declared in any manifest; per the
   no-install constraint the dashboard is implemented as a dependency-free
@@ -193,9 +194,16 @@ the final deliverable:
   local `/v1/chat/completions` server driven by real `urllib` requests — no
   injected transport seam), and the dashboard tests above.
 
-> These provisional modules are **uncommitted** and are a bounded step toward the
-> December dashboard + AI deliverable; the full Flask+D3 dashboard (T-DE-04) and
-> a *real* model backend (pending decision) remain open.
+  **Model activation:** `--model` defaults to **OFF** (deterministic only). The
+  dashboard CLI flag `--model` defaults to `"OFF"`. Only the exact value `--model ON`
+  (case-insensitive) enables the optional local-model backend. When **ON** and
+  `OPENAI_BASE_URL` / `OPENAI_API_KEY` are configured, the dashboard sends
+  **finding data** (package name, version, vulnerability ID, aliases, severity score,
+  severity vector, severity types, published date, affected range, fixed versions,
+  recommended action) to the configured endpoint. Whether the configured endpoint
+  is unencrypted HTTP or encrypted HTTPS is an **open privacy decision** — the
+  endpoint receives the API key and finding data in either case. Model use is
+  **not approved by default**; it requires explicit opt-in.
 
 ## Key documents
 
