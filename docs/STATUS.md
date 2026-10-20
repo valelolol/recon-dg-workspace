@@ -23,10 +23,12 @@ the remediation stage); `1b4a8d9` (docs-only); `b4fc87c` (docs-only) and the oth
 docs-only publishes did not change implementation code; `c548f32` added NVD/reporter/
 scanner scaffolding.
 
-**This session (2026-10-19):** reconciled docs against accepted scope; updated README.md,
+*This session (2026-10-19):* reconciled docs against accepted scope; updated README.md,
 TASKS.md, and docs/STATUS.md to reflect the published commit 83b10fb (explanation +
 dashboard committed and pushed). The full suite now runs **248 passed, 29 subtests**
-(2026-10-19). **Working tree is clean.**
+(2026-10-19 — reported historical result, date not independently verifiable from
+repository evidence). **Working tree:** tracked files unmodified at HEAD; untracked file
+`docs/REVIEW-DECISIONS.md` present (intentionally left untracked).
 
 ## Scope
 
@@ -149,6 +151,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 
 ## Verification
 
-- **Test suite:** 248 passed, 29 subtests (2026-10-19).
+- **Test suite:** 248 passed, 29 subtests — reported historical result (2026-10-19;
+  date not independently verifiable from repository evidence).
 - **Remote tip:** `origin/feat/inventory-report` = `83b10fb` (matches).
-- **Untracked files:** none (the explanation/dashboard files are committed in 83b10fb).
+|- **Untracked files:** `docs/REVIEW-DECISIONS.md` (intentionally left untracked).

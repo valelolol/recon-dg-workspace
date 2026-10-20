@@ -29,7 +29,8 @@ pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
 The **stdlib-only dashboard** (`src/web/`) and the **explanation layer**
 (`src/explanation/` — a grounded deterministic explainer plus an optional
 OpenAI-compatible local-model client) are **committed** (83b10fb, 2026-10-19)
-and verified by real loopback HTTP tests (248 passed, 29 subtests, 2026-10-19).
+and verified by real loopback HTTP tests (248 passed, 29 subtests — reported historical
+result, 2026-10-19; date not independently verifiable from repository evidence).
 The **full Flask+D3** dashboard and a *real* local model remain **planned**
 and not yet running. Steps (2) live NVD/OSV, (4) the full dashboard, and (5)
 a real AI model backend are still planned; the agent below runs fully without
@@ -148,7 +149,8 @@ not yet implemented. Full suite: **241 passed, 29 subtests, 2 warnings**.
 The December deliverable includes a dashboard (step 4) and AI explanations (step
 5). The **stdlib-only dashboard** (`src/web/`) and the **explanation layer**
 (`src/explanation/`) are **committed** (83b10fb, 2026-10-19) and verified by
-real loopback HTTP tests (248 passed, 29 subtests, 2026-10-19):
+real loopback HTTP tests (248 passed, 29 subtests — reported historical result,
+2026-10-19; date not independently verifiable from repository evidence):
 
 - **Dashboard (`src/web/`) — stdlib-only `http.server`, no third-party deps.**
   `python -m src.web [--report FILE] [--port N] [--host HOST] [--model ON/OFF]`

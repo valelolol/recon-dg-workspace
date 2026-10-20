@@ -282,10 +282,11 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 ## Status
 
-### Current baseline (published HEAD `83b10fb`, 2026-10-19)
-- **Date:** 2026-10-19 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `83b10fb`
-  ("feat: add opt-in explanations and read-only dashboard") — this commit is
-  the published remote tip (`origin/feat/inventory-report`) and **includes** the
+### Current baseline (published baseline `83b10fb`, 2026-10-19)
+- **Date:** 2026-10-19 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `6bf06c7`
+  (docs update). **Published baseline:** `83b10fb`
+  ("feat: add opt-in explanations and read-only dashboard") — the published remote tip
+  (`origin/feat/inventory-report`) and **includes** the
   `src/agent/` investigation layer, the **remediation stage**
   (`build_remediation_plan` / `verify_remediation` in `src/agent/agent.py`, the
   `_fixed_versions` extraction in `src/agent/normalizer.py`, and the
@@ -309,9 +310,10 @@ Owner: Team. Depends: dashboard (T-DE-04).
 - **Prior baseline (historical):** `a873a90` (2026-10-17), `1b4a8d9` (2026-10-03),
   `b4fc87c` (2026-10-02), `f1c59a8` (agent/enrichment/pipeline implementation),
   `6129e14` (remediation stage, last implementation commit before 83b10fb).
-- **Working tree:** tracked files **unmodified** at HEAD. No untracked files remain
-  (the explanation/dashboard files are committed in 83b10fb).
-- **Test count:** 248 passed, 29 subtests (2026-10-19).
+|- **Working tree:** tracked files **unmodified** at HEAD. Untracked file present:
+  `docs/REVIEW-DECISIONS.md` (intentionally left untracked; not staged, not committed).
+- **Test count:** 248 passed, 29 subtests — reported historical result (date 2026-10-19
+  not independently verifiable from repository evidence; no test output file present).
 
 
 ### Implementation state (published HEAD `83b10fb`; explanation + dashboard committed)
