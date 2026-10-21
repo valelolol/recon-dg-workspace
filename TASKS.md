@@ -39,7 +39,7 @@ the tree — treat it as not done until verified.
 | Task ID | Title | Track | Owner | Status | Depends on |
 |---------|-------|-------|-------|--------|-----------|
 | T-DE-01 | Parser: multi-format manifest support | Core | Vale | In progress | v0.1 contract (done) |
-| T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | In progress | T-DE-01, T-DE-03 |
+| T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | In progress | T-DE-01 |
 | T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | In progress | T-DE-01, T-DE-02 |
 | T-DE-04 | Dashboard: graph + risk + per-package view | Core | Aliyan (provisional) | Not started | T-DE-02, T-DE-03 |
 | T-DE-05 | Docker packaging + local compose | Core | Team | Not started | T-DE-04 |
