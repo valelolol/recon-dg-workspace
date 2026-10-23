@@ -45,20 +45,36 @@ A **demo-validation checklist** (`docs/demo-validation/validation-report.md`) an
 
 ## Verification evidence
 
-```bash
-# 1. Run real scan
-cd /home/vale/projects/recon-dg-workspace
-python -m src.cli --manifest <real-manifest> --output report.json
+### Serve an existing report (step 1)
 
+```bash
+# 1. Serve an existing report (does NOT run a scan)
+cd /home/vale/projects/recon-dg-workspace
+python -m src.web --report <existing-report.json> --host 127.0.0.1 --port 8000 --model OFF
+```
+
+> **Note:** `src.web` is a read-only dashboard server. It serves an existing `report.json` file and its page. It does **not** scan manifests, run OSV-Scanner, or generate reports. The repo has no verified integrated workflow that turns a manifest scan into a dashboard-compatible report. The scanner and reporter components exist; the missing capability is a verified command or workflow that connects a manifest scan to generation of a dashboard-compatible report file.
+
+### Verify report.json has real data
+
+```bash
 # 2. Verify report.json has real data
 python -c "import json; r=json.load(open('report.json')); print(r['risk']['score'])"
+```
 
+### Start stdlib dashboard
+
+```bash
 # 3. Start stdlib dashboard
 python -m src.web --port 8000
+```
 
+### Open and verify
+
+```bash
 # 4. Open http://127.0.0.1:8000 in browser and verify all checklist items
 # 5. Run with --model OFF to verify deterministic fallback
-python -m src.cli --manifest <real-manifest> --output report-off.json --model OFF
+python -m src.web --report <existing-report.json> --host 127.0.0.1 --port 8000 --model OFF
 ```
 
 ## Privacy / security checks

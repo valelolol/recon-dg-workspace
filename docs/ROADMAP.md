@@ -1,7 +1,7 @@
 # December Demo Roadmap — RECON-DG
 
 > **Branch:** `feat/inventory-report`
-> **HEAD:** `dfd115c5d1c5d556b0c8f2b37d3f968b643a0666` (2026-10-20)
+> **HEAD:** `77de712` (2026-10-20)
 > **Published baseline:** `83b10fb` (2026-10-19)
 > **Untracked:** `docs/REVIEW-DECISIONS.md` (intentionally preserved)
 
@@ -22,20 +22,20 @@
 
 ---
 
-## Implementation-state inventory (as of HEAD `dfd115c`)
+## Implementation-state inventory (as of HEAD `77de712`)
 
 | Module | Status | Evidence |
 |--------|--------|----------|
-| `src/parser` | **Partial** — `requirements.txt` only (1 of ~6 manifest formats). | `src/parser/parser.py:7–51` |
-| `src/engine/risk_analyzer` | **Implemented** — PHEI path-max (`calculate_path_weight`, `calculate_impact_multiplicity`, `calculate_phei`) + `UnavailableTopologyError` guard. | `src/engine/risk_analyzer.py` |
-| `src/engine/nvd_client` | **Partial** — NVD/OSV API enrichment fallback client present but **not yet run end-to-end** against a real project. | `src/engine/nvd_client.py` |
-| `src/reporter` | **Partial** — `RiskReport` dataclass + `interface.py` + `report_generator.py` present. Inventory serializer implemented; **dependency-graph serializer unimplemented**. | `src/reporter/interface.py`, `src/reporter/report_generator.py`, `src/reporter/inventory.py` |
-| `src/agent` | **Implemented** — bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic grounded policy (no model). **45 passing tests** (`tests/test_agent.py`). | `src/agent/agent.py`, `src/agent/normalizer.py`, `src/agent/pipeline.py`, `src/agent/scan_runner.py` |
+| `src/parser` | **Partial** — `requirements.txt` only (1 of ~6 manifest formats). | `src/parser/__init__.py`, `src/parser/parser.py:7–51` |
+| `src/engine/risk_analyzer` | **Implemented** — PHEI path-max (`calculate_path_weight`, `calculate_impact_multiplicity`, `calculate_phei`) + `UnavailableTopologyError` guard. | `src/engine/__init__.py`, `src/engine/risk_analyzer.py` |
+| `src/engine/nvd_client` | **Partial** — NVD/OSV API enrichment fallback client present but **not yet run end-to-end** against a real project. | `src/engine/__init__.py`, `src/engine/nvd_client.py` |
+| `src/reporter` | **Partial** — `RiskReport` dataclass + `interface.py` + `report_generator.py` present. Inventory serializer implemented; **dependency-graph serializer unimplemented**. | `src/reporter/__init__.py`, `src/reporter/interface.py`, `src/reporter/report_generator.py`, `src/reporter/inventory.py` |
+| `src/agent` | **Implemented** — bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic grounded policy (no model). **45 passing tests** (`tests/test_agent.py`). | `src/agent/__init__.py`, `src/agent/agent.py`, `src/agent/normalizer.py`, `src/agent/pipeline.py`, `src/agent/scan_runner.py` |
 | `src/agent` remediation | **Implemented** — `build_remediation_plan` (pure, fixed versions verbatim, severity `None`) + `verify_remediation` (user-supplied after scan; no after scan → `not_run`). **24 passing tests** (`tests/test_remediation.py`). | `src/agent/agent.py` |
-| `src/explanation` | **Implemented** — grounded deterministic explainer (default) + optional OpenAI-compatible local-model client (`src/explanation/local_model.py`). Model defaults **OFF** (`--model ON` required). Per-finding deterministic fallback. | `src/explanation/deterministic.py`, `src/explanation/local_model.py`; `tests/test_explanation.py` (20), `tests/test_explanation_http.py` (7) |
-| `src/web` (dashboard) | **Implemented** — stdlib `http.server` + `dashboard.html` (no third-party deps). Read-only; serves report + page. **Not** Flask+D3. | `src/web/server.py`, `src/web/__main__.py`, `src/web/dashboard.html`; `tests/test_dashboard.py` (10) |
-| `src/enrichment` | **Implemented** — deps.dev enrichment layer (stdlib-only, `package_context` tool, additive only, never fed to PHEI). **26 passing tests** (`tests/test_enrichment.py`). | `src/enrichment/deps_dev.py` |
-| `src/models/dependency_graph` | **Implemented** — `DependencyNode` + `DependencyGraph` (NetworkX DiGraph). | `src/models/dependency_graph.py` |
+| `src/explanation` | **Implemented** — grounded deterministic explainer (default) + optional OpenAI-compatible local-model client (`src/explanation/local_model.py`). Model defaults **OFF** (`--model ON` required). Per-finding deterministic fallback. | `src/explanation/__init__.py`, `src/explanation/deterministic.py`, `src/explanation/local_model.py`; `tests/test_explanation.py` (23), `tests/test_explanation_http.py` (7) |
+| `src/web` (dashboard) | **Implemented** — stdlib `http.server` + `dashboard.html` (no third-party deps). Read-only; serves report + page. **Not** Flask+D3. | `src/web/__init__.py`, `src/web/__main__.py`, `src/web/server.py`, `src/web/dashboard.html`; `tests/test_dashboard.py` (13) |
+| `src/enrichment` | **Implemented** — deps.dev enrichment layer (stdlib-only, `package_context` tool, additive only, never fed to PHEI). **26 passing tests** (`tests/test_enrichment.py`). | `src/enrichment/__init__.py`, `src/enrichment/deps_dev.py` |
+| `src/models/dependency_graph` | **Implemented** — `DependencyNode` + `DependencyGraph` (NetworkX DiGraph). | `src/models/__init__.py`, `src/models/dependency_graph.py` |
 | `tests/` | **Partial** — 12 test files; full suite historically ~241–248 passed (historical counts; verify before demo). | See `tests/` directory |
 
 **Test counts are historical unless re-run.** The "pytest 248 passed" figure is historical (2026-10-19; date not independently verifiable from repository evidence).
@@ -96,7 +96,7 @@
 
 **Deliverable:** `src/agent/` wired to the chosen endpoint. `--model ON` enables the layer; `--model OFF` (default) uses the deterministic grounded explainer. All model output is additive only (never modifies findings).
 
-**Verification:** `python -m src.agent --model OFF` (deterministic fallback); `python -m src.agent --model ON` (configured endpoint).
+**Verification:** `python -m src.agent --model OFF` is **unavailable** — the `src/agent` layer has no `--model` CLI flag. `--model` is a `src.web` dashboard flag (serves an existing report only; requires `OPENAI_BASE_URL` + `OPENAI_API_KEY` for `--model ON`). The agent layer is already implemented (bounded tool loop, `EvidenceTrail`, deterministic grounded policy) but its endpoint wiring (llama.cpp vs. user API key) is pending.
 
 > **Decision-dependent:** Team to decide llama.cpp vs. user API key. The agent layer is **already implemented** — only the endpoint wiring is pending.
 

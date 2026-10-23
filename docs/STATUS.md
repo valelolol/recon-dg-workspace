@@ -4,6 +4,7 @@
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
 **Published baseline:** `83b10fb` ("feat: add opt-in explanations and read-only dashboard", 2026-10-19) — the current live tip of `feat/inventory-report`, pushed to `origin/feat/inventory-report`.
+**Current HEAD:** `77de712` ("docs: December roadmap + 7 weekly handoffs + demo outline + system diagrams", 2026-10-20) — ahead of the published baseline by 2 commits (both docs-only).
 
 `6129e14` ("feat(agent): add evidence-grounded remediation verification", 2026-10-10)
 is the last commit that changed implementation code before the explanation/dashboard slice.
@@ -73,7 +74,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   `report["explanation_source"]` (counts model vs deterministic; never echoes the key/
   endpoint). Deterministic fallback is guaranteed and labelled per finding on any
   failure (no config, network/timeout, non-2xx, malformed body, empty completion,
-  `max_calls` cap). Verified by `tests/test_explanation.py` (20) +
+  `max_calls` cap). Verified by `tests/test_explanation.py` (23) +
   `tests/test_explanation_http.py` (7, a real local `/v1/chat/completions` server
   driven by real `urllib` requests — no injected transport seam).
 - **Read-only dashboard (`src/web/`, committed 83b10fb):** a minimal read-only stdlib
@@ -84,7 +85,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   remediation plan (scanner-provided fixed versions verbatim), and the after-scan
   verification state **including `not_run`** (a red card with a zero count summary
   and no resolution claim). Additive labelled explanations are rendered alongside
-  findings when `use_model=True`. Verified by `tests/test_dashboard.py` (10, real
+  findings when `use_model=True`. Verified by `tests/test_dashboard.py` (13, real
   loopback GETs).
 - **Model activation:** `--model` defaults to **OFF** (deterministic only). Only the
   exact value `--model ON` (case-insensitive) enables the optional local-model backend.
@@ -120,7 +121,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
   explainer plus an optional OpenAI-compatible local-model client (env-only config,
-  per-finding deterministic fallback) — tested by `tests/test_explanation.py` (20) and
+  per-finding deterministic fallback) — tested by `tests/test_explanation.py` (23) and
   `tests/test_explanation_http.py` (7).
 
 ## Open decisions (not yet resolved)
@@ -153,5 +154,5 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 
 - **Test suite:** 248 passed, 29 subtests — reported historical result (2026-10-19;
   date not independently verifiable from repository evidence).
-- **Remote tip:** `origin/feat/inventory-report` = `83b10fb` (matches).
+- **Remote tip:** `origin/feat/inventory-report` = `77de712` (matches HEAD).
 |- **Untracked files:** `docs/REVIEW-DECISIONS.md` (intentionally left untracked).

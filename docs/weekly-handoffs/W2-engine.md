@@ -47,11 +47,11 @@ python -m pytest tests/test_nvd_integration.py tests/test_risk_analyzer.py -q
 
 Expected: all tests pass. For a live demo, run against a real project manifest:
 
-```bash
-python -m src.cli --manifest <real-manifest> --output report.json
-```
+**The repo has no verified integrated workflow that turns a manifest scan into a dashboard-compatible report.** The `src.web` module is a read-only dashboard server that serves an existing `report.json` file; it does **not** accept `--manifest` or `--output` flags, nor does it scan manifests or generate reports.
 
-(Verify `report.json` contains real CVE data, not synthetic.)
+The scanner and reporter components exist in the repo. The missing capability is a verified command or workflow that connects a manifest scan to generation of a dashboard-compatible report file.
+
+> **OSV-Scanner** can run as a separate external scanner (e.g. `osv-scanner --json` on a `requirements.txt`). Its JSON output is the authoritative CVE evidence for the project but is **not** directly consumed by the dashboard — a report-generation step must translate it into the `RiskReport` schema before `src.web` can serve it.
 
 ## Security / privacy controls
 

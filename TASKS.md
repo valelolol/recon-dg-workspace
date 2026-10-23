@@ -90,7 +90,7 @@ Scope: C0 gates Nick's fixture authoring and the downstream fixture-consuming st
 | W1-DE-01.L | T-DE-01 | Vale | `src/parser/parser.py` | `load_known_topo_json()` → graph `edge_availability="known"`; correct nodes/edges/weights | `calculate_phei` on it == 6.0; `parse_requirements` untouched |
 | W1-DE-02.R | T-DE-02 | Vale | `src/engine/risk_analyzer.py`, `src/reporter/report_generator.py` | `calculate_phei` returns the argmax scalar score (6.0); `generate_report` calls PHEI (path-max), not `calculate_systemic_risk` (global-sum); `w_uv` logged as OPEN | Score numerics preserved (6.0) and invariant to severity; no formula change/invented; no path field emitted; severity not in score. **Complete 2026-10-03 (uncommitted):** `generate_report()` wired to `calculate_phei`; unavailable topology → "unavailable" risk (no fabricated score); `calculate_systemic_risk` kept as legacy; latent `KeyError` in "removed" section fixed (reads `previous_graph`); new `tests/test_report_generator.py` (8 tests). Verification: `python -m pytest tests/test_report_generator.py tests/test_parser.py tests/test_risk_analyzer.py tests/test_inventory_reporter.py -q` → 76 passed; `git diff --check` clean. |
 | W1-DE-03.R | T-DE-03 | Vale | `src/reporter/inventory.py`, `src/cli.py`, `examples/fixtures/sample_risk_report.json` | `sample_risk_report.json`: `input.type=="file"`, `input.format=="synthetic-graph"`, `risk.score==6.0`, `method=="phei"`, 3 findings, synthetic-labeled, no path field | Matches v0.1; Mode A fields/behavior preserved + existing tests pass; offline, deterministic |
-| W1-DE-04.V | T-DE-04 | Aliyan (provisional) | `src/dashboard/view.py` | `view.py <report.json>` → `report.html`: packages, edges, score, findings; **no level labels** | Data-driven; no framework; numeric score + status only |
+| W1-DE-04.V | T-DE-04 | Aliyan (provisional) | `src/web/dashboard.html` | `dashboard.html` (served at `/` by `python -m src.web`) renders findings table, risk summary, remediation plan; **no level labels** | Data-driven; no framework; numeric score + status only |
 | W1-DE-03.T | T-DE-02/03 | Christian | `tests/test_e2e_risk.py`, `docs/E2E_EXPECTED_RESULTS.md` | Passing offline test asserts the 6.0 reference (and no path field) | Deterministic: run twice with the same fixed scan_id and created_at and compare outputs |
 
 **Resolved field mapping (all spec-supported; see STATUS.md Verified/Proposed/Unverified):**
@@ -210,7 +210,7 @@ fixtures. Approval = an explicit user decision; do not treat this as agreed unti
 ## Phase 1: Parser (Multi-format Manifest Support) — December-critical → T-DE-01
 Owner: Vale. Depends: shared `DependencyGraph` IR (T-DE-03 schema).
 - [x] Parse `requirements.txt` (`package==version`) — `src/parser/parser.py:7–57`
-- [x] `build_mock_graph()` test helper — `src/parser/parser.py:59–75`
+- [x] `build_mock_graph()` test helper — `src/parser/parser.py:54–72`
 - [ ] Add `package.json` (JSON) parser via `json` module
 - [ ] Add `pyproject.toml` / `setup.cfg` parser via `tomllib`
 - [ ] Add `go.mod` / `Gopfile.lock` parser
@@ -283,8 +283,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 ## Status
 
 ### Current baseline (published baseline `83b10fb`, 2026-10-19)
-- **Date:** 2026-10-19 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `6bf06c7`
-  (docs update). **Published baseline:** `83b10fb`
+- **Date:** 2026-10-19 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `77de712`
   ("feat: add opt-in explanations and read-only dashboard") — the published remote tip
   (`origin/feat/inventory-report`) and **includes** the
   `src/agent/` investigation layer, the **remediation stage**
@@ -312,8 +311,17 @@ Owner: Team. Depends: dashboard (T-DE-04).
   `6129e14` (remediation stage, last implementation commit before 83b10fb).
 |- **Working tree:** tracked files **unmodified** at HEAD. Untracked file present:
   `docs/REVIEW-DECISIONS.md` (intentionally left untracked; not staged, not committed).
-- **Test count:** 248 passed, 29 subtests — reported historical result (date 2026-10-19
+|- **Test count:** 248 passed, 29 subtests — reported historical result (date 2026-10-19
   not independently verifiable from repository evidence; no test output file present).
+  Full suite: 241 passed, 29 subtests, 2 warnings (re-run 2026-10-10): 53 reporter, 45 agent,
+  26 enrichment, 23 pipeline, **24 remediation**, 11 NVD integration, 10 parser, 8
+  report generator, 5 risk analyzer, 23 explanation, 7 explanation-HTTP, 13
+  dashboard (23 explanation, 7 explanation-HTTP, 13 dashboard). The T-DE-02
+  NVD integration suite currently passes (11).
+  > **Unverified:** The aggregate totals "248 passed" and "241 passed" are **unverified**.
+  > The per-module breakdown (53+45+26+23+24+11+10+8+5+23+7+13 = 248) does not
+  > establish a passing-test total — it is a function-count listing, not a run result.
+  > No test output file exists on disk to confirm either figure.
 
 
 ### Implementation state (published HEAD `83b10fb`; explanation + dashboard committed)
@@ -327,27 +335,27 @@ Owner: Team. Depends: dashboard (T-DE-04).
   serializer unimplemented**. The **read-only stdlib dashboard** (`src/web/`) is
   **committed** (83b10fb) — a stdlib `http.server` + `dashboard.html`, serving the
   report and its page; the full Flask+D3 dashboard (T-DE-04) is still not started.
-- **Agent (T-DE-03 AI layer):** implemented + tested — new `src/agent/` package
+|- **Agent (T-DE-03 AI layer):** implemented + tested — new `src/agent/` package
   (bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic grounded policy
   with no model, `compare_scans`). **45 passing tests** (`tests/test_agent.py`).
   Plus **remediation** (`build_remediation_plan` / `verify_remediation`; committed in
   `6129e14`): `build_remediation_plan` (pure; one item per finding; fixed versions
   verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
-  fails closed). **24 passing tests** (`tests/test_remediation.py`). A real model
+  fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`). A real model
   backend (llama.cpp vs. user API key) is **not yet wired** (pending decision);
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
   explainer plus an optional OpenAI-compatible local-model client (env-only config,
-  per-finding deterministic fallback) — tested by `tests/test_explanation.py` (20) and
+  per-finding deterministic fallback) — tested by `tests/test_explanation.py` (23) and
   `tests/test_explanation_http.py` (7).
 
 > Test counts are **historical** unless re-run. The "pytest 79 passed" figure dates to
 > the `5b8a1f7` baseline and has been **superseded**: the full suite now runs
 > **241 passed, 29 subtests, 2 warnings** (re-run 2026-10-10): 53 reporter, 45 agent,
 > 26 enrichment, 23 pipeline, **24 remediation**, 11 NVD integration, 10 parser, 8
-> report generator, 5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9
-> dashboard (20 explanation, 7 explanation-HTTP, 9 dashboard). The T-DE-02
+> report generator, 5 risk analyzer, 23 explanation, 7 explanation-HTTP, 13
+> dashboard (23 explanation, 7 explanation-HTTP, 13 dashboard). The T-DE-02
 > NVD integration suite currently passes (11).
 
 ## Unresolved technical contradictions (do not guess)

@@ -15,8 +15,8 @@ state: handoffs rewritten for complete beginners, README/TASKS/STATUS reconciled
 fixture, manifest, or test changed. The latest docs-only commit is `a873a90` (2026-10-17).
 
 ## Baseline (for the reader)
-- **Branch:** `feat/inventory-report`. **HEAD:** `a873a90` ("docs: reconcile docs; fix README duplication; update WEEKLY; remove stale Mode-B blocker", 2026-10-17, docs-only). **Live remote**
-  `origin/feat/inventory-report` == `a873a90` (verified via `git ls-remote`).
+- **Branch:** `feat/inventory-report`. **HEAD:** `77de712` ("docs: reconcile docs; fix README duplication; update WEEKLY; remove stale Mode-B blocker", 2026-10-17, docs-only). **Live remote**
+  `origin/feat/inventory-report` == `77de712` (verified via `git ls-remote`).
 - *Historical prior HEAD (label only):* `6323285` ("docs: publish current team handoffs and
   clean up obsolete guidance", 2026-10-02) and `1524425` ("Publish reviewed M-DE-CORE plan
   and four handoffs", 2026-10-01) — both docs-only commits that published the plan and the
@@ -56,7 +56,7 @@ of synthetic fixtures and no live API.
 Nothing waits on a finished CLI; the reference sample is the single shared artifact the
 later three roles depend on.
 
-## Blockers (as of Oct 17, HEAD `a873a90`)
+## Blockers (as of Oct 17, HEAD `77de712`)
 - **No reference `report.json` / `examples/fixtures/` in the tree.** This is the single
   gating prerequisite for Christian's byte-assertion and Aliyan's viewer. Must be produced
   by Vale (W1-DE-03.R). Without it, their "first checkpoints" are static-only.

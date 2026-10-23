@@ -29,6 +29,7 @@ Extend `serialize_inventory` to handle `edge_availability == "known"`. The outpu
 ### 3. `src/cli.py`
 
 A CLI entry point: `python -m src.cli <input.json> output.json` that:
+> **Historical (M-DE-CORE, not in current tree):** `src.cli` does not exist in the current repository. This handoff is a historical assignment, not an active deliverable.
 - Loads the input topology
 - Runs the pipeline (loader → PHEI → serializer)
 - Writes the report JSON

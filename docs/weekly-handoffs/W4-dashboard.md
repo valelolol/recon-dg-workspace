@@ -13,16 +13,16 @@ Christian (for team confirmation)
 - W3 deliverable: `generate_report()` produces a complete `RiskReport` with real data
 - `src/web/` exists with the stdlib `http.server` dashboard (committed 83b10fb) — serves as a reference for the report format
 - `src/models/dependency_graph.py` has `get_nodes_list()` and `get_edges_list()` for serialization
-- `tests/test_dashboard.py` (10 tests) exists — extend for Flask endpoints
+- `tests/test_dashboard.py` (13 tests) exists — extend for Flask endpoints
 
 ## Input / Output contract
 
 | Direction | Artifact | Format |
 |-----------|----------|--------|
 | Input | `RiskReport` from W3 | Structured JSON with findings, edges, PHEI score, remediation plan |
-| Output | `src/dashboard/` (new directory) | Flask app with routes `/risk`, `/graph`, `/paths/<node>` |
-| Output | `src/dashboard/static/graph.html` | D3.js interactive graph (local copy, no CDN) |
-| Output | `src/dashboard/static/dashboard.html` | Main page with filters, trend display |
+| Output | `src/web/` (existing stdlib dashboard, committed 83b10fb) | Read-only `http.server` dashboard serving `dashboard.html` at `/` and `/report.json`; does **not** scan manifests or generate reports |
+| Output | `src/web/dashboard.html` | Main page with findings table, remediation plan display, and `not_run` state (red card, zero count summary) |
+| Output | **Optional (Flask+D3, not started):** `src/dashboard/` (new directory) | Flask app with routes `/risk`, `/graph`, `/paths/<node>`, D3.js interactive graph (local copy, no CDN), per-node path display, severity/threshold filters |
 | Output | `tests/test_dashboard.py` | Extended tests for Flask endpoints |
 
 ## Deliverable (one bounded item)
@@ -34,7 +34,7 @@ Christian (for team confirmation)
 - [ ] `python -m src.web` starts the stdlib dashboard on `127.0.0.1:8000`
 - [ ] Dashboard renders findings table + risk summary
 - [ ] `python -m pytest tests/test_dashboard.py -q` passes (stdlib dashboard)
-- [ ] **Optional (Flask+D3):** `python -m src.dashboard` starts Flask server on `127.0.0.1:5000`
+- [ ] **Optional (Flask+D3, not started):** `python -m src.web --report <existing-report.json> --host 127.0.0.1 --port 8000 --model OFF` serves the report and page (read-only; report must already exist)
 - [ ] **Optional (Flask+D3):** GET `/graph` returns graph adjacency as JSON
 - [ ] **Optional (Flask+D3):** D3.js graph renders nodes as circles, edges as arrows, color-coded by risk
 - [ ] **Optional (Flask+D3):** Filters work: ecosystem, severity threshold, node criticality
@@ -47,10 +47,10 @@ cd /home/vale/projects/recon-dg-workspace
 python -m pytest tests/test_dashboard.py -q
 ```
 
-For live demo:
+For live demo (serving an existing report):
 ```bash
-python -m src.dashboard --report <path-to-report.json> --port 5000
-# Open http://127.0.0.1:5000 in browser
+python -m src.web --report <existing-report.json> --host 127.0.0.1 --port 8000 --model OFF
+# Open http://127.0.0.1:8000 in browser
 ```
 
 ## Security / privacy controls

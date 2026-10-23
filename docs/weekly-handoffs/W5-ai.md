@@ -14,7 +14,7 @@ Vale (for team confirmation)
 - `src/explanation/local_model.py` exists (targeting `/v1/chat/completions` via stdlib `urllib`)
 - `src/explanation/deterministic.py` exists (grounded deterministic explainer)
 - `src/explanation/__init__.py` has `add_explanations(report, use_model=True)`
-- `tests/test_explanation.py` (20) and `tests/test_explanation_http.py` (7) exist
+- `tests/test_explanation.py` (23) and `tests/test_explanation_http.py` (7) exist
 - **Team decision pending:** llama.cpp local endpoint vs. user API key
 
 ## Input / Output contract
@@ -54,7 +54,7 @@ For live demo (llama.cpp):
 ./llama-server -m <model.gguf> --host 127.0.0.1 --port 8080
 
 # Set env and run
-OPENAI_BASE_URL=http://127.0.0.1:8080/v1 OPENAI_API_KEY=sk-... python -m src.dashboard --model ON
+OPENAI_BASE_URL=http://127.0.0.1:8080/v1 OPENAI_API_KEY=sk-... python -m src.web --model ON
 ```
 
 ## Security / privacy controls

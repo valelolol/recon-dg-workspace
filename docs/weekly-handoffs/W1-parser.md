@@ -12,7 +12,7 @@ Nick (for team confirmation)
 
 - `src/models/dependency_graph.py` exists and defines `DependencyGraph` with `edge_availability` attribute
 - `src/parser/parser.py` already has `parse_requirements()` (requirements.txt, line 7–51)
-- `tests/test_parser.py` exists with a mock-graph helper (`build_mock_graph()`, line 54–71)
+- `tests/test_parser.py` exists with a mock-graph helper (`build_mock_graph()`, line 54–72)
 
 ## Input / Output contract
 

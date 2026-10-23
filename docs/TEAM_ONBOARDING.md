@@ -198,7 +198,7 @@ If a venv already exists in your clone (look for a `.venv/` or `venv/` folder), 
 
 1. Drag your cloned folder into **VS Code**, **PyCharm**, or your editor (or use "Open Folder").
 2. Make sure the editor is rooted at the **repo root** — the folder that directly contains `README.md`, `src/`, and `tests/`.
-3. **Create a file** with the exact name and extension: JSON files end in `.json`, Python in `.py`, notes in `.md`. Save it inside the right folder (e.g., `examples/fixtures/`).
+3. **Create a file** with the exact name and extension: JSON files end in `.json`, Python in `.py`, notes in `.md`. Save it inside the right folder (e.g., `examples/scan-results/`).
 4. **Run commands from the repo root.** Open the editor's integrated terminal and check the path shown at the left of the prompt; it should end in your repo root (the folder with `README.md`). If the path is wrong, `cd` into the repo root first.
 
 ---
@@ -268,7 +268,7 @@ py -3.11 -m venv .venv
 .venv\Scripts\python -m pip install -r requirements-dev.txt
 
 # 5) Validate a JSON file without writing over it (stdout to null)
-.venv\Scripts\python -m json.tool examples/fixtures\known_topology.json > $null
+.venv\Scripts\python -m json.tool examples/scan-results/dependency-graph-demo.json > $null
 
 # 6) When done
 git status
@@ -304,7 +304,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-dev.txt
 
 # 5) Validate a JSON file without writing over it (stdout to null)
-.venv/bin/python -m json.tool examples/fixtures/known_topology.json > /dev/null
+.venv/bin/python -m json.tool examples/scan-results/dependency-graph-demo.json > /dev/null
 
 # 6) When done
 git status
