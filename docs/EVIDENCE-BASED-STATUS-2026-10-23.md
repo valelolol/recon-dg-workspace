@@ -54,7 +54,7 @@
   - `tests/test_explanation_http.py` — 7 tests. Verified: exists (11,206 bytes).
   - **Total: 573 lines across 3 files.**
 - **`tests/test_report_generator.py`** — 8 tests. Verified: exists (9,475 bytes).
-- **`tests/test_inventory_reporter.py`** — 11 tests. Verified: exists (21,526 bytes).
+- **`tests/test_inventory_reporter.py`** — 53 tests. Verified: exists (21,526 bytes).
 - **`tests/test_enrichment.py`** — 26 tests. Verified: exists (14,294 bytes).
 - **`tests/data/osv-scanner.json`** — real OSV-Scanner shape fixture (6,236 bytes). Verified: exists.
 - **`tests/fixtures/requirements-before.txt`** — real manifest fixture (368 bytes). Verified: exists.
