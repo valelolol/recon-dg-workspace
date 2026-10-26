@@ -283,16 +283,10 @@ Owner: Team. Depends: dashboard (T-DE-04).
 ## Status
 
 ### Current baseline (published baseline `83b10fb`, 2026-10-19)
-- **Date:** 2026-10-19 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `77de712`
-  ("feat: add opt-in explanations and read-only dashboard") — the published remote tip
-  (`origin/feat/inventory-report`) and **includes** the
-  `src/agent/` investigation layer, the **remediation stage**
-  (`build_remediation_plan` / `verify_remediation` in `src/agent/agent.py`, the
-  `_fixed_versions` extraction in `src/agent/normalizer.py`, and the
-  `after_scan_report` parameter in `src/agent/pipeline.py`), `src/enrichment/`,
-  `tests/data/osv-scanner.json`, and the tests `tests/test_agent.py`,
-  `tests/test_report_generator.py`, `tests/test_enrichment.py`,
-  `tests/test_pipeline.py`, and `tests/test_remediation.py` (24 tests).
+- **Date:** 2026-10-27 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `e455881`
+  ("docs: fix test_inventory_reporter.py count", 2026-10-20) — the published remote tip
+  (`origin/feat/inventory-report`) is `83b10fb`; HEAD is 3 commits ahead (all docs-only).
+- **Agent layer (`src/agent/`):**
 - **Explanation + dashboard (committed 83b10fb):** `src/explanation/` (3 files:
   `__init__.py`, `deterministic.py`, `local_model.py`) — a grounded deterministic
   explainer plus an optional OpenAI-compatible local-model client (env-only
@@ -309,8 +303,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 - **Prior baseline (historical):** `a873a90` (2026-10-17), `1b4a8d9` (2026-10-03),
   `b4fc87c` (2026-10-02), `f1c59a8` (agent/enrichment/pipeline implementation),
   `6129e14` (remediation stage, last implementation commit before 83b10fb).
-|- **Working tree:** tracked files **unmodified** at HEAD. Untracked file present:
-  `docs/REVIEW-DECISIONS.md` (intentionally left untracked; not staged, not committed).
+||- **Working tree:** tracked files **unmodified** at HEAD.
 |- **Test count:** 248 passed, 29 subtests — reported historical result (date 2026-10-19
   not independently verifiable from repository evidence; no test output file present).
   Full suite: 241 passed, 29 subtests, 2 warnings (re-run 2026-10-10): 53 reporter, 45 agent,

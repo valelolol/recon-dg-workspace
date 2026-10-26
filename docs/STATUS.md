@@ -1,10 +1,10 @@
 # STATUS — Recon-DG
 
-**Date:** 2026-10-19 (CDT)
+**Date:** 2026-10-27 (CDT)
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
 **Published baseline:** `83b10fb` ("feat: add opt-in explanations and read-only dashboard", 2026-10-19) — the current live tip of `feat/inventory-report`, pushed to `origin/feat/inventory-report`.
-**Current HEAD:** `77de712` ("docs: December roadmap + 7 weekly handoffs + demo outline + system diagrams", 2026-10-20) — ahead of the published baseline by 2 commits (both docs-only).
+**Current HEAD:** `e455881` ("docs: fix test_inventory_reporter.py count", 2026-10-20) — ahead of the published baseline by 3 commits (all docs-only).
 
 `6129e14` ("feat(agent): add evidence-grounded remediation verification", 2026-10-10)
 is the last commit that changed implementation code before the explanation/dashboard slice.
@@ -28,8 +28,7 @@ scanner scaffolding.
 TASKS.md, and docs/STATUS.md to reflect the published commit 83b10fb (explanation +
 dashboard committed and pushed). The full suite now runs **248 passed, 29 subtests**
 (2026-10-19 — reported historical result, date not independently verifiable from
-repository evidence). **Working tree:** tracked files unmodified at HEAD; untracked file
-`docs/REVIEW-DECISIONS.md` present (intentionally left untracked).
+repository evidence). **Working tree:** tracked files unmodified at HEAD.
 
 ## Scope
 
@@ -149,10 +148,22 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 - `1b4a8d9` (docs-only): last-implementation baseline to c548f32.
 - `b4fc87c` (docs-only): correct Aliyan handoff schema/path.
 - `c548f32`: NVD/reporter/scanner scaffolding.
+- `e455881` (2026-10-20): docs: fix test_inventory_reporter.py count (3 docs-only commits ahead of published baseline `83b10fb`).
+
+## W8 plan and handoffs (2026-10-27)
+
+- **Weekly plan:** `docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md`
+  - Goal: one additional manifest format → one reproducible real-project OSV-Scanner scan → offline tests for scan-JSON → normalized-report path → bounded search bar + severity filter in existing dashboard
+  - Daily checkpoints Mon-Fri; Friday demo checklist
+- **Individual handoffs:** `docs/weekly-handoffs/`
+  - `W8-parser.md` — Nick · one additional manifest format + focused fixture/tests
+  - `W8-engine-and-reporter.md` — Vale · one reproducible real-project OSV-Scanner scan attempt (what works, gaps, topology/risk limits; no NVD wiring promise)
+  - `W8-dashboard-and-docker.md` — Christian · offline tests for scan JSON → normalized report path (empty/malformed input, unknown-topology); no Docker this week
+  - `W8-demo-validation.md` — Aliyan · bounded search bar + numeric `severity_score` threshold filter in `src/web/dashboard.html` (after checking feature exists); no Flask/D3
+- **Historical handoffs (for reference):** `W1-parser.md`, `W2-engine.md`, `W3-reporter.md`, `W4-dashboard.md`, `W5-ai.md`, `W6-docker.md`, `W7-demo-validation.md`
 
 ## Verification
 
 - **Test suite:** 248 passed, 29 subtests — reported historical result (2026-10-19;
   date not independently verifiable from repository evidence).
-- **Remote tip:** `origin/feat/inventory-report` = `77de712` (matches HEAD).
-|- **Untracked files:** `docs/REVIEW-DECISIONS.md` (intentionally left untracked).
+**Remote tip:** `origin/feat/inventory-report` = `e455881` (published baseline; HEAD `e455881` is in sync).

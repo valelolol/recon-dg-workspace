@@ -45,15 +45,16 @@ real AI model backend are not yet implemented.*
 
 ## Getting started (read this first)
 
+> **Start here tonight:** [W8 kickoff page](docs/weekly-plan/W8-kickoff-2026-10-26.md) → [W8-parser.md](docs/weekly-handoffs/W8-parser.md) → [W8-dashboard-and-docker.md](docs/weekly-handoffs/W8-dashboard-and-docker.md) → [W8-demo-validation.md](docs/weekly-handoffs/W8-demo-validation.md) → [W8-engine-and-reporter.md](docs/weekly-handoffs/W8-engine-and-reporter.md)
+
 - **`docs/TEAM_ONBOARDING.md`** — how to clone the repo and set up **your own computer**
   (Git + Python checks, a personal branch, a virtual environment, and how to validate
   your JSON fixtures). It defines the ten terms you will meet and gives separate
   PowerShell / terminal routes.
-- **`docs/WEEKLY.md`** — historical M-DE-CORE demo-track focus, acceptance criteria,
-  and the handoff list for that week (now complete); current project status is in
-  **`docs/STATUS.md`**.
+- **`docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md`** — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
+- **`docs/weekly-handoffs/`** — individual handoffs for each teammate (Nick, Vale, Christian, Aliyan); see below
+- **`docs/STATUS.md`** — the current state (date, branch/HEAD, working-tree state)
 - **`TASKS.md`** — the task register (stable IDs), phase plans, and the shared
-- **`docs/STATUS.md`** — the current state (date, branch/HEAD, working-tree state).
 
 **Synthetic data rule:** synthetic graph/advisory data is only for clearly labeled offline tests or a separate demo. It is **never** scanner evidence. Real scanner output (OSV-Scanner JSON) is the only valid input for the agent and PHEI scoring.
 
@@ -209,17 +210,25 @@ real loopback HTTP tests (248 passed, 29 subtests — reported historical result
 
 ## Key documents
 
-- [docs/TEAM_ONBOARDING.md](docs/TEAM_ONBOARDING.md) — beginner setup on your own machine (read first)
-- [AGENTS.md](AGENTS.md) — startup/completion routine, evidence rules, routing
-- [TASKS.md](TASKS.md) — task register, phase plans
-- [docs/STATUS.md](docs/STATUS.md) — current state (date, branch/HEAD, working tree)
-- [docs/WEEKLY.md](docs/WEEKLY.md) — weekly focus and acceptance criteria
-|- **Historical handoffs (M-DE-CORE demo week, for reference):**
+|- [docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md](docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md) — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
+|- [docs/weekly-handoffs/](docs/weekly-handoffs/) — individual handoffs for each teammate:
+  - [W8-parser.md](docs/weekly-handoffs/W8-parser.md) — Nick · one additional manifest format + focused fixture/tests
+  - [W8-engine-and-reporter.md](docs/weekly-handoffs/W8-engine-and-reporter.md) — Vale · one reproducible real-project OSV-Scanner scan attempt (what works, gaps, topology/risk limits; no NVD wiring promise)
+  - [W8-dashboard-and-docker.md](docs/weekly-handoffs/W8-dashboard-and-docker.md) — Christian · offline tests for scan JSON → normalized report path (empty/malformed input, unknown-topology); no Docker this week
+  - [W8-demo-validation.md](docs/weekly-handoffs/W8-demo-validation.md) — Aliyan · bounded search bar + numeric `severity_score` threshold filter in `src/web/dashboard.html` (after checking feature exists); no Flask/D3
+|- **Historical handoffs (for reference):**
   - `HANDOFF_NICK_MDECORE.md` — Nick · fixtures + limitations note (T-DE-01/02)
   - `HANDOFF_CHRISTIAN_MDECORE.md` — Christian · offline tests + expected results (T-DE-02/03)
   - `HANDOFF_VALE_MDECORE.md` — Vale · loader, PHEI/report integration, reference output (T-DE-01/02/03)
   - `HANDOFF_ALIYAN_MDECORE.md` — Aliyan (provisional) · static viewer spike (T-DE-04)
-- [docs/WEEKLY.md](docs/WEEKLY.md) — historical weekly focus and acceptance criteria
+- [docs/weekly-handoffs/W1-parser.md](docs/weekly-handoffs/W1-parser.md) — historical W1 handoff (T-DE-01)
+- [docs/weekly-handoffs/W2-engine.md](docs/weekly-handoffs/W2-engine.md) — historical W2 handoff (T-DE-02)
+- [docs/weekly-handoffs/W3-reporter.md](docs/weekly-handoffs/W3-reporter.md) — historical W3 handoff (T-DE-03)
+- [docs/weekly-handoffs/W4-dashboard.md](docs/weekly-handoffs/W4-dashboard.md) — historical W4 handoff (T-DE-04)
+- [docs/weekly-handoffs/W5-ai.md](docs/weekly-handoffs/W5-ai.md) — historical W5 handoff (T-DE-05)
+- [docs/weekly-handoffs/W6-docker.md](docs/weekly-handoffs/W6-docker.md) — historical W6 handoff (T-DE-05)
+- [docs/weekly-handoffs/W7-demo-validation.md](docs/weekly-handoffs/W7-demo-validation.md) — historical W7 handoff
+- [docs/WEEKLY.md](docs/WEEKLY.md) — historical weekly focus and acceptance criteria (M-DE-CORE demo week)
 
 > **Read the handoff list above (for reference).** `docs/WEEKLY.md` is now historical;
 > the `HANDOFF_*_MDECORE.md` files are the M-DE-CORE demo week's (complete) handoffs.
