@@ -124,7 +124,7 @@ git branch -vv
 
 ## 6. Start a personal branch from the integration baseline
 
-For the current week (M-DE-CORE) the integration baseline is **`feat/inventory-report`**.
+For the M-DE-CORE demo week (Sep 28–Oct 4, 2026) the integration baseline is **`feat/inventory-report`**.
 Create and switch to your own branch **before editing anything**:
 
 **Windows (PowerShell)**
@@ -151,14 +151,13 @@ Now `git status` should say you are on your new branch and the tree is clean. If
 You do **not** need a venv for pure standard-library work (for example, authoring and
 validating a JSON fixture); for fixture/docs-only work you do **not** need a venv or any
 install. You **do** need one for code/test tasks that need the project (create a venv and
-install `requirements-dev.txt`) or for `bandit` (the supporting source-audit handoffs only).
+install `requirements-dev.txt`).
 
 ### Which dependencies does the project actually need?
 
 Check the real manifests before installing anything:
-- `requirements.txt` → **`networkx` and `numpy` only.** It does **not** include pytest or Bandit.
-- `requirements-dev.txt` → `requirements.txt` + **pytest + ruff.** It does **not** include Bandit.
-- **Bandit** is not in any manifest; it is installed separately and only by people following the supporting source-audit handoffs.
+- `requirements.txt` → **`networkx` and `numpy` only.** It does **not** include pytest or ruff.
+- `requirements-dev.txt` → `requirements.txt` + **pytest + ruff.**
 
 **Install only what your task requires.**
 
@@ -171,12 +170,9 @@ py -3.11 -m venv .venv
 #   code / test tasks that need project dependencies (one step — pulls networkx + numpy
 #   from requirements.txt, plus pytest + ruff):
 .venv\Scripts\python -m pip install -r requirements-dev.txt
-#   Bandit (supporting source-audit handoffs only):
-.venv\Scripts\python -m pip install bandit
 #   fixture / docs-only work: nothing to install — standard library (`json`) only
 # Verify:
 .venv\Scripts\python -m pytest --version
-.venv\Scripts\python -m bandit --version
 ```
 > **Do not disable any Windows execution policy or security control.** Instead of relying on `activate`, call the interpreter by its explicit path (`.venv\Scripts\python ...`). If your machine's policy still blocks script execution, tell Vale — we handle it through an approved channel, not by lowering security.
 
@@ -185,11 +181,9 @@ py -3.11 -m venv .venv
 python3 -m venv .venv
 # Install what your task needs (pick only what applies):
 .venv/bin/python -m pip install -r requirements-dev.txt            # code/test tasks (networkx+numpy from requirements.txt, pytest, ruff)
-.venv/bin/python -m pip install bandit                            # supporting source-audit only
 # fixture / docs-only work: nothing to install — standard library (`json`) only
 # Verify:
 .venv/bin/python -m pytest --version
-.venv/bin/python -m bandit --version
 ```
 
 ### Using an existing venv
@@ -204,7 +198,7 @@ If a venv already exists in your clone (look for a `.venv/` or `venv/` folder), 
 
 1. Drag your cloned folder into **VS Code**, **PyCharm**, or your editor (or use "Open Folder").
 2. Make sure the editor is rooted at the **repo root** — the folder that directly contains `README.md`, `src/`, and `tests/`.
-3. **Create a file** with the exact name and extension: JSON files end in `.json`, Python in `.py`, notes in `.md`. Save it inside the right folder (e.g., `examples/fixtures/`).
+3. **Create a file** with the exact name and extension: JSON files end in `.json`, Python in `.py`, notes in `.md`. Save it inside the right folder (e.g., `examples/scan-results/`).
 4. **Run commands from the repo root.** Open the editor's integrated terminal and check the path shown at the left of the prompt; it should end in your repo root (the folder with `README.md`). If the path is wrong, `cd` into the repo root first.
 
 ---
@@ -269,13 +263,12 @@ git pull --ff-only
 git branch mdecore-<your-name>-<topic>
 git checkout mdecore-<your-name>-<topic>
 
-# 4) Virtual env (only if your task needs the project or bandit)
+# 4) Virtual env (only if your task needs the project)
 py -3.11 -m venv .venv
 .venv\Scripts\python -m pip install -r requirements-dev.txt
-# .venv\Scripts\python -m pip install bandit    # supporting source-audit only
 
 # 5) Validate a JSON file without writing over it (stdout to null)
-.venv\Scripts\python -m json.tool examples/fixtures\known_topology.json > $null
+.venv\Scripts\python -m json.tool examples/scan-results/dependency-graph-demo.json > $null
 
 # 6) When done
 git status
@@ -306,13 +299,12 @@ git checkout feat/inventory-report
 git pull --ff-only
 git switch -c mdecore-<your-name>-<topic>
 
-# 4) Virtual env (only if your task needs the project or bandit)
+# 4) Virtual env (only if your task needs the project)
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-dev.txt
-# .venv/bin/python -m pip install bandit    # supporting source-audit only
 
 # 5) Validate a JSON file without writing over it (stdout to null)
-.venv/bin/python -m json.tool examples/fixtures/known_topology.json > /dev/null
+.venv/bin/python -m json.tool examples/scan-results/dependency-graph-demo.json > /dev/null
 
 # 6) When done
 git status

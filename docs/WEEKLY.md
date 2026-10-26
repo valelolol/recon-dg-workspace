@@ -1,27 +1,29 @@
-# WEEKLY — September 28 – October 4, 2026
+# WEEKLY — September 28 – October 4, 2026 (M-DE-CORE demo track) — *historical*
+
+## Historical note
+*This file covers the M-DE-CORE demo track (Sep 28–Oct 4, 2026). The M-DE-CORE handoff
+work is complete; current status is in `docs/STATUS.md`.*
 
 ## Focus
-Move the **core** T-DE-01/02/03 path from "PHEI implemented" to "a small, demonstrable core
+Move the **demo** T-DE-01/02/03 path from "PHEI implemented" to "a small, demonstrable demo
 dependency-risk report" using clearly-labeled synthetic fixtures and **no live API calls**.
-The Bandit sub-track (T-SA-01/02/03) stays **non-gating this week** (course requirement
-UNKNOWN — pending confirmation). No completion percentages are quoted; status is per task ID.
+No completion percentages are quoted; status is per task ID.
 The docs reviewed in this session (2026-10-01, reviewed at HEAD `1524425`; published at
 HEAD `6323285`; corrected/baseline-updated at HEAD `b4fc87c`, 2026-10-02) are the
 *documentation-only*
 state: handoffs rewritten for complete beginners, README/TASKS/STATUS reconciled. No code,
-fixture, manifest, or test changed.
+fixture, manifest, or test changed. The latest docs-only commit is `a873a90` (2026-10-17).
 
 ## Baseline (for the reader)
-- **Branch:** `feat/inventory-report`. **HEAD:** `b4fc87c` ("docs: correct Aliyan handoff
-  schema/path and baseline dates", 2026-10-02, docs-only). **Live remote**
-  `origin/feat/inventory-report` == `b4fc87c` (verified via `git ls-remote`).
+- **Branch:** `feat/inventory-report`. **HEAD:** `77de712` ("docs: reconcile docs; fix README duplication; update WEEKLY; remove stale Mode-B blocker", 2026-10-17, docs-only). **Live remote**
+  `origin/feat/inventory-report` == `77de712` (verified via `git ls-remote`).
 - *Historical prior HEAD (label only):* `6323285` ("docs: publish current team handoffs and
   clean up obsolete guidance", 2026-10-02) and `1524425` ("Publish reviewed M-DE-CORE plan
   and four handoffs", 2026-10-01) — both docs-only commits that published the plan and the
   four handoffs; implementation code was unchanged by them.
-- The *implementation* code state is as of `c548f32` (the last commit that changed
-  implementation code — it added the NVD/reporter/scanner scaffolding); the later commits
-  `f2303ee`, `5b8a1f7`, `1524425`, `6323285`, and `b4fc87c` are docs-only and did not
+- The *implementation* code state is as of `6129e14` (the last commit that changed
+  implementation code — it added the evidence-grounded remediation verification); the later commits
+  the later commits `f2303ee`, `5b8a1f7`, `1524425`, `6323285`, `b4fc87c`, `5ea1154`, and `a873a90` are docs-only
   alter it. The executed verifications below (PHEI == 6.0, pytest 79 passed) date to
   `5b8a1f7` and remain *historical* unless re-run.
 
@@ -31,7 +33,6 @@ fixture, manifest, or test changed.
 | T-DE-01/02/03 | Vale + Nick | `report.json` (Mode A + Mode B) + reference sample | One command, no live API. Mode A: existing fields/behavior preserved and existing tests pass. Mode B: `analysis_mode: dependency_graph`, `topology_status: known`, **`risk.score: 6.0`**, `method: phei`, `risk.status: available` (spec enum `available`/`unavailable`, not `complete`), `input.format == "synthetic-graph"`, 3 synthetic findings with `id`, `advisory_source` = `synthetic-fixture`, `severity: null`, synthetic `warnings`, **no path field** (v0.1 defines none). Byte-equality asserted only where `scan_id`/`created_at` are fixed. |
 | T-DE-04 | Aliyan (provisional) | `src/dashboard/view.py` → `report.html` (provisional static spike) | Renders packages/edges/numeric score/findings from `report.json`; **no LOW/MED/HIGH/CRITICAL labels**; data-driven; no framework. Full Phase 4 T-DE-04 dashboard scope (Flask+D3, endpoints, interactive graph) is preserved and out of scope this week. **Prerequisite:** a reference `report.json` must exist (Vale, W1-DE-03.R) — without it Aliyan can only build a static viewer skeleton + a hand-authored synthetic sample (labeled synthetic). |
 | T-DE-02/03 | Christian | `tests/test_e2e_risk.py` + `docs/E2E_EXPECTED_RESULTS.md` | 3 scenarios pass offline, deterministic (run twice with the same fixed scan_id and created_at and compare outputs); asserts the 6.0 reference. **Prerequisite:** reference `report.json` (Vale). Without it, Christian can only write the test harness skeleton + expected-results doc. |
-| T-SA-01/02/03 | — | (unchanged) | **Non-gating this week; course requirement UNKNOWN.** |
 
 **Defer:** the older T-DE-02 goal of *real* NVD/OSV lookups is deferred this week in favor
 of synthetic fixtures and no live API.
@@ -52,35 +53,26 @@ of synthetic fixtures and no live API.
    run twice with identical fixed scan_id and created_at, then compare outputs.
 5. **Aliyan (provisional static viewer)** — runs against the checked-in reference sample;
    first checkpoint to assess fit for the Phase 4 dashboard.
-6. **Supporting Bandit (Nick/Christian)** — runs in parallel, **non-gating**: rule config +
-   docs (T-SA-02), harness + pairs + table (T-SA-03).
 Nothing waits on a finished CLI; the reference sample is the single shared artifact the
 later three roles depend on.
 
-## Blockers (as of Oct 2, HEAD `6323285`)
+## Blockers (as of Oct 17, HEAD `77de712`)
 - **No reference `report.json` / `examples/fixtures/` in the tree.** This is the single
   gating prerequisite for Christian's byte-assertion and Aliyan's viewer. Must be produced
   by Vale (W1-DE-03.R). Without it, their "first checkpoints" are static-only.
-- `tests/test_harness.py` does not run correctly: wrong examples path (exits before
-  scanning); the `-ll` flag (a *valid* Bandit severity filter that omits low-severity
-  findings); and the pickle pair expects B704 (must be B301).
 - Dashboard, AI layer, and Docker not started (T-DE-04 / T-DE-03 AI-layer item / T-DE-05).
-- Mode B serializer missing (required for the 6.0 report).
 - `httpx` undeclared in any manifest (not needed for the core path).
 - **Historical** (not re-run this session): `tests/test_nvd_integration.py` previously
   failing.
+- **Mode B serializer is now implemented** (6129e14) but not yet verified end-to-end
+  against a real project (no `examples/fixtures/` to run against).
 
 ## Handoffs (beginner-friendly, one manageable assignment each)
-Active this week (M-DE-CORE core deliverable):
+Handoffs from this week's M-DE-CORE demo track (historical):
 - **Vale (M-DE-CORE loader/serializer/integration):** `HANDOFF_VALE_MDECORE.md`.
 - **Nick (M-DE-CORE fixtures):** `HANDOFF_NICK_MDECORE.md`.
 - **Christian (M-DE-CORE E2E + expected results):** `HANDOFF_CHRISTIAN_MDECORE.md`.
 - **Aliyan (M-DE-CORE T-DE-04 viewer, provisional):** `HANDOFF_ALIYAN_MDECORE.md`.
-
-Supporting (Bandit source-audit sub-track, **parked / non-gating this week** — NOT the December deliverable; preserved, ownership unchanged):
-- Nick (T-SA-02, rule config + docs) and Christian (T-SA-03, harness + pairs + table): no
-  active handoff files this week. Task descriptions are in `TASKS.md` (T-SA-02 / T-SA-03) and
-  the shared contract in `examples/source-audit-week1/RECON-DG_MONTH1_ROADMAP.md`.
 
 Beginners: start at `docs/TEAM_ONBOARDING.md` for OS-specific setup, then the handoff
 matching your task ID.
@@ -117,10 +109,6 @@ each maps to an existing registered task and stays unapproved until the user acc
   prompt-design doc.
 
 ## Friday outcomes (to fill)
-- T-SA-01: [ ] / [ ] scanner reports correct `rule_id` on the eval + pickle pairs.
-- T-SA-02: [ ] / [ ] config + docs show only the canonical mapping (verified by the
-  commands in `docs/security-checks.md` / the T-SA-02 section of `TASKS.md`).
-- T-SA-03: [ ] / [ ] harness table shows TP/FP/FN/TN; 8 cases (4 rules × vulnerable/secure).
 - T-DE-01/02/03 (M-DE-CORE): [ ] / [ ] `report.json` Mode B score == 6.0, method phei,
   3 findings, no path field, synthetic warnings; Mode A fields/behavior preserved and
   existing tests pass.
@@ -129,6 +117,6 @@ each maps to an existing registered task and stays unapproved until the user acc
 - T-DE-02/03 (M-DE-CORE): [ ] / [ ] E2E: 3 scenarios pass offline; run twice with
   the same fixed scan_id and created_at and compare outputs (Christian).
 - Unresolved: [ ] dashboard stack decision · [ ] AI backend decision ·
-  [ ] severity-in-score (`w_uv`) decision · [ ] Bandit course-requirement confirmation ·
+  [ ] severity-in-score (`w_uv`) decision ·
   [ ] reference `report.json` produced (gates Christian + Aliyan) ·
   [ ] input-fixture contract approved at C0 (gates Nick).

@@ -1,21 +1,34 @@
 # STATUS — Recon-DG
 
-**Date:** 2026-10-02 (UTC)
+**Date:** 2026-10-27 (CDT)
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
-**Published baseline:** `b4fc87c` ("docs: correct Aliyan handoff schema/path and baseline
-dates", 2026-10-02, docs-only) — the current live tip of `feat/inventory-report`.
-**Remote:** `git ls-remote` (read-only) confirms `origin/feat/inventory-report` ==
-  `b4fc87c`; the local tracking ref matches. Verified against the live remote.
-*Historical prior states (label only, not the current state):* the last commit that
-changed implementation code is `c548f32` ("wip(scanner): save source-audit week-1 work +
-NVD/reporter scaffolding"); the later commits `f2303ee`, `5b8a1f7`, `1524425`, `6323285`,
-and `b4fc87c` are docs-only and did not alter the code. The executed verifications below
-(PHEI == 6.0, pytest 79 passed) were run at the historical point `5b8a1f7` and remain
-*historical* unless re-run.
-**This session:** documentation corrections (Aliyan schema/path + baseline dates) were
-**committed as `b4fc87c` and pushed** to `origin/feat/inventory-report`; as of that tip
-the working tree is clean. No scanner, test, fixture, manifest, or code was edited.
+**Published baseline:** `83b10fb` ("feat: add opt-in explanations and read-only dashboard", 2026-10-19) — the current live tip of `feat/inventory-report`, pushed to `origin/feat/inventory-report`.
+**Current HEAD:** `e455881` ("docs: fix test_inventory_reporter.py count", 2026-10-20) — ahead of the published baseline by 3 commits (all docs-only).
+
+`6129e14` ("feat(agent): add evidence-grounded remediation verification", 2026-10-10)
+is the last commit that changed implementation code before the explanation/dashboard slice.
+The published baseline **includes** the `src/agent/` investigation layer, the **remediation
+stage** (`build_remediation_plan` / `verify_remediation`, published in `6129e14`), `src/enrichment/`,
+`tests/data/osv-scanner.json`, `tests/test_agent.py`,
+`tests/test_report_generator.py`, `tests/test_enrichment.py`,
+`tests/test_pipeline.py`, and `tests/test_remediation.py`.
+
+The explanation + dashboard layer (`src/explanation/` ×3, `src/web/` ×4, 3 test files)
+is **committed in 83b10fb** and pushed — not untracked.
+
+*Historical prior states (label only, not the current state):* `f1c59a8`
+("Implement evidence-grounded agent and scanner pipeline" — added the
+agent/enrichment/pipeline implementation; now superseded by `6129e14` which commits
+the remediation stage); `1b4a8d9` (docs-only); `b4fc87c` (docs-only) and the other
+docs-only publishes did not change implementation code; `c548f32` added NVD/reporter/
+scanner scaffolding.
+
+*This session (2026-10-19):* reconciled docs against accepted scope; updated README.md,
+TASKS.md, and docs/STATUS.md to reflect the published commit 83b10fb (explanation +
+dashboard committed and pushed). The full suite now runs **248 passed, 29 subtests**
+(2026-10-19 — reported historical result, date not independently verifiable from
+repository evidence). **Working tree:** tracked files unmodified at HEAD.
 
 ## Scope
 
@@ -24,130 +37,133 @@ uses actual dependency relationships when available, and helps developers priori
 findings via deterministic PHEI risk analysis. The December prototype includes a clear
 dashboard and AI explanations grounded in the findings. Inventory-only input must not
 produce invented dependency edges; risk scoring requires explicitly "known" topology.
-Bandit source auditing is a supporting sub-track, **not** the December deliverable.
 
-## Current state (HEAD `b4fc87c`)
+## Current state (HEAD `83b10fb` + committed explanation + dashboard)
 
-- **Onboarding / handoffs:** rewritten for complete beginners on individual machines
-  (Windows PowerShell and Linux/macOS routes in `docs/TEAM_ONBOARDING.md`).
-  The current week's **active** assignments are the M-DE-CORE handoffs. The two older
-  source-audit handoffs (`HANDOFF_NICK.md` / `HANDOFF_CHRISTIAN.md`) were **removed**
-  this week (Bandit sub-track **parked / non-gating this week** — preserved in git
-  history, task descriptions remain in `TASKS.md`).
-  `README.md` and `docs/WEEKLY.md` direct readers to the shared onboarding and the
-  M-DE-CORE handoffs first.
-- **M-DE-CORE plan:** committed in `TASKS.md` (Mode B field mapping + proposed input-fixture
-  contract, §C0-prereq). The **implementation** it assigns (known-topology loader, Mode B
-  serializer, `src/cli.py`, viewer, reference output, E2E test) is **not in the tree yet**.
-- **Shared-contract statements** are aligned across docs: rule = JSON `test_id` (never
-  `test_name`); `rc=5` does not exist (Bandit 1.9.4: `rc=0`=clean, `rc=1`=findings,
-  `rc>=2`=error); "clean" is composite (`rc=0` AND valid JSON AND empty `results` AND
-  empty `errors`); `-ll` is a valid severity filter that omits low severity and is
-  omitted here; 4 tested rules / 8 cases; `os.system` is B605, not B602.
-- **PHEI return value:** `calculate_phei` returns **only the scalar score** (6.0 for the
-  3-node unit chain); **no** path field is emitted, rendered, or asserted. The numeric
-  result is the "maximum path score," not an argmax path. No `top_risk_path`.
-- **Missing reference sample:** `examples/fixtures/` (and `sample_risk_report.json`) do
-  **not** exist in the tree. The reference `report.json` is **not** checked in. This is a
-  prerequisite for Christian's E2E assertion and Aliyan's viewer — see the handoffs.
+- **Agent layer (`src/agent/`) — implemented (published in `f1c59a8`) and tested:** a
+  package (`agent.py`, `normalizer.py`, `scan_runner.py`, `__init__.py`) runs a bounded,
+  evidence-grounded investigation over normalized OSV-Scanner output (45 passing
+  tests in `tests/test_agent.py`; tested against the checked-in
+  `tests/data/osv-scanner.json` fixture). It is *not* "OSV-Scanner with an LLM
+  summary": a pluggable `llm` hook may steer tool selection but is restricted to an
+  allowlisted tool set (`findings`, `get_finding`, `package_info`, `package_context`,
+  `high_severity`, `risk_score`, `summary`, `stop`) and every call is recorded in an
+  append-only `EvidenceTrail`; out-of-band choices fall back to a grounded deterministic
+  policy (recorded). On the flat fixture (5 findings, 4 packages, 0 edges) a run reports
+  `risk.status == "unavailable"` and `risk.score is None` with *"No score is
+  fabricated; this is an inventory-only result."* A **real** model backend (llama.cpp
+  vs. user API key) is a pending decision — not yet wired.
+- **Remediation stage (`src/agent/`) — implemented and published in `6129e14`:** a pure
+  `build_remediation_plan` (one item per baseline finding; scanner-provided fixed
+  versions verbatim, never "latest"/"best"; `severity_score` left `None` — no numeric
+  CVSS score or high/low category; scheme types + vector strings preserved as evidence;
+  a plain recommended action) plus `verify_remediation` (reconciles the plan against a
+  user-supplied after scan, no network; no after scan → `status == "not_run"` with
+  no resolution claim; same version persists as `unchanged`, key absent → `resolved`,
+  same advisory at a different version → `regressed`; unusable after report fails
+  closed to `not_run`). Verified by 24 passing tests in `tests/test_remediation.py`.
+- **Explanation layer (`src/explanation/`, committed 83b10fb):** a grounded
+  deterministic explainer (default; `explain_finding` / `explain_findings`) that cites
+  only facts already on the finding and never fabricates a numeric CVSS score, version,
+  or CVE. Plus an optional OpenAI-compatible local-model client
+  (`src/explanation/local_model.py`) targeting a single `/v1/chat/completions` endpoint
+  via stdlib `urllib`, configured only by `OPENAI_BASE_URL` / `OPENAI_API_KEY` (no
+  credentials or endpoint secrets committed). `add_explanations` is additive: it adds
+  `report["ai_explanations"]` (one `{"text", "source"}` entry per finding) and
+  `report["explanation_source"]` (counts model vs deterministic; never echoes the key/
+  endpoint). Deterministic fallback is guaranteed and labelled per finding on any
+  failure (no config, network/timeout, non-2xx, malformed body, empty completion,
+  `max_calls` cap). Verified by `tests/test_explanation.py` (23) +
+  `tests/test_explanation_http.py` (7, a real local `/v1/chat/completions` server
+  driven by real `urllib` requests — no injected transport seam).
+- **Read-only dashboard (`src/web/`, committed 83b10fb):** a minimal read-only stdlib
+  `http.server` dashboard (no third-party deps) serving `dashboard.html` at `/` and the
+  structured report at `/report.json` on local loopback. It does **not** re-run scans,
+  edit manifests, or imply a fix was verified. It renders findings, the risk
+  limitations (`risk.status == "unavailable"` → "no score is fabricated"), the
+  remediation plan (scanner-provided fixed versions verbatim), and the after-scan
+  verification state **including `not_run`** (a red card with a zero count summary
+  and no resolution claim). Additive labelled explanations are rendered alongside
+  findings when `use_model=True`. Verified by `tests/test_dashboard.py` (13, real
+  loopback GETs).
+- **Model activation:** `--model` defaults to **OFF** (deterministic only). Only the
+  exact value `--model ON` (case-insensitive) enables the optional local-model backend.
+  When **ON** and `OPENAI_BASE_URL` / `OPENAI_API_KEY` are configured, the dashboard
+  sends **finding data** (package name, version, vulnerability ID, aliases, severity
+  score, severity vector, severity types, published date, affected range, fixed versions,
+  recommended action) to the configured endpoint. Whether the configured endpoint is
+  unencrypted HTTP or encrypted HTTPS is an **open privacy decision** — the endpoint
+  receives the API key and finding data in either case. Model use is **not approved
+  by default**; it requires explicit opt-in.
 
-## Evidence-supported implementation progress (implementation state at HEAD `c548f32`;
-verified at the historical point `5b8a1f7`; unchanged by the docs-only commits
-`1524425`, `6323285`, and `b4fc87c`)
+## Implementation state (published HEAD `83b10fb`; explanation + dashboard committed)
 
-- **Parser (T-DE-01):** `requirements.txt` done + `build_mock_graph()` (3-node unit
-  chain A→B→C, edge weights 1.0). Known-topology loader **not yet built**
-  (W1-DE-01.L, Vale).
-- **Engine (T-DE-02):** PHEI path-max implemented and verified. `calculate_phei` returns
-  **6.0** for the 3-node unit chain and is invariant to CVE severity. Central finding:
-  `report_generator.generate_report` still calls the global-sum `calculate_systemic_risk`,
-  **not** PHEI (W1-DE-02.R must correct this). NVD/OSV client present but not wired into PHEI.
-- **Reporter (T-DE-03):** inventory serializer (`serialize_inventory`) works; it **rejects
-  any graph with edges** (requires `edge_availability == "unavailable"`). Mode B
-  `serialize_dependency_graph` **not started**. No `src/cli.py` and no `src/dashboard/` yet.
-- **Source-audit (T-SA-01/02/03):** unchanged this week; supporting / non-gating.
-  `scan_demo.py` crashes (`NameError: venv_path`); `multi_check_wrapper.py` mislabels
-  `rule_id` (`"blacklist"`) and uses the nonexistent `rc=5`; `tests/test_harness.py`
-  does not run correctly (wrong examples path, invalid `-ll`, expects B704 for pickle).
-  Nick (T-SA-02) and Christian (T-SA-03) own the corrections — see the T-SA-02 /
-  T-SA-03 sections of `TASKS.md` (the source-audit handoff files were removed this week).
+- **Parser (T-DE-01):** `requirements.txt` done (1 of ~6 manifest formats).
+- **Engine (T-DE-02):** PHEI path-max scoring implemented
+  (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
+  `UnavailableTopologyError` guard. NVD/OSV client code present
+  (`src/engine/nvd_client.py`) but **not yet run end-to-end** against a real project.
+- **Reporter (T-DE-03):** `RiskReport` dataclass + `src/reporter/interface.py` +
+  `report_generator.py` present. Inventory serializer implemented; **dependency-graph
+  serializer unimplemented**. The **read-only stdlib dashboard** (`src/web/`) is
+  **committed** (83b10fb) — a stdlib `http.server` + `dashboard.html`, serving the
+  report and its page; the full Flask+D3 dashboard (T-DE-04) is still not started.
+- **Agent (T-DE-03 AI layer):** implemented + tested — new `src/agent/` package
+  (bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic grounded policy
+  with no model, `compare_scans`). **45 passing tests** (`tests/test_agent.py`).
+  Plus **remediation** (`build_remediation_plan` / `verify_remediation`; committed in
+  `6129e14`): `build_remediation_plan` (pure; one item per finding; fixed versions
+  verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
+  after scan; no after scan → `not_run`, no resolution claim; unusable after report
+  fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`). A real model
+  backend (llama.cpp vs. user API key) is **not yet wired** (pending decision);
+  current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
+  (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
+  explainer plus an optional OpenAI-compatible local-model client (env-only config,
+  per-finding deterministic fallback) — tested by `tests/test_explanation.py` (23) and
+  `tests/test_explanation_http.py` (7).
 
-## Blockers (as of HEAD `b4fc87c`)
+## Open decisions (not yet resolved)
 
-- Mode B (dependency-graph serializer) does not exist yet — required to emit the 6.0 report
-  (W1-DE-03.R).
-- **No reference `report.json` / `examples/fixtures/`** — required for Christian's byte-identity
-  E2E assertion and Aliyan's viewer. Must be produced by Vale (W1-DE-03.R).
-- `httpx` is imported by `nvd_client.py` but undeclared in any manifest (separate fix;
-  not needed for the core path this week).
-- `tests/test_harness.py` collects **0 tests** (pytest cannot collect `TestCase`/
-  `TestHarness` — both define `__init__`); the "79 passed" total does not cover the
-  Bandit harness.
-- No live NVD/OSV end-to-end run this session (findings are synthetic fixtures).
-- Dashboard framework, AI layer, and Docker are not started (out of scope this week).
+1. **Model backend (llama.cpp vs. user API key):** pending — not wired. The optional
+   local-model client (`src/explanation/local_model.py`) targets a single
+   `/v1/chat/completions` endpoint via env-only `OPENAI_BASE_URL`/`OPENAI_API_KEY`
+   (no credentials committed). `--model` defaults to **OFF**; only exact `--model ON`
+   enables it. Whether the configured endpoint is HTTP or HTTPS is an **open privacy
+   decision** — the endpoint receives the API key and finding data in either case.
+2. **Full interactive dashboard (T-DE-04):** Flask+D3 graph, per-node `/paths/<node>`,
+   filters, trend history — **not started**. The stdlib dashboard (committed 83b10fb)
+   is read-only and dependency-free.
+3. **Dependency-graph serializer (T-DE-03):** unimplemented; inventory-only input
+   produces no risk score (by design, `risk.status == "unavailable"`).
+4. **Real NVD/OSV end-to-end scan:** NVD/OSV client code present but not yet run
+   against a real project.
 
-## Pending decisions (unchanged)
+## Prior published baselines (historical)
 
-1. **Severity in the score.** The design spec leaves the edge-weight function `w_uv`
-   undefined. Current PHEI is topology-only — CVE severity is **unspecified**
-   (`findings[].severity` is `null` per v0.1) and does **not** enter the score. Decide
-   whether/how severity would enter `w_uv` once a severity standard is agreed.
-   **Open, assigned to Vale.** Do not call the current 6.0 a complete vulnerability-risk
-   score.
-2. **AI backend:** local model (llama.cpp) vs. user-provided API key?
-3. **Dashboard stack:** Flask + D3.js (recommended) vs. FastAPI + React? (Full T-DE-04
-   dashboard out of scope this week; only a provisional static-viewer spike is proposed.)
-4. **Bandit course requirement.** Is the source-audit sub-track a course deliverable this
-   week? Status: **UNKNOWN** (no mandate found in repo). Treated as non-gating.
-5. **Scanner exit-code semantics** (see TASKS.md unresolved #1): the scanner itself
-   uses its own exit codes (0/1/2); Bandit's `rc=1` = findings is separate.
+- `7e8d4c4` (2026-09-28): docs-scope + templates + PHEI engine + handoffs.
+- `24c99b6` (docs-only): reconciled docs against accepted scope.
+- `6129e14` (2026-10-10): evidence-grounded remediation verification.
+- `f1c59a8`: agent/enrichment/pipeline implementation (superseded by `6129e14`).
+- `1b4a8d9` (docs-only): last-implementation baseline to c548f32.
+- `b4fc87c` (docs-only): correct Aliyan handoff schema/path.
+- `c548f32`: NVD/reporter/scanner scaffolding.
+- `e455881` (2026-10-20): docs: fix test_inventory_reporter.py count (3 docs-only commits ahead of published baseline `83b10fb`).
 
-## Next bounded task
+## W8 plan and handoffs (2026-10-27)
 
-- **M-DE-CORE checkpoint.** Sign the Mode B field-mapping contract and the **proposed
-  input-fixture contract** (TASKS.md §C0-prereq — approval required before Nick authors
-  fixtures), then Vale implements the known-topology loader (W1-DE-01.L) + Mode B
-  serializer (W1-DE-03.R) to emit the 6.0 reference `report.json`. Only after that
-  can Christian's E2E byte-assertion and Aliyan's viewer be run against a real sample.
-- **What the pending C0 fixture-contract decision does and does not block.** C0 (the
-  shared contract + the proposed input-fixture contract, `TASKS.md` §C0-prereq) gates
-  exactly two things: **(a)** Nick authoring the two M-DE-CORE fixtures, and **(b)**
-  anything that **consumes** those approved fixtures — Vale's end-to-end CLI run +
-  generated reference sample, Christian's running E2E assertions, and Aliyan's viewer run
-  against real data. C0 does **not** gate (i) drafting/writing Vale's loader / Mode B
-  serializer / CLI against the proposed shape, (ii) drafting Christian's test scaffolding
-  + expected-results doc, or (iii) reviewing or sharing the handoffs.
-- **Beginner onboarding doc committed:** `docs/TEAM_ONBOARDING.md` is **committed** in the
-  repo and ships with the published handoffs (confirmed by `git ls-files`); all four
-  M-DE-CORE handoffs, `README.md`, and `docs/WEEKLY.md` link to it.
+- **Weekly plan:** `docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md`
+  - Goal: one additional manifest format → one reproducible real-project OSV-Scanner scan → offline tests for scan-JSON → normalized-report path → bounded search bar + severity filter in existing dashboard
+  - Daily checkpoints Mon-Fri; Friday demo checklist
+- **Individual handoffs:** `docs/weekly-handoffs/`
+  - `W8-parser.md` — Nick · one additional manifest format + focused fixture/tests
+  - `W8-engine-and-reporter.md` — Vale · one reproducible real-project OSV-Scanner scan attempt (what works, gaps, topology/risk limits; no NVD wiring promise)
+  - `W8-dashboard-and-docker.md` — Christian · offline tests for scan JSON → normalized report path (empty/malformed input, unknown-topology); no Docker this week
+  - `W8-demo-validation.md` — Aliyan · bounded search bar + numeric `severity_score` threshold filter in `src/web/dashboard.html` (after checking feature exists); no Flask/D3
+- **Historical handoffs (for reference):** `W1-parser.md`, `W2-engine.md`, `W3-reporter.md`, `W4-dashboard.md`, `W5-ai.md`, `W6-docker.md`, `W7-demo-validation.md`
 
-## Verified / Proposed / Unverified
+## Verification
 
-- **Verified (executed, 2026-10-01, baseline HEAD `5b8a1f7`; preserved as historical,
-  not re-run in this docs-only session):**
-  - requirements.txt → edgeless graph → v0.1 inventory JSON.
-  - `calculate_phei` == 6.0 on a **one-off synthetic** 3-node unit chain A→B→C
-    (2 unit-weight edges × 3 nodes = 6.0), verified by running the current code.
-    The reusable `examples/fixtures/known_topology.json` has **not** been added yet.
-  - PHEI invariant to CVE severity; `report_generator` uses the wrong (global-sum)
-    formula; `serialize_inventory` emits only the v0.1 fields.
-  - pytest 79 passed (test_harness collects 0).
-- **Proposed (M-DE-CORE, not yet in repo):** known-topology loader, Mode B serializer,
-  `src/cli.py`, `src/dashboard/view.py`, the two input fixtures,
-  `examples/fixtures/sample_risk_report.json`, `tests/test_e2e_risk.py`,
-  `docs/E2E_EXPECTED_RESULTS.md`. **No out-of-spec fields are emitted this week:**
-  v0.1 defines no risk-path field, so `top_risk_path` is **deferred to a separate
-  schema decision** (not emitted, rendered, or asserted). All emitted fields are
-  spec-defined v0.1 fields; the known-topology input is a JSON file, so it uses
-  `input.type = file`, `input.format = "synthetic-graph"` (both spec-supported; the
-  committed demo uses `synthetic-graph`). Emitted (spec-backed): `findings[].id`,
-  `findings[].advisory_source` (`synthetic-fixture`), `findings[].severity = null`.
-  `vulnerability_lookup.matched` = distinct package IDs with at least one finding.
-  Deferred: `packages[].risk_score` (node-level PHEI undefined). `risk.status` uses the
-  spec enum `available`/`unavailable`.
-- **Unverified / pending:** that the new Mode B serializer emits 6.0 end-to-end
-  (not yet built); severity-in-score (open, Vale); Bandit course mandate (UNKNOWN);
-  that the reference sample (once produced) byte-matches Christian's determinism check (run twice with identical scan_id and created_at, then compare outputs).
-
-> Test counts in this file are **historical** unless re-run and re-recorded. No completion
-> percentages are reported.
+- **Test suite:** 248 passed, 29 subtests — reported historical result (2026-10-19;
+  date not independently verifiable from repository evidence).
+**Remote tip:** `origin/feat/inventory-report` = `e455881` (published baseline; HEAD `e455881` is in sync).
