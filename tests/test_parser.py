@@ -1,9 +1,10 @@
 
 import os
+import tempfile
 import unittest
 
 from src.models.dependency_graph import DependencyGraph, DependencyNode
-from src.parser.parser import build_mock_graph, parse_requirements
+from src.parser.parser import build_mock_graph, parse_pyproject_toml, parse_requirements
 from src.engine.risk_analyzer import calculate_systemic_risk, UnavailableTopologyError
 
 
@@ -80,6 +81,65 @@ class TestDependencyGraphParsing(unittest.TestCase):
         # Missing file: raises
         with self.assertRaises(FileNotFoundError):
             parse_requirements("./nonexistent_detect.txt")
+
+
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+class TestPyprojectParsing(unittest.TestCase):
+
+    def _parse_text(self, text):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "pyproject.toml")
+            with open(path, "w") as f:
+                f.write(text)
+            return parse_pyproject_toml(path)
+
+    def test_fixture_main_and_optional_dependencies(self):
+        graph = parse_pyproject_toml(os.path.join(FIXTURE_DIR, "pyproject_with_deps.toml"))
+
+        self.assertCountEqual(
+            graph.get_nodes_list(),
+            [
+                ("requests", ">=2.28.1"),
+                ("django", "4.2"),
+                ("numpy", ">=1.24.0"),
+                ("pytest", ">=7.0"),
+                ("ruff", "0.1.0"),
+                ("sphinx", ">=5.0"),
+            ],
+        )
+        self.assertEqual(len(graph.get_edges_list()), 0)
+        self.assertEqual(graph.edge_availability, "unavailable")
+
+    def test_repo_pyproject_has_no_dependencies(self):
+        graph = parse_pyproject_toml(os.path.join(REPO_ROOT, "pyproject.toml"))
+
+        self.assertEqual(graph.get_nodes_list(), [])
+        self.assertEqual(graph.edge_availability, "unavailable")
+
+    def test_extras_markers_and_bare_names(self):
+        graph = self._parse_text(
+            '[project]\nname = "x"\ndependencies = [\n'
+            '  "requests[security]==2.31.0",\n'
+            '  "tomli>=1.1; python_version < \'3.11\'",\n'
+            '  "flask",\n'
+            ']\n'
+        )
+
+        self.assertCountEqual(
+            graph.get_nodes_list(),
+            [("requests", "2.31.0"), ("tomli", ">=1.1"), ("flask", "unspecified")],
+        )
+
+    def test_missing_file_raises(self):
+        with self.assertRaises(FileNotFoundError):
+            parse_pyproject_toml("nonexistent_pyproject.toml")
+
+    def test_invalid_toml_raises(self):
+        with self.assertRaises(IOError):
+            self._parse_text("[project\nname = ")
 
 
 class TestUnavailableTopology(unittest.TestCase):
