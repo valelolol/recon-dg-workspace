@@ -150,6 +150,12 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 - `c548f32`: NVD/reporter/scanner scaffolding.
 - `e455881` (2026-10-20): docs: fix test_inventory_reporter.py count (3 docs-only commits ahead of published baseline `83b10fb`).
 
+## W1-DE-03.T progress (2026-11-02, Christian)
+
+- `tests/test_e2e_risk.py` and `docs/E2E_EXPECTED_RESULTS.md` added. Verification: `python -m pytest tests/test_e2e_risk.py -v` -> 6 passed, 7 skipped (Windows, Python 3.15).
+- **Still blocked:** the 7 skipped tests need `examples/fixtures/sample_risk_report.json`, `load_known_topo_json()`,
+  known-topology support in `serialize_inventory`, and `examples/fixtures/known_topology.json`. None exist on any branch.
+
 ## W8 plan and handoffs (2026-10-27)
 
 - **Weekly plan:** `docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md`
