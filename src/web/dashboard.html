@@ -61,19 +61,57 @@
   <p class="sub" id="subtitle">Loading report…</p>
   <div class="section" id="summary"></div>
   <div class="section" id="topology"></div>
-  <div class="section" id="findings"></div>
+  <div class="section">
+  <label for="package-search">Search packages:</label>
+  <input
+    type="search"
+    id="package-search"
+    placeholder="Enter package name..."
+    maxlength="100"
+  />
+</div>
+  <div class="section">
+  <label for="severity-filter">Minimum severity score:</label>
+  <select id="severity-filter">
+    <option value="all">All</option>
+    <option value="4">4.0 or higher</option>
+    <option value="7">7.0 or higher</option>
+    <option value="9">9.0 or higher</option>
+    <option value="unknown">Unknown only</option>
+  </select>
+</div>
+<div class="section" id="findings"></div>
   <div class="section" id="remediation"></div>
   <div class="section" id="verification"></div>
   <div id="ai-note"></div>
   <div class="footer" id="footer"></div>
 </div>
 <script>
-function el(tag, attrs){
-  const n=document.createElement(tag);
-  if(attrs){for(const [k,v] of Object.entries(attrs)) n[k]=v;}
+function el(tag, attrs, content) {
+  const n = document.createElement(tag);
+
+  if (Array.isArray(attrs)) {
+    for (let i = 0; i + 1 < attrs.length; i += 2) {
+      n.setAttribute(attrs[i], attrs[i + 1]);
+    }
+  } else if (attrs) {
+    for (const [k, v] of Object.entries(attrs)) {
+      n.setAttribute(k, v);
+    }
+  }
+
+  if (content !== undefined) {
+    n.textContent = content;
+  }
+
   return n;
 }
-function textEl(tag, s, attrs){const n=el(tag,attrs); n.textContent=s; return n;}
+
+function textEl(tag, attrs, content) {
+  const n = el(tag, attrs);
+  n.textContent = content == null ? "" : String(content);
+  return n;
+}
 function badge(kind){
   const b=el('span',['class','badge '+(kind||'det')]); b.textContent=kind; return b;
 }
@@ -81,7 +119,25 @@ function esc(s){return s==null?'':String(s);}
 function fmtScore(v){return v==null?'—':Number(v).toFixed(2);}
 
 let report=null;
+let searchTerm = "";
+let severityFilter = "all";
 
+document.getElementById("severity-filter")
+  .addEventListener("change", function () {
+    severityFilter = this.value;
+
+    if (report) {
+      render();
+    }
+  });
+
+document.getElementById("package-search")
+  .addEventListener("input", function () {
+    searchTerm = this.value.trim().toLowerCase();
+    if (report) {
+      render();
+    }
+  });
 function render(){
   const app=document.getElementById('app');
   if(!report){app.innerHTML='';return;}
@@ -139,6 +195,25 @@ function render(){
   const fsec=document.getElementById('findings'); fsec.innerHTML='';
   fsec.appendChild(textEl('h2',null,'Findings ('+(report.findings_count||0)+')'));
   (report.findings||[]).forEach((f,idx)=>{
+
+  const packageName = String(f.package_name || "").toLowerCase();
+
+  if (!packageName.includes(searchTerm)) {
+    return;
+  }
+  const score = f.severity_score;
+
+if (severityFilter === "unknown") {
+  if (score !== null && score !== undefined) {
+    return;
+  }
+} else if (severityFilter !== "all") {
+  if (score === null || score === undefined ||
+      !Number.isFinite(Number(score)) ||
+      Number(score) < Number(severityFilter)) {
+    return;
+  }
+}
     const c=el('div',['class','finding']);
     c.appendChild(textEl('div',['class','pkg'],
       f.package_name+'@'+f.version));
@@ -199,10 +274,10 @@ function render(){
       rsec.appendChild(c);
     });
   } else {
-    rsec.appendChild(textEl('p',['class','note'],'No remediation plan in this report '
+    rsec.appendChild(textEl('p',['class','note'],
+      ' No remediation plan in this report ' +
       '(no findings, or no baseline plan produced).'));
   }
-
   // Verification
   const vsec=document.getElementById('verification'); vsec.innerHTML='';
   if(remediation&&remediation.verification){
@@ -231,9 +306,10 @@ function render(){
     }
     vsec.appendChild(card);
   } else {
-    vsec.appendChild(textEl('p',['class','note'],'No after-scan verification '
-      '(after_scan_report was not supplied for this report).'));
-  }
+  vsec.appendChild(textEl('p',['class','note'],
+    'No after-scan verification ' +
+    '(after_scan_report was not supplied for this report).'));
+}
 
   // AI note
   const srcInfo=report.explanation_source||{};
@@ -242,10 +318,10 @@ function render(){
     'Explanations are additive and review-only. '
     +(srcInfo.total?
        `Source: ${srcInfo.model} model, ${srcInfo.deterministic} deterministic.`:'')
-    +(' The model (when used) restates only scanner-grounded facts; '
-      'do not treat it as authoritative. Severity and risk values are scanner-grounded '+
-      'and are never modified by the AI layer.');
-  document.getElementById('ai-note').appendChild(anote);
++(' The model (when used) restates only scanner-grounded facts; ' +
+  'do not treat it as authoritative. Severity and risk values are scanner-grounded ' +
+  'and are never modified by the AI layer.');
+document.getElementById('ai-note').replaceChildren(anote);
 }
 function riskScoreMsg(risk){
   return risk.score!=null? (' (score '+risk.score+')'):'';
