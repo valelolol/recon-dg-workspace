@@ -99,7 +99,7 @@
 ### T-DE-02: Engine (OSV-Scanner → report workflow — unverified)
 - **Current state:** OSV-Scanner scanner (`scan_runner.py`, 305 lines) and NVD/OSV enrichment client (`nvd_client.py`, 415 lines) both exist. The gap is a **missing integration** connecting a manifest scan by the authoritative external OSV-Scanner to generation of a dashboard-compatible report — neither component has been run end-to-end against a real project.
 - **Operational concern:** NVD rate limits (5 req/30s without key) are an operational concern, not a blocker — the active roadmap (docs/ROADMAP.md "Security and privacy gates" heading, line 142) designates OSV-Scanner as the authoritative scanner. No real scan output on disk to validate against.
-- **Evidence:** `src/engine/nvd_client.py` exists with `NVDClient`/`RateLimiter`/`CachedResponse` classes but no evidence of a live OSV-Scanner scan (no `report.json` output file, no scan log).
+- **Evidence:** `src/engine/nvd_client.py` exists with `NVDClient`/`RateLimiter`/`CachedResponse` classes but no evidence of a live OSV-Scanner scan on the project (no `report.json` output file on disk; the committed `docs/fixtures/report-fixture-demo.json` is entirely fixture-derived from `tests/fixtures/requirements-before.txt` and `requirements_simple.txt`, **not** project-dependency evidence).
 
 ### T-DE-03: Reporter (dependency-graph serializer)
 - **Current state:** Inventory serializer (Mode A) implemented; dependency-graph serializer (Mode B) **unimplemented**.

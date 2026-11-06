@@ -6,7 +6,7 @@ Create the Dec 8 rehearsal checklist and the ≥10-step demo script for the Dece
 
 ## Evidence
 - `src/web/dashboard.html` has a search bar (package name) and severity filter dropdown (numeric `severity_score` threshold).
-- `report.json` (untracked) uses `severity` (not `severity_score`); normalizer expects `severity_score`. **Mismatch documented by Christian.**
+- `docs/fixtures/report-fixture-demo.json` (committed in `1ad2a7b8`) uses `severity` (not `severity_score`); normalizer expects `severity_score`. **Mismatch documented by Christian.**
 - Dec 8 rehearsal: one place only — `docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md` §Dec 8 Rehearsal.
 - `docs/demo-validation/` directory does not exist yet.
 - **Implementation details:** Search bar filters by `package_name` (case-insensitive, partial match). Severity filter shows only findings at or above selected numeric `severity_score` threshold; scores ≥ 7.0 match the selected threshold; scores below 7.0 are below threshold; null scores remain Unknown and are not classified. All JavaScript inlined in existing HTML file. No new Python files, no new dependencies, no Flask/D3 rewrite, no Docker.

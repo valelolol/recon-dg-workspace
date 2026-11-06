@@ -11,3 +11,4 @@ test.py
 *.report.json
 comprehensive_report.json
 vuln_report.json
+report.json
