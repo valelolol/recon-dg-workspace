@@ -33,7 +33,7 @@
 | `src/agent` | **Implemented** — bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic grounded policy (no model). **45 passing tests** (`tests/test_agent.py`). | `src/agent/__init__.py`, `src/agent/agent.py`, `src/agent/normalizer.py`, `src/agent/pipeline.py`, `src/agent/scan_runner.py` |
 | `src/agent` remediation | **Implemented** — `build_remediation_plan` (pure, fixed versions verbatim, severity `None`) + `verify_remediation` (user-supplied after scan; no after scan → `not_run`). **24 passing tests** (`tests/test_remediation.py`). | `src/agent/agent.py` |
 | `src/explanation` | **Implemented** — grounded deterministic explainer (default) + optional OpenAI-compatible local-model client (`src/explanation/local_model.py`). Model defaults **OFF** (`--model ON` required). Per-finding deterministic fallback. | `src/explanation/__init__.py`, `src/explanation/deterministic.py`, `src/explanation/local_model.py`; `tests/test_explanation.py` (23), `tests/test_explanation_http.py` (7) |
-| `src/web` (dashboard) | **Implemented** — stdlib `http.server` + `dashboard.html` (no third-party deps). Read-only; serves report + page. **Not** Flask+D3. | `src/web/__init__.py`, `src/web/__main__.py`, `src/web/server.py`, `src/web/dashboard.html`; `tests/test_dashboard.py` (13) |
+|| `src/web` (dashboard) | **Implemented** — stdlib `http.server` + `dashboard.html` (no third-party deps). Read-only; serves report + page. **Not** Flask+D3. `src/web/osv_normalizer.py` (6,851 bytes) corrected to dashboard contract (2026-11-03). **Note:** two normalizers exist: `src/web/osv_normalizer.py` (dashboard format) and `src/agent/normalizer.py` (445 lines, older agent format). No single canonical normalizer yet. | `src/web/__init__.py`, `src/web/__main__.py`, `src/web/server.py`, `src/web/dashboard.html`, `src/web/osv_normalizer.py`; `tests/test_dashboard.py` (13), `tests/test_osv_normalizer.py` (12) |
 | `src/enrichment` | **Implemented** — deps.dev enrichment layer (stdlib-only, `package_context` tool, additive only, never fed to PHEI). **26 passing tests** (`tests/test_enrichment.py`). | `src/enrichment/__init__.py`, `src/enrichment/deps_dev.py` |
 | `src/models/dependency_graph` | **Implemented** — `DependencyNode` + `DependencyGraph` (NetworkX DiGraph). | `src/models/__init__.py`, `src/models/dependency_graph.py` |
 | `tests/` | **Partial** — 12 test files; full suite historically ~241–248 passed (historical counts; verify before demo). | See `tests/` directory |
@@ -59,6 +59,8 @@
 ### W2 — Engine wiring: real OSV + PHEI on known topology (T-DE-02)
 
 **Milestone:** OSV client wired into the graph; real CVE data flows into PHEI on a graph with `edge_availability = "known"`. Inventory-only input (no edges) reports risk as unavailable — no score fabricated.
+
+**⚠️ W9 audit (2026-11-03):** NVD/OSV client wiring **exists** (15 focused offline tests pass; `get_cve_severity()` calls `NVDClient.query_nvd_api()` → `query_osv_api()`; no MOCK_CVE_DB in production). A clean real-project OSV-Scanner scan returned 0 findings. **However, live CVE data has NOT been demonstrated flowing into the PHEI score on a real project.** `calculate_phei()` (risk_analyzer.py:186-190) computes `path_weight * impact_multiplicity` **without using `node_risks`** (the CVE-severity dict). CVE severity IS used in `calculate_systemic_risk()` (lines 224-258) but **not** in `calculate_phei()`. The severity-to-PHEI mapping is **undefined**. T-DE-02 remains **partial**. See ROADMAP §Open decisions item 7.
 
 **Why second:** Depends on W1 (real graph needed for real lookups).
 
@@ -135,7 +137,8 @@
 | 3 | **Review policy** (who reviews, when, acceptance criteria) | Unconfirmed. Team to decide. |
 | 4 | **Model backend: llama.cpp vs. user API key** | Pending decision (see W5). |
 | 5 | **Open privacy decision:** whether the configured `OPENAI_BASE_URL` endpoint is HTTP or HTTPS — the endpoint receives the API key and finding data in either case. | Open — documented in `src/explanation/local_model.py` and `docs/STATUS.md`. |
-| 6 | **"integrations across different stories"** — phrase appears in TASKS.md without a defined meaning. | **Flagged for clarification** — do not assign an assumed meaning. |
+|| 6 | **"integrations across different stories"** — phrase appears in TASKS.md without a defined meaning. | **Flagged for clarification** — do not assign an assumed meaning. |
+|| 7 | **Severity-to-PHEI normalization:** `calculate_phei()` does NOT use `node_risks` (CVE severity). `calculate_systemic_risk()` DOES use severity. The ROADMAP W2 milestone states "real CVE data flows into PHEI" but the code does not use severity in `calculate_phei()`. What should the severity-to-PHEI mapping be? Options: (a) multiply PHEI by a severity factor (e.g., `phei * (1 + severity / 10)`), (b) use severity as a threshold for path-weight scaling, (c) keep PHEI topology-only and let `calculate_systemic_risk()` handle severity. **Team to decide.** | Open — documented in STATUS.md §Engine section and ROADMAP W2 audit. |
 
 ---
 

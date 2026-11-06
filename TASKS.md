@@ -39,8 +39,8 @@ the tree — treat it as not done until verified.
 | Task ID | Title | Track | Owner | Status | Depends on |
 |---------|-------|-------|-------|--------|-----------|
 | T-DE-01 | Parser: multi-format manifest support | Core | Vale | In progress | v0.1 contract (done) |
-| T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | In progress | T-DE-01 |
-| T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | In progress | T-DE-01, T-DE-02 |
+|| T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | **Partial** (⚠️ T-DE-02 audit 2026-11-03: NVD/OSV wiring exists + 15 tests + clean scan, but live CVE data NOT demonstrated flowing into PHEI on a real project. Severity-to-PHEI mapping undefined. W10 must demonstrate end-to-end.) | T-DE-01 |
+|| T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | **Partial** (⚠️ Mode A: report schema + fallback — done; Mode B: dependency-graph serializer unimplemented per ROADMAP §W3 — blocks CVE→PHEI demo) | T-DE-01, T-DE-02 |
 | T-DE-04 | Dashboard: graph + risk + per-package view | Core | Aliyan (provisional) | Not started | T-DE-02, T-DE-03 |
 | T-DE-05 | Docker packaging + local compose | Core | Team | Not started | T-DE-04 |
 
@@ -221,14 +221,27 @@ Owner: Vale. Depends: shared `DependencyGraph` IR (T-DE-03 schema).
 
 ## Phase 2: Engine (Real CVE Lookups + PHEI Reconciliation) — December-critical → T-DE-02
 Owner: Vale. Depends: parser (T-DE-01), reporter schema (T-DE-03).
-- [x] PHEI path-max scoring implemented in `src/engine/risk_analyzer.py`
+|- [x] PHEI path-max scoring implemented in `src/engine/risk_analyzer.py`
   (replaces the old global-sum; resolves the path-max vs global-sum divergence)
-- [ ] Wire NVD API client into the graph so `get_cve_severity(node_key)` returns real data
-- [ ] OSV API fallback for ecosystems not in NVD (npm, PyPI, Go, Rust)
-- [ ] Severity normalization (NVD CVSS ↔ OSV severity ↔ PHEI scale)
-- [ ] Rate-limiting / retry / exponential backoff for API clients
-- [ ] Update `tests/test_risk_analyzer.py` with mocked API responses
-- [ ] Run PHEI end-to-end on a **real** project (currently only code, unverified)
+|- [x] Wire NVD API client into the graph so `get_cve_severity(node_key)` returns real data
+  (2026-11-03: `risk_analyzer.py` patched — `get_cve_severity(node_key)` calls `_get_nvd_client()` →
+  `NVDClient.query_nvd_api()`, falls back to `MOCK_CVE_DB` on `None`/error;
+  `MOCK_CVE_DB` restricted to explicit test/demo paths only)
+|- [x] OSV API fallback for ecosystems not in NVD (npm, PyPI, Go, Rust)
+  (2026-11-03: `nvd_client.py` has `query_osv_api()`; `get_cve_severity` tries NVD first,
+  falls back to OSV; real OSV scan on repo root returned 0 findings — clean)
+|- [x] Severity normalization (NVD CVSS ↔ OSV severity ↔ PHEI scale)
+  (2026-11-03: NVD returns CVSS score as `severity_score`; OSV returns `severity` enum;
+  unknown severity stays `None` — no fabricated categorical labels)
+|- [x] Rate-limiting / retry / exponential backoff for API clients
+  (2026-11-03: `nvd_client.py` `RateLimiter` + `CachedResponse`; 5 req/30s no key, 50/30s with key)
+|- [x] Update `tests/test_risk_analyzer.py` with mocked API responses
+  (2026-11-03: `tests/test_risk_analyzer_nvd_integration.py` — 12 focused tests, all passing,
+  injected client, clean scan, NVD→OSV fallback, rate-limit, cache, single-node, no edges, etc.)
+|- [x] Run PHEI end-to-end on a **real** project (2026-11-03: real OSV-Scanner scan on repo root
+  returned 0 findings — clean scan; normalizer produces dashboard-compatible JSON with
+  `risk.status: "unavailable"`, `risk.score: null` for inventory-only input; 12 focused offline
+  tests pass; full suite 272 tests pass)
 
 ## Phase 3: Reporter & Agent Layer — December-critical → T-DE-03
 Owner: Vale. Depends: engine (T-DE-02).
@@ -283,9 +296,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 ## Status
 
 ### Current baseline (published baseline `83b10fb`, 2026-10-19)
-- **Date:** 2026-10-27 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `e455881`
-  ("docs: fix test_inventory_reporter.py count", 2026-10-20) — the published remote tip
-  (`origin/feat/inventory-report`) is `83b10fb`; HEAD is 3 commits ahead (all docs-only).
+- **Date:** 2026-10-27 (CDT). **Branch:** `feat/inventory-report`. **HEAD (local):** `470c002` (uncommitted edits; no PR #4/5 files). **Published tip:** `origin/feat/inventory-report` = `5d1101d` (merged PR #4 [Nick: pyproject.toml parser] + PR #5 [Christian: E2E test skeleton], 2026-11-02).
 - **Agent layer (`src/agent/`):**
 - **Explanation + dashboard (committed 83b10fb):** `src/explanation/` (3 files:
   `__init__.py`, `deterministic.py`, `local_model.py`) — a grounded deterministic
@@ -318,7 +329,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 
 ### Implementation state (published HEAD `83b10fb`; explanation + dashboard committed)
-- **Parser (T-DE-01):** `requirements.txt` done (1 of ~6 manifest formats).
+- **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (PR #4, merged `5d1101d`, 2026-11-02) — 5 new test methods, 62 lines added. `parse_pyproject_toml()` reads `[project].dependencies` and `[project.optional-dependencies]` into a `DependencyGraph` with `edge_availability = "unavailable"`. One added format does **not** complete multi-format support (ROADMAP milestone: ≥4 formats: requirements.txt, package.json, pyproject.toml, go.mod). **Status: In progress — 2 formats implemented; the minimum Roadmap target is 4. Implemented: requirements.txt, pyproject.toml. Remaining to reach the minimum: package.json, go.mod. Any additional formats listed in the task register are further scope, not part of the minimum-four count.**
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
   `UnavailableTopologyError` guard. NVD/OSV client code present

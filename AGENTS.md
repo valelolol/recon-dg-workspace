@@ -61,6 +61,7 @@
 - Finish with: task outcome, changed files, verification command and
   result, unresolved issues, and the next bounded task if applicable.
 - Never include credentials or authentication tokens in output.
+- **Handoff discipline:** The repository must contain exactly four current-week handoff files in `docs/weekly-handoffs/` (one per team member). At weekly rollover, replace the previous four. Do not archive old handoff files in the repository. The template in `docs/weekly-handoff-template.md` encodes this rule.
 
 ## A2A
 - A timeout does not prove the remote task stopped — never assume it did.

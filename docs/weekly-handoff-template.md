@@ -91,6 +91,7 @@ Copy this block into `docs/weekly-handoffs/W{N}-{name}.md`. Replace all `{placeh
 6. **Synthetic data** is never scanner evidence. Real OSV-Scanner JSON is the only valid input for the agent and PHEI scoring.
 7. **Mode B is not an active milestone.** If a handoff requires "Mode B," it should be reworked into the current scope.
 8. **Aliyan deliverable:** each handoff should include a small, bounded task for Aliyan (e.g., a documentation section, a test harness example, or a diagram). If a week has no natural task for Aliyan, note "No Aliyan task this week" in Questions/blockers.
+9. **Exactly four handoffs per week.** The repository must contain exactly four handoff files per week — one for each current team member (Nick, Vale, Christian, Aliyan) — in `docs/weekly-handoffs/`. At each weekly rollover, replace the previous four handoffs with the new week's four. Do not retain older weekly handoff files or root-level M-DE-CORE handoff files in the repository. Old handoff files must not be archived in the repository.
 
 ---
 

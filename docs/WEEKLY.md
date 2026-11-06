@@ -68,11 +68,11 @@ later three roles depend on.
   against a real project (no `examples/fixtures/` to run against).
 
 ## Handoffs (beginner-friendly, one manageable assignment each)
-Handoffs from this week's M-DE-CORE demo track (historical):
-- **Vale (M-DE-CORE loader/serializer/integration):** `HANDOFF_VALE_MDECORE.md`.
-- **Nick (M-DE-CORE fixtures):** `HANDOFF_NICK_MDECORE.md`.
-- **Christian (M-DE-CORE E2E + expected results):** `HANDOFF_CHRISTIAN_MDECORE.md`.
-- **Aliyan (M-DE-CORE T-DE-04 viewer, provisional):** `HANDOFF_ALIYAN_MDECORE.md`.
+Handoffs from this week's M-DE-CORE demo track (historical; files removed from repo):
+- **Vale (M-DE-CORE loader/serializer/integration):** `HANDOFF_VALE_MDECORE.md` (removed).
+- **Nick (M-DE-CORE fixtures):** `HANDOFF_NICK_MDECORE.md` (removed).
+- **Christian (M-DE-CORE E2E + expected results):** `HANDOFF_CHRISTIAN_MDECORE.md` (removed).
+- **Aliyan (M-DE-CORE T-DE-04 viewer, provisional):** `HANDOFF_ALIYAN_MDECORE.md` (removed).
 
 Beginners: start at `docs/TEAM_ONBOARDING.md` for OS-specific setup, then the handoff
 matching your task ID.
