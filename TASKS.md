@@ -23,17 +23,16 @@ array stays empty and risk is unavailable.
 **Synthetic data rule:** synthetic graph/advisory data is only for clearly labeled offline tests or a separate demo. It is **never** scanner evidence. Real scanner output (OSV-Scanner JSON) is the only valid input for the agent and PHEI scoring.
 
 ### December-critical path (in order)
-1. **Dec 3 (Wed):** candidate freeze — all deliverables locked for review.
-2. **Dec 4 (Thu):** team demo (internal).
-3. **Dec 7 (Sun):** team demo (internal).
-4. **Dec 8 (Mon):** rehearsal/buffer.
-5. **Dec 9 (Tue):** presentation.
+1. **Dec 3 (Thu):** candidate freeze — all deliverables locked for review.
+2. **Dec 4 (Fri):** team demo (internal).
+3. **Dec 7 (Mon):** team demo (internal).
+4. **Dec 8 (Tue):** rehearsal/buffer.
+5. **Dec 9 (Wed):** presentation.
 6. Parser: enough manifest formats to scan a real project.
 7. Engine: wire NVD/OSV into the graph so **real** CVE data flows into PHEI.
 8. Reporter: structured report schema + deterministic fallback.
 9. Dashboard: web app (graph + risks + per-package risk).
 10. AI explanations: `src/agent/` pluggable model layer (plain-language + prioritization).
-11. Docker: portable image + local-dev compose.
 
 ## Task register
 
