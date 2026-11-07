@@ -175,7 +175,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 
 ## W9 plan and handoffs (2026-11-03)
 
-- **Weekly plan:** `docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md`
+- **Weekly plan:** `docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`
   - Goal: Parser at 3/4 formats; NVD/OSV wiring closed (2026-11-03); dashboard validation; W10 handoffs
   - Deliverables: W10 handoffs for Nick (go.mod), Christian (dashboard validation), Aliyan (demo script/search/filter), Vale (end-to-end CVE-to-PHEI demo on controlled data)
 - **Historical handoffs (W1–W7):** removed from the repository (see the rule in `docs/weekly-handoff-template.md` that old handoff files must not be archived in the repo). The M-DE-CORE week (Sep 28–Oct 4, 2026) is documented in `docs/WEEKLY.md` (historical) and `docs/ROADMAP.md` §47.

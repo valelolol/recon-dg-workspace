@@ -130,7 +130,7 @@
 
 > **Owner:** Aliyan (for team confirmation). This is a usability/demo-validation task, not a code task.
 
-### W9 — Weekly handoffs (2026-11-03 to 2026-11-09)
+### W9 — Weekly handoffs (2026-11-02 to 2026-11-08)
 
 **Four active handoffs, one per team member.** No archived W1–W8 or M-DE-CORE handoffs restored.
 
@@ -143,9 +143,9 @@
 | Christian | `docs/weekly-handoffs/W9-Christian.md` | Dashboard validation tests; normalizer/schema gap |
 | Aliyan | `docs/weekly-handoffs/W9-Aliyan.md` | Dec 8 rehearsal checklist; demo script (≤10 steps) |
 
-**Dec 8 rehearsal:** Single source of truth in `docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md` §Dec 8 Rehearsal. See Aliyan's handoff for the checklist.
+**Dec 8 rehearsal:** Single source of truth in `docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md` §Dec 8 Rehearsal. See Aliyan's handoff for the checklist.
 
-**W9 plan:** `docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md`
+**W9 plan:** `docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`
 
 ---
 

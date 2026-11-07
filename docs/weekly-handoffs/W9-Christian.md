@@ -1,5 +1,5 @@
 # W9 Handoff — Christian (Dashboard Validation)
-# 2026-11-03 to 2026-11-09
+# 2026-11-02 to 2026-11-08
 
 ## Goal
 W10 deliverable (moved from W9): Extend `tests/test_dashboard.py` for real report rendering: empty input, malformed input, unknown-topology behavior. Verify the untracked `src/web/osv_normalizer.py` against the dashboard contract.

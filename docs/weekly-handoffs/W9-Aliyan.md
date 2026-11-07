@@ -1,5 +1,5 @@
 # W9 Handoff — Aliyan (Demo Validation)
-# 2026-11-03 to 2026-11-09
+# 2026-11-02 to 2026-11-08
 
 ## Goal
 W10 deliverable (moved from W9): Create the Dec 8 rehearsal checklist and the ≥10-step demo script for the December 9 presentation. Verify the dashboard search bar + severity filter.
@@ -7,7 +7,7 @@ W10 deliverable (moved from W9): Create the Dec 8 rehearsal checklist and the �
 ## Evidence
 - **No repository evidence of search bar or severity_score threshold filter in `src/web/dashboard.html` as of 2026-11-06.** The W9 plan expected this; it has not been delivered.
 - `docs/fixtures/report-fixture-demo.json` (committed in `1ad2a7b8`) uses `severity` (not `severity_score`); normalizer expects `severity_score`. **Mismatch documented by Christian.**
-- Dec 8 rehearsal: one place only — `docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md` §Dec 8 Rehearsal.
+- Dec 8 rehearsal: one place only — `docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md` §Dec 8 Rehearsal.
 - `docs/demo-validation/` directory does not exist yet.
 - `ai_explanations` carries deterministic explanations (from `src/explanation/deterministic.py`, 5,311 bytes); `src/explanation/local_model.py` (14,362 bytes) is the optional local-model client.
 - `--model ON` still requires `OPENAI_API_KEY` env var (not baked into any output).

@@ -1,5 +1,5 @@
 # W9 Handoff — Vale (Engine + Reporter)
-# 2026-11-03 to 2026-11-09
+# 2026-11-02 to 2026-11-08
 
 ## Goal
 Close the PHEI gap: reconcile `calculate_phei()` against the **agreed topology-only target** (0–100 impact score using reachable dependents and existing importance/criticality, separate from OSV severity). Document what is missing; do not fabricate.

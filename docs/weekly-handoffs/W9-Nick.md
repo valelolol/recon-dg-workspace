@@ -1,5 +1,5 @@
 # W9 Handoff — Nick (Parser)
-# 2026-11-03 to 2026-11-09
+# 2026-11-02 to 2026-11-08
 
 ## Goal
 Parser is at **3/4 minimum formats** (requirements.txt + pyproject.toml + package.json). go.mod remains the blocker for the ≥4 target.

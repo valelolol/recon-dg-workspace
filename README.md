@@ -45,13 +45,13 @@ real AI model backend are not yet implemented.*
 
 ## Getting started (read this first)
 
-> **Start here tonight:** [W9 kickoff page](docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md) → [W9-Nick.md](docs/weekly-handoffs/W9-Nick.md) → [W9-Vale.md](docs/weekly-handoffs/W9-Vale.md) → [W9-Christian.md](docs/weekly-handoffs/W9-Christian.md) → [W9-Aliyan.md](docs/weekly-handoffs/W9-Aliyan.md)
+> **Start here tonight:** [W9 kickoff page](docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md) → [W9-Nick.md](docs/weekly-handoffs/W9-Nick.md) → [W9-Vale.md](docs/weekly-handoffs/W9-Vale.md) → [W9-Christian.md](docs/weekly-handoffs/W9-Christian.md) → [W9-Aliyan.md](docs/weekly-handoffs/W9-Aliyan.md)
 
 - **`docs/TEAM_ONBOARDING.md`** — how to clone the repo and set up **your own computer**
   (Git + Python checks, a personal branch, a virtual environment, and how to validate
   your JSON fixtures). It defines the ten terms you will meet and gives separate
   PowerShell / terminal routes.
-- **`docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md`** — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
+- **`docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`** — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
 - **`docs/weekly-handoffs/`** — individual handoffs for each teammate (Nick, Vale, Christian, Aliyan); see below
 - **`docs/STATUS.md`** — the current state (date, branch/HEAD, working-tree state)
 - **`TASKS.md`** — the task register (stable IDs), phase plans, and the shared
@@ -217,7 +217,7 @@ real loopback HTTP tests (248 passed, 29 subtests — reported historical result
 
 ## Key documents
 
-|- [docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md](docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md) — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
+|- [docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md](docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md) — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
 |- [docs/weekly-handoffs/](docs/weekly-handoffs/) — individual handoffs for each teammate:
   - [W9-Nick.md](docs/weekly-handoffs/W9-Nick.md) — Nick · one additional manifest format + focused fixture/tests
   - [W9-Vale.md](docs/weekly-handoffs/W9-Vale.md) — Vale · one reproducible real-project OSV-Scanner scan (scan-to-report integration met 2026-11-03; `report.json` written)
