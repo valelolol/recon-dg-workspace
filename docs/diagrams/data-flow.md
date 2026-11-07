@@ -38,7 +38,7 @@ flowchart LR
     end
 
     subgraph AI["W5: Model endpoint (opt-in)"]
-        A1[Configured endpoint (any OpenAI-compatible / API key)]
+        A1[Configured endpoint (**OpenAI/ChatGPT, Claude, or a custom endpoint**)]
         A2[Deterministic fallback (default)]
     end
 

@@ -36,15 +36,15 @@ array stays empty and risk is unavailable.
 
 ## Task register
 
-Stable IDs used by `docs/STATUS.md`, `docs/WEEKLY.md`, and the handoffs. "Unverified"
+Stable IDs used by `docs/STATUS.md`, the handoffs, and the plan files in `docs/weekly-plan/`. (`docs/WEEKLY.md` is historical and not an active reference.) "Unverified"
 means a completion claim that is not yet backed by a run command or a passing test in
 the tree — treat it as not done until verified.
 
 | Task ID | Title | Track | Owner | Status | Depends on |
 |---------|-------|-------|-------|--------|-----------|
 | T-DE-01 | Parser: multi-format manifest support | Core | Vale | In progress | v0.1 contract (done) |
-|| T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | **Partial** (⚠️ T-DE-02 audit 2026-11-03: NVD/OSV wiring exists + 15 tests + clean scan, but live CVE data NOT demonstrated flowing into PHEI on a real project. Severity-to-PHEI mapping undefined. W10 must demonstrate end-to-end.) | T-DE-01 |
-|| T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | **Partial** (⚠️ Mode A: report schema + fallback — done; Mode B: dependency-graph serializer unimplemented per ROADMAP §W3 — blocks CVE→PHEI demo) | T-DE-01, T-DE-02 |
+| || T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | **Partial** (⚠️ T-DE-02 audit 2026-11-03: NVD/OSV wiring exists + 15 tests + clean scan, but live CVE data NOT demonstrated flowing into PHEI on a real project. Severity-to-PHEI mapping is an implementation gap (topology-only PHEI is the agreed target; severity is handled by `calculate_systemic_risk()`, not PHEI). W10 must demonstrate end-to-end: real scan → real CVE data → `calculate_systemic_risk()` on a controlled project.) | T-DE-01 |
+| || T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | **Partial** (⚠️ Mode A: report schema + fallback — done; Mode B: dependency-graph serializer unimplemented per ROADMAP §W3 — blocks CVE→systemic-risk demo) | T-DE-01, T-DE-02 |
 | T-DE-04 | Dashboard: graph + risk + per-package view | Core | Aliyan (provisional) | Not started | T-DE-02, T-DE-03 |
 | T-DE-05 | Standalone GUI (Windows/Linux): dashboard + local-model explanations | Core | Team | Not started | T-DE-04 |
 
@@ -233,8 +233,8 @@ fixtures. Approval = an explicit user decision; do not treat this as agreed unti
 - PHEI is distinct from per-finding Low/Medium/High severity. It requires a known dependency graph and the approved scoring rule above.
 - If trustworthy topology or an approved PHEI scoring rule is absent, **report topology-based PHEI as unavailable**; do not fabricate a score.
 
-### Model backend — any OpenAI-compatible endpoint (user-selected)
-|- **Any OpenAI-compatible endpoint is valid for AI explanations in the demo:** ChatGPT with a user API key, Claude with a user API key, or a custom endpoint configured by URL/IP and port (credentials if required). The user selects and configures the provider.
+### Model backend — **OpenAI/ChatGPT, Claude, or a custom endpoint** (user-selected)
+||- **OpenAI/ChatGPT, Claude, or a custom endpoint configured by URL/IP and port (credentials if required)** are valid for AI explanations in the demo. The user selects and configures the provider.
 |- Keep deterministic explanation fallback available when no provider is configured or the endpoint is unreachable.
 |- The `src/explanation/` layer's deterministic explainer is the default; the optional local-model client targets any `/v1/chat/completions` endpoint via `OPENAI_BASE_URL` / `OPENAI_API_KEY` (no credentials committed).
 |- **No remote endpoint is approved by default.** Model use requires explicit opt-in (`--model ON` + `OPENAI_BASE_URL` pointing to a configured endpoint).
@@ -256,7 +256,7 @@ Owner: Vale. Depends: shared `DependencyGraph` IR (T-DE-03 schema).
 - [x] Parse `pyproject.toml` (`[project] dependencies`) — `src/parser/parser.py:78–111`
 - [x] `build_mock_graph()` test helper — `src/parser/parser.py:113–130`
 - [x] Add `package.json` (JSON) parser via `json` module — `src/parser/parser.py:parse_package_json` (W9, Nick)
-- [ ] Add `go.mod` / `Gopfile.lock` parser — **W10 blocker for ≥4 target**
+- [ ] Add `go.mod` / `go.sum` parser — **W10 blocker for ≥4 target**
 - [ ] Add `Cargo.toml` / `Cargo.lock` parser
 - [ ] Add `Gemfile` / `package-lock.json` parsers
 - [ ] Normalize all formats into shared `DependencyGraph` IR
@@ -314,8 +314,7 @@ Owner: Vale. Depends: engine (T-DE-02).
   (or when the model is out of band), and `compare_scans` before/after delta. The
   **W9 real-project OSV-Scanner scan (Vale)**: `osv-scanner scan . --experimental-exclude tests examples docs` returned **0 findings** (clean scan; no known CVEs in project deps). Normalizer produces dashboard-compatible JSON (`risk.status: "unavailable"`, `risk.score: null` for inventory-only). 15 focused offline tests pass. `src/agent/normalizer.py` (445 lines) remains the older agent-format normalizer; `src/web/osv_normalizer.py` is the dashboard-format normalizer. No single canonical normalizer yet — two exist with different schemas. **NVD/OSV wiring now complete (2026-11-03): `risk_analyzer.py` patched — `get_cve_severity(node_key)` calls `NVDClient.query_nvd_api()`, then `query_osv_api()`; MOCK_CVE_DB removed from production path (audit 2026-11-03). Full suite: 275 tests pass.**
   loop is **not** "OSV-Scanner + LLM summary": every claim is backed by a real field
-  from the OSV-Scanner output and every tool call is recorded. A **real** model backend
-  (any OpenAI-compatible endpoint, user-configured — pending decision, see TASKS.md pending-decisions /
+  from the OSV-Scanner output and every tool call is recorded.  A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured — pending decision, see TASKS.md pending-decisions /
   `docs/STATUS.md`) is **not yet wired** (`used_llm=False` in current runs).
 - [x] Deterministic plain-language fallback when no model is configured / generation fails
 - [x] Tests: `tests/test_agent.py` (45) + `tests/test_remediation.py` (24, remediation
@@ -336,19 +335,34 @@ Owner: Team. Depends: engine (T-DE-02) + reporter (T-DE-03).
 Owner: Team. Depends: dashboard (T-DE-04).
 - [ ] Finalize `src/web/dashboard.html` (read-only stdlib `http.server` + vanilla JS, no framework)
 - [ ] Ensure `python -m src.web --report <report.json> --port 8000` works on Windows and Linux
-- [ ] Add `--model ON/OFF` flag for any OpenAI-compatible endpoint explanation toggle (deterministic fallback when OFF)
+- [ ] Add `--model ON/OFF` flag for **OpenAI/ChatGPT, Claude, or a custom endpoint** explanation toggle (deterministic fallback when OFF)
 - [ ] Verify dashboard renders: findings table, risk status, remediation plan (fixed versions verbatim), `not_run` state
 - [ ] No Docker, no third-party deps, no API keys required
 - [ ] Single-command launch: `python -m src.web --report examples/fixtures/sample_risk_report.json --port 8000`
 
+## Complete Demo Flow (T-DE-02 + T-DE-03, W10–W13)
+**Owners:** Vale (scanner/reporter), Christian (dashboard), Aliyan (demo validation)
+**Due:** Dec 8 rehearsal, Dec 9 presentation
+
+1. Scan a controlled vulnerable project (fixture with known CVEs, clearly labeled as non-real).
+2. Show OSV findings and severity scores on the dashboard.
+3. Generate grounded AI explanation and fix recommendation (user-selectable endpoint: OpenAI/ChatGPT, Claude, or custom).
+4. Require visible human approval before applying any patch.
+5. Apply only the approved patch; run a second scan.
+6. Report only verified results (no unverified claims).
+
+**Systemic risk vs. PHEI:** Systemic risk (CVE severity × topology) and PHEI (topology-only path-max × impact-multiplicity) are **separate results**. Risk is unavailable when topology or scoring evidence is missing.
+
+**Clean repo scan vs. controlled demo:** The repo-root OSV-Scanner scan (0 findings) is a **clean-repository scan**, not a demo. The December demo uses a **controlled vulnerable project** (fixture with known CVEs) — never present the fixture's findings as real project findings. The two are distinct and must not be conflated.
+
 ## Status
 
 ### Current baseline (published baseline `83b10fb`, 2026-10-19)
-- **Date:** 2026-11-06. **Branch:** `feat/inventory-report`. **HEAD (local):** `b2d0fee72f` (W9 planning docs pushed to origin; 2026-11-06). **Published tip:** `origin/feat/inventory-report` = `b2d0fee72f`.
+- **Date:** 2026-11-06. **Branch:** `feat/inventory-report`. **HEAD (local):** `88f2b2c12e979000aaaa604955e205010f76c133` (W9 planning docs pushed to origin; 2026-11-06). **Published tip:** `origin/feat/inventory-report` = `88f2b2c12e979000aaaa604955e205010f76c133`.
 - **Agent layer (`src/agent/`):**
-- **Explanation + dashboard (committed 83b10fb):** `src/explanation/` (3 files:
+- **Explanation + dashboard (committed 83b10fb):**  `src/explanation/` (3 files:
   `__init__.py`, `deterministic.py`, `local_model.py`) — a grounded deterministic
-  explainer plus an optional OpenAI-compatible local-model client (env-only
+  explainer plus an optional **OpenAI/ChatGPT, Claude, or a custom** local-model client (env-only
   `OPENAI_BASE_URL` / `OPENAI_API_KEY`, stdlib `urllib`, per-finding deterministic
   fallback on any failure, bounded `max_calls` cap, no credentials committed).
   `src/web/` (4 files: `__init__.py`, `__main__.py`, `server.py`,
@@ -362,7 +376,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 - **Prior baseline (historical):** `a873a90` (2026-10-17), `1b4a8d9` (2026-10-03),
   `b4fc87c` (2026-10-02), `f1c59a8` (agent/enrichment/pipeline implementation),
   `6129e14` (remediation stage, last implementation commit before 83b10fb).
-||- **Working tree:** tracked files **unmodified** at HEAD (b2d0fee72f).
+||- **Working tree:** tracked files **unmodified** at HEAD (88f2b2c12e979000aaaa604955e205010f76c133).
 |- **Test count:** 248 passed, 29 subtests — reported historical result (date 2026-10-19
   not independently verifiable from repository evidence; no test output file present).
   Full suite: 241 passed, 29 subtests, 2 warnings (re-run 2026-10-10): 53 reporter, 45 agent,
@@ -376,7 +390,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
   > No test output file exists on disk to confirm either figure.
 
 
-### Implementation state (published HEAD `b2d0fee72f`; 2026-11-06)
+### Implementation state (published HEAD `88f2b2c12e979000aaaa604955e205010f76c133`; 2026-11-06)
 |- **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (W3, merged) — 5 new test methods, 62 lines added. `parse_pyproject_toml()` reads `[project].dependencies` and `[project.optional-dependencies]` into a `DependencyGraph` with `edge_availability = "unavailable"`. `parse_package_json()` added (W9, committed `1ad2a7b`). **Status: 3/4 minimum formats (requirements.txt, pyproject.toml, package.json). Remaining to reach the ≥4 target: go.mod (W10 blocker).**
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
@@ -394,11 +408,11 @@ Owner: Team. Depends: dashboard (T-DE-04).
   `6129e14`): `build_remediation_plan` (pure; one item per finding; fixed versions
   verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
-  fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`). A real model
-  A real model backend (any OpenAI-compatible endpoint, user-configured) is **not yet wired** (pending decision);
+  fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`).
+  A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured) is **not yet wired** (pending decision);
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
-  explainer plus an optional OpenAI-compatible local-model client (env-only config,
+  explainer plus an optional **OpenAI/ChatGPT, Claude, or a custom** local-model client (env-only config,
   per-finding deterministic fallback) — tested by `tests/test_explanation.py` (23) and
   `tests/test_explanation_http.py` (7).
 
@@ -415,5 +429,5 @@ Owner: Team. Depends: dashboard (T-DE-04).
 - Search bar: pending — no repository evidence of implementation as of 2026-11-06. W9 plan step 3 marked "pending: search bar not yet implemented."
 - Severity filter: plan expects numeric `severity_score` threshold (≥ 7.0 matches; below 7.0 = Unknown; null = Unknown).
 - go.mod indirect deps: unresolved — direct only or transitive? TASKS.md §DECISIONS.
-- OSV severity mapping: unresolved — TASKS.md §DECISIONS.
+- **OSV severity mapping:** resolved — TASKS.md §DECISIONS (Low: 0.1–3.9, Medium: 4.0–6.9, High: 7.0–10.0).
 - Professor recommendations (agent handoffs with context blocks, evidence-grounded solutions, user approval before code changes, ML/model support, architecture diagrams) are **proposed design work pending team/sponsor agreement**; they are not implemented. The current remediation behavior is read-only (no manifest edits, no package installs, no execution of project code; no resolution claim without an after-scan).

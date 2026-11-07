@@ -4,8 +4,8 @@
 **Host:** vale-llm
 **Branch:** `feat/inventory-report`
 **Published baseline:** `83b10fb` ("feat: add opt-in explanations and read-only dashboard", 2026-10-19) — the current live tip of `feat/inventory-report`, pushed to `origin/feat/inventory-report`.
-**Current HEAD (local):** `b2d0fee72f` (W9 planning docs pushed to origin, 2026-11-06; uncommitted edits in working tree preserved).
-**Published tip:** `origin/feat/inventory-report` = `b2d0fee72f`.
+**Current HEAD (local):** `88f2b2c12e979000aaaa604955e205010f76c133` (W9 planning docs pushed to origin, 2026-11-06; uncommitted edits in working tree preserved).
+**Published tip:** `origin/feat/inventory-report` = `88f2b2c12e979000aaaa604955e205010f76c133`.
 
 `6129e14` ("feat(agent): add evidence-grounded remediation verification", 2026-10-10)
 is the last commit that changed implementation code before the explanation/dashboard slice.
@@ -52,7 +52,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   append-only `EvidenceTrail`; out-of-band choices fall back to a grounded deterministic
   policy (recorded). On the flat fixture (5 findings, 4 packages, 0 edges) a run reports
   `risk.status == "unavailable"` and `risk.score is None` with *"No score is
-  fabricated; this is an inventory-only result."* A **real** model backend (any OpenAI-compatible endpoint, user-configured) is a pending decision — not yet wired.
+  fabricated; this is an inventory-only result."* A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured) is a pending decision — not yet wired.
 - **Remediation stage (`src/agent/`) — implemented and published in `6129e14`:** a pure
   `build_remediation_plan` (one item per baseline finding; scanner-provided fixed
   versions verbatim, never "latest"/"best"; `severity_score` left `None` — no numeric
@@ -65,7 +65,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 - **Explanation layer (`src/explanation/`, committed 83b10fb):** a grounded
   deterministic explainer (default; `explain_finding` / `explain_findings`) that cites
   only facts already on the finding and never fabricates a numeric CVSS score, version,
-  or CVE. Plus an optional OpenAI-compatible local-model client
+  or CVE. Plus an optional **OpenAI/ChatGPT, Claude, or a custom** local-model client
   (`src/explanation/local_model.py`) targeting a single `/v1/chat/completions` endpoint
   via stdlib `urllib`, configured only by `OPENAI_BASE_URL` / `OPENAI_API_KEY` (no
   credentials or endpoint secrets committed). `add_explanations` is additive: it adds
@@ -99,7 +99,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   by default**; it requires explicit opt-in. Deterministic fallback is guaranteed
   and labelled `source` per finding.
 
-## Implementation state (published HEAD `83b10fb`; explanation + dashboard committed)
+## Implementation state (current tree: `88f2b2c12e979000aaaa604955e205010f76c133`; published baseline `83b10fb`)
 
 - **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (PR #4, merged 5d1101d, 2026-11-02). `parse_pyproject_toml()` added with fixture `tests/fixtures/pyproject_with_deps.toml` and **5 new test methods** (`tests/test_parser.py`). `parse_package_json()` added (W9, committed `1ad2a7b`). The repo-root `pyproject.toml` declares no dependencies (confirmed by `test_repo_pyproject_has_no_dependencies`). **Status: 3/4 minimum formats (requirements.txt, pyproject.toml, package.json). Remaining to reach the ≥4 target: go.mod (W10 blocker).**
 |- **Engine (T-DE-02):** PHEI path-max scoring implemented
@@ -138,10 +138,10 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
   fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`). A real model
-  backend (any OpenAI-compatible endpoint, user-configured) is **not yet wired** (pending decision);
+  backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured) is **not yet wired** (pending decision);
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
-  explainer plus an optional OpenAI-compatible local-model client (env-only config,
+  explainer plus an optional **OpenAI/ChatGPT, Claude, or a custom** local-model client (env-only config,
   per-finding deterministic fallback) — tested by `tests/test_explanation.py` (23) and
   `tests/test_explanation_http.py` (7).
 
@@ -152,7 +152,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
    is read-only and dependency-free.
 2. **Dependency-graph serializer (T-DE-03):** unimplemented; inventory-only input
    produces no risk score (by design, `risk.status == "unavailable"`).
-3. **Real NVD/OSV end-to-end scan:** NVD/OSV client code present but not yet run
+3. **Real NVD/OSV end-to-end scan:** Client code present; repo-root scan returned 0 findings (no known CVEs in project deps). **Gap:** no controlled project with known CVEs has been scanned end-to-end (W11 target).
    against a real project.
 4. **Edge-weight function (ROADMAP §7):** Resolved. Systemic risk is topology-only (path-max × impact-multiplicity, capped at 10.0). Severity is handled by `calculate_systemic_risk()`. No fabricated edge weights.
 
@@ -191,8 +191,20 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 - **Nick's W9 parser deliverable (W9-Nick.md):** ✅ **3/4 minimum formats reached.** `parse_pyproject_toml()` (PR #4, merged `5d1101d`) + `parse_package_json()` (W9, committed `1ad2a7b`). The repo-root `pyproject.toml` declares **no** dependencies (confirmed by `test_repo_pyproject_has_no_dependencies`). **Status: 3/4 minimum formats (requirements.txt, pyproject.toml, package.json). Remaining to reach the ≥4 target: go.mod (W10 deliverable).**
 
 - **Edge-weight function (ROADMAP §7):** Resolved. Systemic risk is topology-only (path-max × impact-multiplicity, capped at 10.0). Severity is handled by `calculate_systemic_risk()`. No fabricated edge weights.
+- **Clean repo scan vs. controlled demo:** The repo-root OSV-Scanner scan (0 findings) is a **clean-repository scan**, not a demo. The December demo uses a **controlled vulnerable project** (fixture with known CVEs) — never present the fixture's findings as real project findings. The two are distinct and must not be conflated.
+- **Complete demo flow (T-DE-02 + T-DE-03, W10–W13):**
+  - **Owner:** Vale (scanner/reporter), Christian (dashboard), Aliyan (demo validation)
+  - **Due:** Dec 8 rehearsal, Dec 9 presentation
+  - **Acceptance criteria (W10–W13):**
+    1. Scan a controlled vulnerable project (fixture with known CVEs, clearly labeled as non-real).
+    2. Show OSV findings and severity scores on the dashboard.
+    3. Generate grounded AI explanation and fix recommendation (user-selectable endpoint: OpenAI/ChatGPT, Claude, or custom).
+    4. Require visible human approval before applying any patch.
+    5. Apply only the approved patch; run a second scan.
+    6. Report only verified results (no unverified claims).
+  - **Systemic risk vs. PHEI:** Systemic risk (CVE severity × topology) and PHEI (topology-only path-max × impact-multiplicity) are **separate results**. Risk is unavailable when topology or scoring evidence is missing.
 - **Post-demo next steps:** What comes after the December deliverable? — Not yet decided.
-- **AI backend:** any OpenAI-compatible endpoint (user-selected); deterministic fallback when no provider configured.
+- **AI backend:** **OpenAI/ChatGPT, Claude, or a custom endpoint** (user-selected); deterministic fallback when no provider configured.
 
 ## Critical dependency correction
 

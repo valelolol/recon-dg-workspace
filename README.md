@@ -28,7 +28,7 @@ pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
 5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard.
 The **stdlib-only dashboard** (`src/web/`) and the **explanation layer**
 (`src/explanation/` — a grounded deterministic explainer plus an optional
-OpenAI-compatible local-model client) are **committed** (83b10fb, 2026-10-19)
+**OpenAI/ChatGPT, Claude, or a custom** local-model client) are **committed** (83b10fb, 2026-10-19)
 and verified by real loopback HTTP tests (248 passed, 29 subtests — reported historical
 result, 2026-10-19; date not independently verifiable from repository evidence).
 The **full Flask+D3** dashboard and a *real* local model remain **planned**
@@ -141,7 +141,7 @@ deterministic policy. On the checked-in flat fixture (`tests/data/osv-scanner.js
 5 findings, 4 packages, 0 edges) a 7-turn run reports `risk.status == "unavailable"`,
 `risk.score is None`, with the message *"No score is fabricated; this is an
 inventory-only result"* — no invented edges, no invented score, consistent with
-the inventory-only contract. The **explanation layer** (`src/explanation/`) is **committed** (83b10fb) and verified: a grounded deterministic explainer plus an optional local-model client (env-only `OPENAI_BASE_URL` / `OPENAI_API_KEY` pointing to any `/v1/chat/completions` endpoint). **The user selects and configures the provider (ChatGPT, Claude, or a custom URL/IP/port with credentials if required).** Model use is **not approved by default**; it requires explicit opt-in (`--model ON` + configured endpoint). Deterministic fallback is guaranteed and labelled `source` per finding. Full suite: **241 passed, 29 subtests, 2 warnings**.
+the inventory-only contract. The **explanation layer** (`src/explanation/`) is **committed** (83b10fb) and verified: a grounded deterministic explainer plus an optional local-model client (env-only `OPENAI_BASE_URL` / `OPENAI_API_KEY` pointing to any `/v1/chat/completions` endpoint). **The user selects and configures the provider (ChatGPT, Claude, or a custom URL/IP/port with credentials if required).** Model use is **not approved by default**; it requires explicit opt-in (`--model ON` + configured endpoint).
 
 ## Implemented explanation layer and read-only dashboard (committed 83b10fb)
 
@@ -177,8 +177,7 @@ real loopback HTTP tests (248 passed, 29 subtests — reported historical result
   The **default** is a grounded deterministic explainer
   (`src/explanation/deterministic.py`) that cites only facts already on the
   finding and never fabricates a numeric CVSS score, version, or CVE. The
-  **optional** backend (`src/explanation/local_model.py`) targets a single
-  OpenAI-compatible `/v1/chat/completions` endpoint via stdlib `urllib`,
+  The **optional** backend (`src/explanation/local_model.py`) targets **OpenAI/ChatGPT, Claude, or a custom** `/v1/chat/completions` endpoint via stdlib `urllib`,
   configured only by the `OPENAI_BASE_URL` / `OPENAI_API_KEY` environment
   variables (no credentials or endpoint secrets are committed). Model output is
   *optional explanatory text only*: `add_explanations(report, use_model=True)`
