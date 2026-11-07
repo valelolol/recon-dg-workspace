@@ -2,15 +2,13 @@
 # 2026-11-03 to 2026-11-09
 
 ## Goal
-Create the Dec 8 rehearsal checklist and the ≥10-step demo script for the December 9 presentation. Verify the dashboard search bar + severity filter.
+W10 deliverable (moved from W9): Create the Dec 8 rehearsal checklist and the ≥10-step demo script for the December 9 presentation. Verify the dashboard search bar + severity filter.
 
 ## Evidence
-- `src/web/dashboard.html` has a search bar (package name) and severity filter dropdown (numeric `severity_score` threshold).
+- **No repository evidence of search bar or severity_score threshold filter in `src/web/dashboard.html` as of 2026-11-06.** The W9 plan expected this; it has not been delivered.
 - `docs/fixtures/report-fixture-demo.json` (committed in `1ad2a7b8`) uses `severity` (not `severity_score`); normalizer expects `severity_score`. **Mismatch documented by Christian.**
 - Dec 8 rehearsal: one place only — `docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md` §Dec 8 Rehearsal.
 - `docs/demo-validation/` directory does not exist yet.
-- **Implementation details:** Search bar filters by `package_name` (case-insensitive, partial match). Severity filter shows only findings at or above selected numeric `severity_score` threshold; scores ≥ 7.0 match the selected threshold; scores below 7.0 are below threshold; null scores remain Unknown and are not classified. All JavaScript inlined in existing HTML file. No new Python files, no new dependencies, no Flask/D3 rewrite, no Docker.
-- **EvidenceTrail correction:** `EvidenceTrail` is the agent's per-turn tool-call log (`src/agent/agent.py:84`), not a report field. No `evidence` field on findings.
 - `ai_explanations` carries deterministic explanations (from `src/explanation/deterministic.py`, 5,311 bytes); `src/explanation/local_model.py` (14,362 bytes) is the optional local-model client.
 - `--model ON` still requires `OPENAI_API_KEY` env var (not baked into any output).
 - **Findings schema confirmed:** `severity_score` (float | null), `package_name`, `vulnerability_id`, `aliases`, `ecosystem`, `published`, `vulnerability_spec`, `fixed_versions`, plus `ai_explanations`.

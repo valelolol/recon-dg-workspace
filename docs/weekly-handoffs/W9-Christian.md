@@ -2,7 +2,7 @@
 # 2026-11-03 to 2026-11-09
 
 ## Goal
-Extend `tests/test_dashboard.py` for real report rendering: empty input, malformed input, unknown-topology behavior. Verify the untracked `src/web/osv_normalizer.py` against the dashboard contract.
+W10 deliverable (moved from W9): Extend `tests/test_dashboard.py` for real report rendering: empty input, malformed input, unknown-topology behavior. Verify the untracked `src/web/osv_normalizer.py` against the dashboard contract.
 
 ## Evidence
 - `src/web/dashboard.html` serves at `/` via `python -m src.web`. CSS vars: `--bg:#0f1216`, `--card:#161b22`, `--accent:#4da3ff`, `--ok:#3fb96f`, `--warn:#ffb52a`, `--bad:#ff5e62`, `--det:#7c8b9e`.

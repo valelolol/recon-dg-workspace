@@ -45,7 +45,7 @@ real AI model backend are not yet implemented.*
 
 ## Getting started (read this first)
 
-> **Start here tonight:** [W9 kickoff page](docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md) → [W9-parser.md](docs/weekly-handoffs/W9-parser.md) → [W9-dashboard-validation.md](docs/weekly-handoffs/W9-dashboard-validation.md) → [W9-demo-validation.md](docs/weekly-handoffs/W9-demo-validation.md) → [W9-engine-and-reporter.md](docs/weekly-handoffs/W9-engine-and-reporter.md)
+> **Start here tonight:** [W9 kickoff page](docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md) → [W9-Nick.md](docs/weekly-handoffs/W9-Nick.md) → [W9-Vale.md](docs/weekly-handoffs/W9-Vale.md) → [W9-Christian.md](docs/weekly-handoffs/W9-Christian.md) → [W9-Aliyan.md](docs/weekly-handoffs/W9-Aliyan.md)
 
 - **`docs/TEAM_ONBOARDING.md`** — how to clone the repo and set up **your own computer**
   (Git + Python checks, a personal branch, a virtual environment, and how to validate
@@ -141,9 +141,7 @@ deterministic policy. On the checked-in flat fixture (`tests/data/osv-scanner.js
 5 findings, 4 packages, 0 edges) a 7-turn run reports `risk.status == "unavailable"`,
 `risk.score is None`, with the message *"No score is fabricated; this is an
 inventory-only result"* — no invented edges, no invented score, consistent with
-the inventory-only contract. Wiring a **real** model backend (local llama.cpp
-endpoint vs. user-provided API key) is a pending decision (see `TASKS.md`) and is
-not yet implemented. Full suite: **241 passed, 29 subtests, 2 warnings**.
+the inventory-only contract. The **explanation layer** (`src/explanation/`) is **committed** (83b10fb) and verified: a grounded deterministic explainer plus an optional local-model client (env-only `OPENAI_BASE_URL` / `OPENAI_API_KEY` pointing to a **local** llama.cpp endpoint). **No remote API key is required for the December deliverable.** Model use is **not approved by default**; it requires explicit opt-in (`--model ON` + local endpoint). Deterministic fallback is guaranteed and labelled `source` per finding. Full suite: **241 passed, 29 subtests, 2 warnings**.
 
 ## Implemented explanation layer and read-only dashboard (committed 83b10fb)
 
@@ -199,23 +197,32 @@ real loopback HTTP tests (248 passed, 29 subtests — reported historical result
 
   **Model activation:** `--model` defaults to **OFF** (deterministic only). The
   dashboard CLI flag `--model` defaults to `"OFF"`. Only the exact value `--model ON`
-  (case-insensitive) enables the optional local-model backend. When **ON** and
-  `OPENAI_BASE_URL` / `OPENAI_API_KEY` are configured, the dashboard sends
-  **finding data** (package name, version, vulnerability ID, aliases, severity score,
-  severity vector, severity types, published date, affected range, fixed versions,
-  recommended action) to the configured endpoint. Whether the configured endpoint
-  is unencrypted HTTP or encrypted HTTPS is an **open privacy decision** — the
-  endpoint receives the API key and finding data in either case. Model use is
-  **not approved by default**; it requires explicit opt-in.
+  (case-insensitive) enables the optional local-model backend, which targets a **local**
+  llama.cpp `/v1/chat/completions` endpoint via `OPENAI_BASE_URL` / `OPENAI_API_KEY` env
+  vars. **No remote endpoint is approved by default.** When **ON** and the local endpoint
+  is configured, the dashboard sends **finding data** (package name, version, vulnerability
+  ID, aliases, severity score, severity vector, severity types, published date, affected
+  range, fixed versions, recommended action) to the configured endpoint. Whether the
+  configured endpoint is unencrypted HTTP or encrypted HTTPS is an **open privacy decision**
+  — the endpoint receives the API key and finding data in either case. Model use is
+  **not approved by default**; it requires explicit opt-in. Deterministic fallback is
+  guaranteed and labelled `source` per finding — on *any* per-finding failure (no config,
+  network/timeout, non-2xx status, malformed body, empty or non-string completion) that
+  finding falls back to the grounded deterministic text; the request is bounded by a hard
+  `max_calls` cap. Findings, severity, fixed versions, risk, remediation, and
+  verification are **never modified** by this layer. Verified by
+  `tests/test_explanation.py` (20), `tests/test_explanation_http.py` (7, a real
+  local `/v1/chat/completions` server driven by real `urllib` requests — no
+  injected transport seam), and the dashboard tests above.
 
 ## Key documents
 
 |- [docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md](docs/weekly-plan/W9-2026-11-03-to-2026-11-09.md) — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
 |- [docs/weekly-handoffs/](docs/weekly-handoffs/) — individual handoffs for each teammate:
-  - [W9-parser.md](docs/weekly-handoffs/W9-parser.md) — Nick · one additional manifest format + focused fixture/tests
-  - [W9-engine-and-reporter.md](docs/weekly-handoffs/W9-engine-and-reporter.md) — Vale · one reproducible real-project OSV-Scanner scan (scan-to-report integration met 2026-11-03; `report.json` written)
-  - [W9-dashboard-validation.md](docs/weekly-handoffs/W9-dashboard-validation.md) — Christian · offline tests for scan JSON → normalized report path (empty/malformed input, unknown-topology); no Docker this week
-  - [W9-demo-validation.md](docs/weekly-handoffs/W9-demo-validation.md) — Aliyan · bounded search bar + numeric `severity_score` threshold filter in `src/web/dashboard.html` (after checking feature exists); no Flask/D3
+  - [W9-Nick.md](docs/weekly-handoffs/W9-Nick.md) — Nick · one additional manifest format + focused fixture/tests
+  - [W9-Vale.md](docs/weekly-handoffs/W9-Vale.md) — Vale · one reproducible real-project OSV-Scanner scan (scan-to-report integration met 2026-11-03; `report.json` written)
+  - [W9-Christian.md](docs/weekly-handoffs/W9-Christian.md) — Christian · offline tests for scan JSON → normalized report path (empty/malformed input, unknown-topology); no Docker this week
+  - [W9-Aliyan.md](docs/weekly-handoffs/W9-Aliyan.md) — Aliyan · bounded search bar + numeric `severity_score` threshold filter in `src/web/dashboard.html` (after checking feature exists); no Flask/D3
 ||- **Historical handoffs (W1–W7):** removed from the repository (see the rule in `docs/weekly-handoff-template.md` that old handoff files must not be archived in the repo). The M-DE-CORE week (Sep 28–Oct 4, 2026) is documented in `docs/WEEKLY.md` (historical) and `TASKS.md` §47.
 - [docs/WEEKLY.md](docs/WEEKLY.md) — historical weekly focus and acceptance criteria (M-DE-CORE demo week, Sep 28–Oct 4 2026; files removed from repo)
 
