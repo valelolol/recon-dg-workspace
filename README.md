@@ -141,7 +141,7 @@ deterministic policy. On the checked-in flat fixture (`tests/data/osv-scanner.js
 5 findings, 4 packages, 0 edges) a 7-turn run reports `risk.status == "unavailable"`,
 `risk.score is None`, with the message *"No score is fabricated; this is an
 inventory-only result"* — no invented edges, no invented score, consistent with
-the inventory-only contract. The **explanation layer** (`src/explanation/`) is **committed** (83b10fb) and verified: a grounded deterministic explainer plus an optional local-model client (env-only `OPENAI_BASE_URL` / `OPENAI_API_KEY` pointing to a **local** llama.cpp endpoint). **No remote API key is required for the December deliverable.** Model use is **not approved by default**; it requires explicit opt-in (`--model ON` + local endpoint). Deterministic fallback is guaranteed and labelled `source` per finding. Full suite: **241 passed, 29 subtests, 2 warnings**.
+the inventory-only contract. The **explanation layer** (`src/explanation/`) is **committed** (83b10fb) and verified: a grounded deterministic explainer plus an optional local-model client (env-only `OPENAI_BASE_URL` / `OPENAI_API_KEY` pointing to any `/v1/chat/completions` endpoint). **The user selects and configures the provider (ChatGPT, Claude, or a custom URL/IP/port with credentials if required).** Model use is **not approved by default**; it requires explicit opt-in (`--model ON` + configured endpoint). Deterministic fallback is guaranteed and labelled `source` per finding. Full suite: **241 passed, 29 subtests, 2 warnings**.
 
 ## Implemented explanation layer and read-only dashboard (committed 83b10fb)
 
@@ -197,9 +197,9 @@ real loopback HTTP tests (248 passed, 29 subtests — reported historical result
 
   **Model activation:** `--model` defaults to **OFF** (deterministic only). The
   dashboard CLI flag `--model` defaults to `"OFF"`. Only the exact value `--model ON`
-  (case-insensitive) enables the optional local-model backend, which targets a **local**
-  llama.cpp `/v1/chat/completions` endpoint via `OPENAI_BASE_URL` / `OPENAI_API_KEY` env
-  vars. **No remote endpoint is approved by default.** When **ON** and the local endpoint
+  (case-insensitive) enables the optional local-model backend, which targets any
+  `/v1/chat/completions` endpoint via `OPENAI_BASE_URL` / `OPENAI_API_KEY` env
+  vars. **No remote endpoint is approved by default.** When **ON** and the endpoint
   is configured, the dashboard sends **finding data** (package name, version, vulnerability
   ID, aliases, severity score, severity vector, severity types, published date, affected
   range, fixed versions, recommended action) to the configured endpoint. Whether the

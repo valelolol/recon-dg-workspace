@@ -57,8 +57,7 @@ invents data, and risk is reported as `unavailable`/`None` when topology is unav
   runs fully without a model and degrades gracefully rather than crashing.
 
 **Consequences / follow-ups:**
-- A **real** model backend is a *pending* decision (local llama.cpp endpoint vs.
-  user-provided API key) and is **not yet wired**; current runs use the deterministic
+- A **real** model backend is a *pending* decision (any OpenAI-compatible endpoint, user-configured) and is **not yet wired**; current runs use the deterministic
   policy (`used_llm=False`).
 - Verified by `tests/test_agent.py` (22 passing) against the checked-in flat fixture
   (`tests/data/osv-scanner.json`: 5 findings, 4 packages, 0 edges → `risk.status ==

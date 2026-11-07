@@ -102,15 +102,15 @@
 
 ### W5 — Wire the configured model endpoint (proposed; no registered task ID)
 
-**Milestone:** The opt-in explanation layer (already implemented, defaults `--model OFF`) is wired to the team's chosen endpoint (llama.cpp local model or user API key). Deterministic grounded fallback remains active when the model is unavailable.
+**Milestone:** The opt-in explanation layer (already implemented, defaults `--model OFF`) is wired to the team's chosen endpoint (any OpenAI-compatible endpoint, user-selected). Deterministic grounded fallback remains active when the model is unavailable.
 
 **Why fifth:** Depends on W3 (needs findings to explain).
 
 **Deliverable:** `src/agent/` wired to the chosen endpoint. `--model ON` enables the layer; `--model OFF` (default) uses the deterministic grounded explainer. All model output is additive only (never modifies findings).
 
-**Verification:** `python -m src.agent --model OFF` is **unavailable** — the `src/agent` layer has no `--model` CLI flag. `--model` is a `src.web` dashboard flag (serves an existing report only; requires `OPENAI_BASE_URL` + `OPENAI_API_KEY` for `--model ON`). The agent layer is already implemented (bounded tool loop, `EvidenceTrail`, deterministic grounded policy) but its endpoint wiring (llama.cpp vs. user API key) is pending.
+**Verification:** `python -m src.agent --model OFF` is **unavailable** — the `src/agent` layer has no `--model` CLI flag. `--model` is a `src.web` dashboard flag (serves an existing report only; requires `OPENAI_BASE_URL` + `OPENAI_API_KEY` for `--model ON`). The agent layer is already implemented (bounded tool loop, `EvidenceTrail`, deterministic grounded policy) but its endpoint wiring (any OpenAI-compatible endpoint, user-configured) is pending.
 
-> **Decision-dependent:** Team to decide llama.cpp vs. user API key. The agent layer is **already implemented** — only the endpoint wiring is pending.
+> **Decision-dependent:** User selects any OpenAI-compatible endpoint. The agent layer is **already implemented** — only the endpoint wiring is pending.
 
 ### W6 — Docker packaging — **dismissed / out of scope** (2026-11-03)
 
@@ -133,6 +133,8 @@
 ### W9 — Weekly handoffs (2026-11-03 to 2026-11-09)
 
 **Four active handoffs, one per team member.** No archived W1–W8 or M-DE-CORE handoffs restored.
+
+**December timeline:** Dec 3 (candidate freeze), Dec 4 (team demo), Dec 7 (team demo), Dec 8 (rehearsal/buffer), Dec 9 (presentation).
 
 | Member | Handoff file | Focus |
 |--------|-------------|-------|

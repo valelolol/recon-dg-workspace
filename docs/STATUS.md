@@ -52,8 +52,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   append-only `EvidenceTrail`; out-of-band choices fall back to a grounded deterministic
   policy (recorded). On the flat fixture (5 findings, 4 packages, 0 edges) a run reports
   `risk.status == "unavailable"` and `risk.score is None` with *"No score is
-  fabricated; this is an inventory-only result."* A **real** model backend (llama.cpp
-  vs. user API key) is a pending decision — not yet wired.
+  fabricated; this is an inventory-only result."* A **real** model backend (any OpenAI-compatible endpoint, user-configured) is a pending decision — not yet wired.
 - **Remediation stage (`src/agent/`) — implemented and published in `6129e14`:** a pure
   `build_remediation_plan` (one item per baseline finding; scanner-provided fixed
   versions verbatim, never "latest"/"best"; `severity_score` left `None` — no numeric
@@ -89,9 +88,9 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   loopback GETs).
 - **Model activation:** `--model` defaults to **OFF** (deterministic only). Only the
   exact value `--model ON` (case-insensitive) enables the optional local-model backend.
-  The backend is a **local** llama.cpp `/v1/chat/completions` endpoint via
+  The backend targets any `/v1/chat/completions` endpoint via
   `OPENAI_BASE_URL` / `OPENAI_API_KEY` env vars. **No remote endpoint is approved
-  by default.** When **ON** and the local endpoint is configured, the dashboard sends
+  by default.** When **ON** and the endpoint is configured, the dashboard sends
   **finding data** (package name, version, vulnerability ID, aliases, severity
   score, severity vector, severity types, published date, affected range, fixed versions,
   recommended action) to the configured endpoint. Whether the configured endpoint is
@@ -139,7 +138,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
   fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`). A real model
-  backend (llama.cpp vs. user API key) is **not yet wired** (pending decision);
+  backend (any OpenAI-compatible endpoint, user-configured) is **not yet wired** (pending decision);
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
   explainer plus an optional OpenAI-compatible local-model client (env-only config,
@@ -193,7 +192,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 
 - **Edge-weight function (ROADMAP §7):** Resolved. Systemic risk is topology-only (path-max × impact-multiplicity, capped at 10.0). Severity is handled by `calculate_systemic_risk()`. No fabricated edge weights.
 - **Post-demo next steps:** What comes after the December deliverable? — Not yet decided.
-- **AI backend:** Local llama.cpp confirmed (deterministic fallback). No API key required.
+- **AI backend:** any OpenAI-compatible endpoint (user-selected); deterministic fallback when no provider configured.
 
 ## Critical dependency correction
 

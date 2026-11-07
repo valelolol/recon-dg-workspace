@@ -37,7 +37,7 @@ flowchart TD
     S20 -->|Yes| S23[Report: resolved]
 
     S10 --> S24[AI explanation? --model ON]
-    S24 --> S25[llama.cpp / User API]
+    S24 --> S25[Configured endpoint (any OpenAI-compatible / API key)]
     S25 --> S26[Deterministic fallback]
 
     S26 --> S12

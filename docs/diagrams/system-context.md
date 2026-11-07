@@ -36,7 +36,7 @@ graph TB
         end
 
         subgraph AI["W5: Model endpoint (opt-in)"]
-            A1[Configured endpoint (llama.cpp / API key)]
+            A1[Configured endpoint (any OpenAI-compatible / API key)]
             A2[Deterministic fallback (default)]
         end
 

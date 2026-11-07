@@ -54,8 +54,8 @@ The `src/agent` module is the agentic investigation layer. It is deliberately **
   output, and risk is reported as `unavailable`/`None` when topology is unavailable
   (no fabricated score).
 
-A pluggable `llm` callable may steer tool selection (the product's AI backend, local
-llama.cpp endpoint or user API key — a pending decision), but it is restricted to an
+A pluggable `llm` callable may steer tool selection (the product's AI backend, any
+OpenAI-compatible endpoint or user API key — the user selects and configures the provider), but it is restricted to an
 **allowlisted** tool set (`findings`, `get_finding`, `package_info`, `package_context`,
 `high_severity`, `risk_score`, `summary`, `stop`); anything out of band falls back to a
 grounded deterministic policy (recorded as evidence). The `package_context` tool is

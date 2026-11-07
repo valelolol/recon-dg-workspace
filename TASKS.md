@@ -23,12 +23,17 @@ array stays empty and risk is unavailable.
 **Synthetic data rule:** synthetic graph/advisory data is only for clearly labeled offline tests or a separate demo. It is **never** scanner evidence. Real scanner output (OSV-Scanner JSON) is the only valid input for the agent and PHEI scoring.
 
 ### December-critical path (in order)
-1. Parser: enough manifest formats to scan a real project.
-2. Engine: wire NVD/OSV into the graph so **real** CVE data flows into PHEI.
-3. Reporter: structured report schema + deterministic fallback.
-4. Dashboard: web app (graph + risks + per-package risk).
-5. AI explanations: `src/agent/` pluggable model layer (plain-language + prioritization).
-6. Docker: portable image + local-dev compose.
+1. **Dec 3 (Wed):** candidate freeze — all deliverables locked for review.
+2. **Dec 4 (Thu):** team demo (internal).
+3. **Dec 7 (Sun):** team demo (internal).
+4. **Dec 8 (Mon):** rehearsal/buffer.
+5. **Dec 9 (Tue):** presentation.
+6. Parser: enough manifest formats to scan a real project.
+7. Engine: wire NVD/OSV into the graph so **real** CVE data flows into PHEI.
+8. Reporter: structured report schema + deterministic fallback.
+9. Dashboard: web app (graph + risks + per-package risk).
+10. AI explanations: `src/agent/` pluggable model layer (plain-language + prioritization).
+11. Docker: portable image + local-dev compose.
 
 ## Task register
 
@@ -229,11 +234,11 @@ fixtures. Approval = an explicit user decision; do not treat this as agreed unti
 - PHEI is distinct from per-finding Low/Medium/High severity. It requires a known dependency graph and the approved scoring rule above.
 - If trustworthy topology or an approved PHEI scoring rule is absent, **report topology-based PHEI as unavailable**; do not fabricate a score.
 
-### Model backend — settled: local llama.cpp
-- **Use local llama.cpp for AI explanations in the demo.** API keys and remote inference are **not required** for the December deliverable.
-- Keep deterministic explanation fallback available when the local model is unavailable.
-- The `src/explanation/` layer's deterministic explainer is the default; the optional local-model client targets a local llama.cpp `/v1/chat/completions` endpoint (no remote API key needed).
-- **No remote endpoint is approved by default.** Model use requires explicit opt-in (`--model ON` + `OPENAI_BASE_URL` pointing to a local endpoint).
+### Model backend — any OpenAI-compatible endpoint (user-selected)
+|- **Any OpenAI-compatible endpoint is valid for AI explanations in the demo:** ChatGPT with a user API key, Claude with a user API key, or a custom endpoint configured by URL/IP and port (credentials if required). The user selects and configures the provider.
+|- Keep deterministic explanation fallback available when no provider is configured or the endpoint is unreachable.
+|- The `src/explanation/` layer's deterministic explainer is the default; the optional local-model client targets any `/v1/chat/completions` endpoint via `OPENAI_BASE_URL` / `OPENAI_API_KEY` (no credentials committed).
+|- **No remote endpoint is approved by default.** Model use requires explicit opt-in (`--model ON` + `OPENAI_BASE_URL` pointing to a configured endpoint).
 
 ### GUI — settled: standalone app for Windows/Linux
 - **Deliver a standalone GUI for Windows and Linux.** Docker is **dismissed/out of scope**.
@@ -311,7 +316,7 @@ Owner: Vale. Depends: engine (T-DE-02).
   **W9 real-project OSV-Scanner scan (Vale)**: `osv-scanner scan . --experimental-exclude tests examples docs` returned **0 findings** (clean scan; no known CVEs in project deps). Normalizer produces dashboard-compatible JSON (`risk.status: "unavailable"`, `risk.score: null` for inventory-only). 15 focused offline tests pass. `src/agent/normalizer.py` (445 lines) remains the older agent-format normalizer; `src/web/osv_normalizer.py` is the dashboard-format normalizer. No single canonical normalizer yet — two exist with different schemas. **NVD/OSV wiring now complete (2026-11-03): `risk_analyzer.py` patched — `get_cve_severity(node_key)` calls `NVDClient.query_nvd_api()`, then `query_osv_api()`; MOCK_CVE_DB removed from production path (audit 2026-11-03). Full suite: 275 tests pass.**
   loop is **not** "OSV-Scanner + LLM summary": every claim is backed by a real field
   from the OSV-Scanner output and every tool call is recorded. A **real** model backend
-  (llama.cpp vs. user API key — pending decision, see TASKS.md pending-decisions /
+  (any OpenAI-compatible endpoint, user-configured — pending decision, see TASKS.md pending-decisions /
   `docs/STATUS.md`) is **not yet wired** (`used_llm=False` in current runs).
 - [x] Deterministic plain-language fallback when no model is configured / generation fails
 - [x] Tests: `tests/test_agent.py` (45) + `tests/test_remediation.py` (24, remediation
@@ -332,7 +337,7 @@ Owner: Team. Depends: engine (T-DE-02) + reporter (T-DE-03).
 Owner: Team. Depends: dashboard (T-DE-04).
 - [ ] Finalize `src/web/dashboard.html` (read-only stdlib `http.server` + vanilla JS, no framework)
 - [ ] Ensure `python -m src.web --report <report.json> --port 8000` works on Windows and Linux
-- [ ] Add `--model ON/OFF` flag for local llama.cpp explanation toggle (deterministic fallback when OFF)
+- [ ] Add `--model ON/OFF` flag for any OpenAI-compatible endpoint explanation toggle (deterministic fallback when OFF)
 - [ ] Verify dashboard renders: findings table, risk status, remediation plan (fixed versions verbatim), `not_run` state
 - [ ] No Docker, no third-party deps, no API keys required
 - [ ] Single-command launch: `python -m src.web --report examples/fixtures/sample_risk_report.json --port 8000`
@@ -391,7 +396,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
   verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
   fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`). A real model
-  backend (llama.cpp vs. user API key) is **not yet wired** (pending decision);
+  A real model backend (any OpenAI-compatible endpoint, user-configured) is **not yet wired** (pending decision);
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
   explainer plus an optional OpenAI-compatible local-model client (env-only config,
