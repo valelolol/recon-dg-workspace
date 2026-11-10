@@ -9,8 +9,11 @@ recon-dg is a **dependency risk mapper**. One command must, for a given project:
 2. **Check** → look up known CVEs for each package via **OSV-Scanner** (the project's
    external vulnerability scanner — the project does *not* build a scanner from scratch);
    NVD/OSV data feeds the *engine's* enrichment layer, not the scanner.
-3. **Score systemic risk** → not "this package has a flaw," but whether low-severity
-   flaws combine along critical dependency paths into a real threat (PHEI path-max).
+|**Score systemic risk** → not "this package has a flaw," but whether low-severity
+   flaws combine along critical dependency paths into a real threat. PHEI (topology-only
+   path-max × impact-multiplicity, capped at 10.0) is a separate topology-based score;
+   severity-aware systemic risk is computed by `calculate_systemic_risk()` and is distinct
+   from PHEI. Neither score is fabricated without a known-topology source.
 4. **Display** → a clear dashboard showing the graph, per-package risk, and the top
    risk paths.
 5. **Explain** → an AI backend that turns each finding into plain-language explanations
@@ -229,12 +232,24 @@ fixtures. Approval = an explicit user decision; do not treat this as agreed unti
 - **Prefer the project's resolved lockfile or package-manager dependency tree** as the source of actual edges.
 - `deps.dev` may enrich or cross-check dependency information, but its graph can vary by environment/options. **Do not** silently treat it as the project's authoritative resolved graph.
 - **Never infer edges from an LLM or from a flat package list.**
-- **PHEI is a separate topology-based impact score with a transparent, deterministic 0–100 normalization.** It is computed on the known dependency graph using:
-  1. **Reachable dependents**: for each vulnerable package, count how many other packages transitively depend on it (direct + indirect). This is the "impact multiplicity."
-  2. **Recorded importance/criticality**: if the graph carries a `node_risks` dict (CVE-severity per node) or a separate `importance` field on nodes, use those as weighted factors. If no importance data exists, use unweighted reachable-dep counts only.
-  3. **Normalization**: `raw_score = Σ(reachable_dependents[node] × importance[node])` over all vulnerable nodes in the graph; `PHEI = min(100, raw_score / max(1, total_vulnerable_nodes) × 10)`. This yields a 0–100 score. If the graph has no known edges, PHEI is **unavailable** (do not fabricate a score).
-- PHEI is distinct from per-finding Low/Medium/High severity. It requires a known dependency graph and the approved scoring rule above.
-- If trustworthy topology or an approved PHEI scoring rule is absent, **report topology-based PHEI as unavailable**; do not fabricate a score.
+|- **PHEI (topology-only)**: current implementation is `path_weight × impact_multiplicity`
+   capped at **10.0** (not 100). It is a separate topology-based score; severity-aware
+   systemic risk is computed by `calculate_systemic_risk()` and is distinct from PHEI.
+   If the graph has no known edges, PHEI is **unavailable** (do not fabricate a score).
+|- **Proposed (unimplemented) 0–100 normalization** (for reference only — not code):
+  1. **Reachable dependents**: for each vulnerable package, count how many other packages
+     transitively depend on it (direct + indirect). This is the "impact multiplicity."
+  2. **Recorded importance/criticality**: if the graph carries a `node_risks` dict
+     (CVE-severity per node) or a separate `importance` field on nodes, use those as
+     weighted factors. If no importance data exists, use unweighted reachable-dep counts
+     only.
+  3. **Normalization**: `raw_score = Σ(reachable_dependents[node] × importance[node])`
+     over all vulnerable nodes in the graph; `PHEI = min(100, raw_score / max(1,
+     total_vulnerable_nodes) × 10)`. This yields a 0–100 score.
+|- PHEI is distinct from per-finding Low/Medium/High severity. It requires a known
+  dependency graph and the approved scoring rule above.
+|- If trustworthy topology or an approved PHEI scoring rule is absent, **report
+  topology-based PHEI as unavailable**; do not fabricate a score.
 
 ### Model backend — **OpenAI/ChatGPT, Claude, or a custom endpoint** (user-selected)
 ||- **OpenAI/ChatGPT, Claude, or a custom endpoint configured by URL/IP and port (credentials if required)** are valid for AI explanations in the demo. The user selects and configures the provider.
@@ -317,8 +332,7 @@ Owner: Vale. Depends: engine (T-DE-02).
   (or when the model is out of band), and `compare_scans` before/after delta. The
   **W9 real-project OSV-Scanner scan (Vale)**: `osv-scanner scan . --experimental-exclude tests examples docs` returned **0 findings** (clean scan; no known CVEs in project deps). Normalizer produces dashboard-compatible JSON (`risk.status: "unavailable"`, `risk.score: null` for inventory-only). 15 focused offline tests pass. `src/agent/normalizer.py` (445 lines) remains the older agent-format normalizer; `src/web/osv_normalizer.py` is the dashboard-format normalizer. No single canonical normalizer yet — two exist with different schemas. **NVD/OSV wiring now complete (2026-11-03): `risk_analyzer.py` patched — `get_cve_severity(node_key)` calls `NVDClient.query_nvd_api()`, then `query_osv_api()`; MOCK_CVE_DB removed from production path (audit 2026-11-03). Full suite: 275 tests pass.**
   loop is **not** "OSV-Scanner + LLM summary": every claim is backed by a real field
-  from the OSV-Scanner output and every tool call is recorded.  A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured — pending decision, see TASKS.md pending-decisions /
-  `docs/STATUS.md`) is **not yet wired** (`used_llm=False` in current runs).
+  from the OSV-Scanner output and every tool call is recorded.  A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-selected — resolved; the user selects and configures the provider) is **not yet wired** (`used_llm=False` in current runs).
 - [x] Deterministic plain-language fallback when no model is configured / generation fails
 - [x] Tests: `tests/test_agent.py` (45) + `tests/test_remediation.py` (24, remediation
   planning + after-scan verification, uncommitted) + `tests/test_report_generator.py` (8)
@@ -412,7 +426,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
   verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
   fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`).
-  A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured) is **not yet wired** (pending decision);
+  A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-selected) is **resolved** — the user selects and configures the provider; deterministic fallback when no provider configured.
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
   explainer plus an optional **OpenAI/ChatGPT, Claude, or a custom** local-model client (env-only config,

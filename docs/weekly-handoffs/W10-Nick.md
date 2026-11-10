@@ -6,7 +6,7 @@
 
 **Demo opportunities before presentation:** Dec 4 (Fri) and Dec 7 (Mon) are scheduled as internal team demos to validate the pipeline end-to-end before the Dec 9 presentation. Dec 8 (Tue) is a rehearsal/buffer day.
 
-**One sentence:** Complete the ≥4-format parser target by adding `go.mod` parsing to `src/parser/parser.py`, enabling the W11 end-to-end CVE→systemic-risk demo on a Go project.
+**One sentence:** Complete the ≥4-format parser target by adding `go.mod` parsing to `src/parser/parser.py` — the **fourth minimum** manifest format (not an extra beyond four) — enabling the W11 end-to-end CVE→systemic-risk demo on a Go project.
 
 ## Proposed accountable owner
 
@@ -57,7 +57,7 @@ python -c "from src.parser.parser import parse_go_mod; g = parse_go_mod('example
 ## Security / privacy controls
 
 - No fabricated edges; inventory-only → `UnavailableTopologyError`
-- `go.mod` indirect dependencies: direct only (team decision pending)
+- **Decision (owner: Nick, due: W11 Tue Nov 17)**: go.mod indirect dependencies — direct only or transitive? Default: direct only (matches `go.mod`'s `require` section semantics). Document the decision in `docs/REVIEW-DECISIONS.md` before W11 scan.
 - Do NOT restore any archived W1–W9 handoff files
 
 ## Fallback
@@ -74,8 +74,8 @@ python -c "from src.parser.parser import parse_go_mod; g = parse_go_mod('example
 
 ## Questions / blockers
 
-- `go.mod` indirect dependencies: direct only or transitive? (team decision pending)
-- Should the demo use a Go project or a Python project with known CVEs? (team decision)
+- **Decision (owner: Nick, due: W11 Tue Nov 17)**: go.mod indirect dependencies — direct only or transitive? Default: direct only. Document in `docs/REVIEW-DECISIONS.md`.
+- Should the demo use a Go project or a Python project with known CVEs? (team decision; default: Go if Nick's parser delivers, else Python with known CVEs)
 - No Aliyan task this week — no natural task for Aliyan in parser work.
 
 ---

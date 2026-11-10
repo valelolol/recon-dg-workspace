@@ -6,7 +6,12 @@
 
 **Demo opportunities before presentation:** Dec 4 (Fri) and Dec 7 (Mon) are scheduled as internal team demos to validate the pipeline end-to-end before the Dec 9 presentation. Dec 8 (Tue) is a rehearsal/buffer day.
 
-**One sentence:** Implement the dependency-graph serializer (T-DE-03 Mode B) in `src/reporter/report_generator.py` so that a real CVE scan can produce a structured `RiskReport` with findings, evidence, and remediation plan — the blocker for the W11 end-to-end CVE→systemic-risk demo.
+**One sentence:** Plan: implement the dependency-graph serializer (T-DE-03 Mode B) in
+   `src/reporter/report_generator.py` so that a real CVE scan can produce a structured
+   `RiskReport` with findings, evidence, and remediation plan — the blocker for the
+   W11 end-to-end CVE→systemic-risk demo. **Current state:** `generate_report()` returns
+   a Markdown string (Mode A inventory-only); Mode B `RiskReport` emission is unimplemented
+   and documented as planned in TASKS.md §T-DE-03.
 
 ## Proposed accountable owner
 
@@ -27,7 +32,7 @@ Vale.
 | Direction | Artifact | Format |
 |-----------|----------|--------|
 | Input | `src/reporter/report_generator.py` (Mode A only) | Python module with inventory serializer |
-| Output | `src/reporter/report_generator.py` with Mode B serializer | Python module with Mode B: emits `RiskReport` with `findings[]`, `evidence[]`, `risk`, `remediation_plan[]` |
+| Output | `src/reporter/report_generator.py` with Mode B serializer (planned) | Python module; planned Mode B: emits `RiskReport` with `findings[]`, `evidence[]`, `risk`, `remediation_plan[]` — **currently unimplemented**; `generate_report()` returns a Markdown string (Mode A inventory-only) |
 
 ## Deliverable (one bounded item)
 

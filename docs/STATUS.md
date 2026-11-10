@@ -52,7 +52,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   append-only `EvidenceTrail`; out-of-band choices fall back to a grounded deterministic
   policy (recorded). On the flat fixture (5 findings, 4 packages, 0 edges) a run reports
   `risk.status == "unavailable"` and `risk.score is None` with *"No score is
-  fabricated; this is an inventory-only result."* A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured) is a pending decision — not yet wired.
+  fabricated; this is an inventory-only result."* A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-selected) is **resolved** — the user selects and configures the provider; deterministic fallback when no provider configured.
 - **Remediation stage (`src/agent/`) — implemented and published in `6129e14`:** a pure
   `build_remediation_plan` (one item per baseline finding; scanner-provided fixed
   versions verbatim, never "latest"/"best"; `severity_score` left `None` — no numeric
@@ -138,7 +138,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
   verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
   fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`). A real model
-  backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured) is **not yet wired** (pending decision);
+  backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-selected) is **resolved** — the user selects and configures the provider; deterministic fallback when no provider configured.
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
   explainer plus an optional **OpenAI/ChatGPT, Claude, or a custom** local-model client (env-only config,

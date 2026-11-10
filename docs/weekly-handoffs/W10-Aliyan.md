@@ -88,10 +88,10 @@ import markdown
 
 ## Questions / blockers
 
-- Should demo include live patch-and-rescan sequence or just show patch proposal?
-- Does demo need to cover all ecosystems (npm, PyPI, Go, Rust) or just one?
-- Is demo script for 10-minute or 30-minute slot?
-- Should validation report be committed to `docs/demo-validation/` or kept as local artifact?
+- **Decision (owner: Aliyan, due: W12 Tue Nov 24)**: Should demo include live patch-and-rescan sequence or just show patch proposal? Default: show patch proposal only (bounded scope for interim demo). Document in `docs/REVIEW-DECISIONS.md`.
+- Does demo need to cover all ecosystems (npm, PyPI, Go, Rust) or just one? (team decision; default: one ecosystem per demo slot)
+- Is demo script for 10-minute or 30-minute slot? (team decision; default: 10-minute for interim demo)
+- Should validation report be committed to `docs/demo-validation/` or kept as local artifact? (team decision; default: committed to `docs/demo-validation/`)
 - **Demo AI explanation: any OpenAI/ChatGPT, Claude, or a custom endpoint** (URL/IP/port with credentials if required) with deterministic fallback; the user selects and configures the provider. (see ROADMAP §W5)
 
 ---
