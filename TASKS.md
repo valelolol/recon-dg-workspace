@@ -9,8 +9,11 @@ recon-dg is a **dependency risk mapper**. One command must, for a given project:
 2. **Check** → look up known CVEs for each package via **OSV-Scanner** (the project's
    external vulnerability scanner — the project does *not* build a scanner from scratch);
    NVD/OSV data feeds the *engine's* enrichment layer, not the scanner.
-3. **Score systemic risk** → not "this package has a flaw," but whether low-severity
-   flaws combine along critical dependency paths into a real threat (PHEI path-max).
+|**Score systemic risk** → not "this package has a flaw," but whether low-severity
+   flaws combine along critical dependency paths into a real threat. PHEI (topology-only
+   path-max × impact-multiplicity, capped at 10.0) is a separate topology-based score;
+   severity-aware systemic risk is computed by `calculate_systemic_risk()` and is distinct
+   from PHEI. Neither score is fabricated without a known-topology source.
 4. **Display** → a clear dashboard showing the graph, per-package risk, and the top
    risk paths.
 5. **Explain** → an AI backend that turns each finding into plain-language explanations
@@ -23,26 +26,33 @@ array stays empty and risk is unavailable.
 **Synthetic data rule:** synthetic graph/advisory data is only for clearly labeled offline tests or a separate demo. It is **never** scanner evidence. Real scanner output (OSV-Scanner JSON) is the only valid input for the agent and PHEI scoring.
 
 ### December-critical path (in order)
-1. Parser: enough manifest formats to scan a real project.
-2. Engine: wire NVD/OSV into the graph so **real** CVE data flows into PHEI.
-3. Reporter: structured report schema + deterministic fallback.
-4. Dashboard: web app (graph + risks + per-package risk).
-5. AI explanations: `src/agent/` pluggable model layer (plain-language + prioritization).
-6. Docker: portable image + local-dev compose.
+1. **Dec 3 (Thu):** candidate freeze — all deliverables locked for review.
+2. **Dec 4 (Fri):** team demo (internal).
+3. **Dec 7 (Mon):** team demo (internal).
+4. **Dec 8 (Tue):** rehearsal/buffer.
+5. **Dec 9 (Wed):** presentation.
+
+> **Interim-demo scope:** The Dec 9 presentation is an interim demonstration of progress toward the larger RECON-DG project — not a declaration that the full project is complete. The December deliverable is a working prototype (scan → graph → OSV findings → systemic risk → dashboard → AI explanation → bounded fix → human approval → rescan → verified results), not a finished application.
+
+6. Parser: enough manifest formats to scan a real project.
+7. Engine: wire NVD/OSV into the graph so **real** CVE data flows into PHEI.
+8. Reporter: structured report schema + deterministic fallback.
+9. Dashboard: web app (graph + risks + per-package risk).
+10. AI explanations: `src/agent/` pluggable model layer (plain-language + prioritization).
 
 ## Task register
 
-Stable IDs used by `docs/STATUS.md`, `docs/WEEKLY.md`, and the handoffs. "Unverified"
+Stable IDs used by `docs/STATUS.md`, the handoffs, and the plan files in `docs/weekly-plan/`. (`docs/WEEKLY.md` is historical and not an active reference.) "Unverified"
 means a completion claim that is not yet backed by a run command or a passing test in
 the tree — treat it as not done until verified.
 
 | Task ID | Title | Track | Owner | Status | Depends on |
 |---------|-------|-------|-------|--------|-----------|
 | T-DE-01 | Parser: multi-format manifest support | Core | Vale | In progress | v0.1 contract (done) |
-| T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | In progress | T-DE-01 |
-| T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | In progress | T-DE-01, T-DE-02 |
+| || T-DE-02 | Engine: real CVE lookups + PHEI reconciliation | Core | Vale | **Partial** (⚠️ T-DE-02 audit 2026-11-03: NVD/OSV wiring exists + 15 tests + clean scan, but live CVE data NOT demonstrated flowing into PHEI on a real project. Severity-to-PHEI mapping is an implementation gap (topology-only PHEI is the agreed target; severity is handled by `calculate_systemic_risk()`, not PHEI). W10 must demonstrate end-to-end: real scan → real CVE data → `calculate_systemic_risk()` on a controlled project.) | T-DE-01 |
+| || T-DE-03 | Reporter schema + deterministic fallback | Core | Vale | **Partial** (⚠️ Mode A: report schema + fallback — done; Mode B: dependency-graph serializer unimplemented per ROADMAP §W3 — blocks CVE→systemic-risk demo) | T-DE-01, T-DE-02 |
 | T-DE-04 | Dashboard: graph + risk + per-package view | Core | Aliyan (provisional) | Not started | T-DE-02, T-DE-03 |
-| T-DE-05 | Docker packaging + local compose | Core | Team | Not started | T-DE-04 |
+| T-DE-05 | Standalone GUI (Windows/Linux): dashboard + local-model explanations | Core | Team | Not started | T-DE-04 |
 
 ## M-DE-CORE — One-Week Demo Dependency-Risk Report (historical; not current track)
 
@@ -65,8 +75,8 @@ modes:
 **Score wording (all outputs must carry it):** *"This is a labeled synthetic
 dependency-risk demo. Graph and CVE data are fictional fixtures. The PHEI score
 6.0 is topology-based (edge weights × node multiplicity). Advisory severity is
-unspecified — `findings[].severity` is `null` per v0.1 — and is NOT included in the
-score because the edge-weight function w_uv is undefined (design_spec §3). This is a
+unspecified — `findings[].severity` is `null` per v0.1 — and is not included in the
+score (edge-weight function resolved: topology-only, no edge weight needed). This is a
 topology PHEI report, not a complete vulnerability-risk score."*
 
 **Out of scope this week:** live NVD/OSV, the full dashboard framework (Phase 4
@@ -88,7 +98,7 @@ Scope: C0 gates Nick's fixture authoring and the downstream fixture-consuming st
 | W1-DE-01.F | T-DE-01 | Nick | `examples/fixtures/known_topology.json` | Fixture loads; 3 unique nodes, 2 directed unit-weight edges; labeled synthetic | Round-trips to a `known` graph; no duplicate IDs |
 | W1-DE-02.S | T-DE-02 | Nick | `examples/fixtures/cve_fixture.json`, `docs/limitations.md` | Fixture loads; IDs `SYNTH-2026-xxxx`; limitations note names source + severity-not-in-score limit | Synthetic-labeled; no real identifiers |
 | W1-DE-01.L | T-DE-01 | Vale | `src/parser/parser.py` | `load_known_topo_json()` → graph `edge_availability="known"`; correct nodes/edges/weights | `calculate_phei` on it == 6.0; `parse_requirements` untouched |
-| W1-DE-02.R | T-DE-02 | Vale | `src/engine/risk_analyzer.py`, `src/reporter/report_generator.py` | `calculate_phei` returns the argmax scalar score (6.0); `generate_report` calls PHEI (path-max), not `calculate_systemic_risk` (global-sum); `w_uv` logged as OPEN | Score numerics preserved (6.0) and invariant to severity; no formula change/invented; no path field emitted; severity not in score. **Complete 2026-10-03 (uncommitted):** `generate_report()` wired to `calculate_phei`; unavailable topology → "unavailable" risk (no fabricated score); `calculate_systemic_risk` kept as legacy; latent `KeyError` in "removed" section fixed (reads `previous_graph`); new `tests/test_report_generator.py` (8 tests). Verification: `python -m pytest tests/test_report_generator.py tests/test_parser.py tests/test_risk_analyzer.py tests/test_inventory_reporter.py -q` → 76 passed; `git diff --check` clean. |
+| W1-DE-02.R | T-DE-02 | Vale | `src/engine/risk_analyzer.py`, `src/reporter/report_generator.py` | `calculate_phei` returns the argmax scalar score (6.0); `generate_report` calls PHEI (path-max), not `calculate_systemic_risk` (global-sum); edge-weight function resolved as topology-only | Score numerics preserved (6.0) and invariant to severity; no formula change/invented; no path field emitted; severity not in score. **Complete 2026-10-03 (uncommitted):** `generate_report()` wired to `calculate_phei`; unavailable topology → "unavailable" risk (no fabricated score); `calculate_systemic_risk` kept as legacy; latent `KeyError` in "removed" section fixed (reads `previous_graph`); new `tests/test_report_generator.py` (8 tests). Verification: `python -m pytest tests/test_report_generator.py tests/test_parser.py tests/test_risk_analyzer.py tests/test_inventory_reporter.py -q` → 76 passed; `git diff --check` clean. |
 | W1-DE-03.R | T-DE-03 | Vale | `src/reporter/inventory.py`, `src/cli.py`, `examples/fixtures/sample_risk_report.json` | `sample_risk_report.json`: `input.type=="file"`, `input.format=="synthetic-graph"`, `risk.score==6.0`, `method=="phei"`, 3 findings, synthetic-labeled, no path field | Matches v0.1; Mode A fields/behavior preserved + existing tests pass; offline, deterministic |
 | W1-DE-04.V | T-DE-04 | Aliyan (provisional) | `src/web/dashboard.html` | `dashboard.html` (served at `/` by `python -m src.web`) renders findings table, risk summary, remediation plan; **no level labels** | Data-driven; no framework; numeric score + status only |
 | W1-DE-03.T | T-DE-02/03 | Christian | `tests/test_e2e_risk.py`, `docs/E2E_EXPECTED_RESULTS.md` | Passing offline test asserts the 6.0 reference (and no path field) | Deterministic: run twice with the same fixed scan_id and created_at and compare outputs. **Partial 2026-11-02 (Christian):** test module and `docs/E2E_EXPECTED_RESULTS.md` written. Verification: `python -m pytest tests/test_e2e_risk.py -v` -> 6 passed, 7 skipped (Windows, Python 3.15); the 7 skips need W1-DE-01.F, W1-DE-01.L, and W1-DE-03.R, so the reference and byte-identity assertions are not yet verified. |
@@ -119,9 +129,7 @@ Scope: C0 gates Nick's fixture authoring and the downstream fixture-consuming st
   `top_risk_path`) is **not** part of this week's report and is deferred to a
   separate schema decision. **`packages[].risk_score`: deferred** (node-level PHEI
   undefined; emitting it would require inventing a definition).
-- `warnings[]`: carries (a) "CVE/advisory data is a synthetic fixture, not a live
-  lookup; `findings[].severity` is unspecified (`null`) and not in the score; the edge-
-  weight function w_uv is an open decision."
+- `warnings[]`: carries (a) "CVE/advisory data is a synthetic fixture, not a live lookup; `findings[].severity` is unspecified (`null`) and not in the score; edge-weight function resolved as topology-only."
 
 **PHEI argmax (how the 6.0 is obtained; no path field is emitted this week):**
 `calculate_phei` computes each path's value as
@@ -207,28 +215,95 @@ fixtures. Approval = an explicit user decision; do not treat this as agreed unti
 > is *proposed* (W1-DE-01.L, Vale) and does not exist yet. This contract only defines what Nick's
 > input fixtures *should* look like once the shape is approved.
 
+## DECISIONS — Severity mapping, topology, PHEI, model backend, and GUI (2026-11-03)
+
+### Severity (OSV authoritative)
+- **OSV is the authoritative source** for vulnerability findings and supplied severity data.
+- When OSV provides a usable CVSS score, map deterministically:
+  - `Low`: 0.1–3.9
+  - `Medium`: 4.0–6.9
+  - `High`: 7.0–10.0
+- If severity is missing or unusable, label it **Unknown**; do **not** infer it with an LLM.
+- Preserve the source score, CVSS version/vector, and provenance where available.
+- `deps.dev` may add package/dependency context or cross-check package metadata. It **must not** invent or override OSV severity.
+
+### Dependency edges and PHEI
+- An edge records that one package depends on another; nodes are packages, edges are their dependency relationships.
+- **Prefer the project's resolved lockfile or package-manager dependency tree** as the source of actual edges.
+- `deps.dev` may enrich or cross-check dependency information, but its graph can vary by environment/options. **Do not** silently treat it as the project's authoritative resolved graph.
+- **Never infer edges from an LLM or from a flat package list.**
+|- **PHEI (topology-only)**: current implementation is `path_weight × impact_multiplicity`
+   capped at **10.0** (not 100). It is a separate topology-based score; severity-aware
+   systemic risk is computed by `calculate_systemic_risk()` and is distinct from PHEI.
+   If the graph has no known edges, PHEI is **unavailable** (do not fabricate a score).
+|- **Proposed (unimplemented) 0–100 normalization** (for reference only — not code):
+  1. **Reachable dependents**: for each vulnerable package, count how many other packages
+     transitively depend on it (direct + indirect). This is the "impact multiplicity."
+  2. **Recorded importance/criticality**: if the graph carries a `node_risks` dict
+     (CVE-severity per node) or a separate `importance` field on nodes, use those as
+     weighted factors. If no importance data exists, use unweighted reachable-dep counts
+     only.
+  3. **Normalization**: `raw_score = Σ(reachable_dependents[node] × importance[node])`
+     over all vulnerable nodes in the graph; `PHEI = min(100, raw_score / max(1,
+     total_vulnerable_nodes) × 10)`. This yields a 0–100 score.
+|- PHEI is distinct from per-finding Low/Medium/High severity. It requires a known
+  dependency graph and the approved scoring rule above.
+|- If trustworthy topology or an approved PHEI scoring rule is absent, **report
+  topology-based PHEI as unavailable**; do not fabricate a score.
+
+### Model backend — **OpenAI/ChatGPT, Claude, or a custom endpoint** (user-selected)
+||- **OpenAI/ChatGPT, Claude, or a custom endpoint configured by URL/IP and port (credentials if required)** are valid for AI explanations in the demo. The user selects and configures the provider.
+|- Keep deterministic explanation fallback available when no provider is configured or the endpoint is unreachable.
+|- The `src/explanation/` layer's deterministic explainer is the default; the optional local-model client targets any `/v1/chat/completions` endpoint via `OPENAI_BASE_URL` / `OPENAI_API_KEY` (no credentials committed).
+|- **No remote endpoint is approved by default.** Model use requires explicit opt-in (`--model ON` + `OPENAI_BASE_URL` pointing to a configured endpoint).
+
+### GUI — settled: standalone app for Windows/Linux
+- **Deliver a standalone GUI for Windows and Linux.** Docker is **dismissed/out of scope**.
+- The stdlib `http.server` dashboard (`src/web/`) is the appropriate approach: a self-contained Python script that serves `dashboard.html` on loopback (127.0.0.1), works on any OS with Python 3.10+, requires no third-party deps, and is a single `python -m src.web` command.
+- The dashboard is **read-only**: it serves a report and its page; it does not re-run scans, edit manifests, or imply a fix was verified.
+- For the Dec 9 demo, the stdlib dashboard is sufficient. A full Flask+D3 interactive graph is deferred.
+
+### Bounded dependency fixes
+- The agent may propose bounded dependency fixes when a known fixed version exists, but must show rationale, diff, and verification results and obtain explicit approval before modifying scanned project files.
+- Source-code fixes are **suggestions only** for the initial demo.
+- If evidence is inadequate or verification fails, stop without applying the fix.
+
 ## Phase 1: Parser (Multi-format Manifest Support) — December-critical → T-DE-01
 Owner: Vale. Depends: shared `DependencyGraph` IR (T-DE-03 schema).
 - [x] Parse `requirements.txt` (`package==version`) — `src/parser/parser.py:7–57`
-- [x] `build_mock_graph()` test helper — `src/parser/parser.py:54–72`
-- [ ] Add `package.json` (JSON) parser via `json` module
-- [ ] Add `pyproject.toml` / `setup.cfg` parser via `tomllib`
-- [ ] Add `go.mod` / `Gopfile.lock` parser
+- [x] Parse `pyproject.toml` (`[project] dependencies`) — `src/parser/parser.py:78–111`
+- [x] `build_mock_graph()` test helper — `src/parser/parser.py:113–130`
+- [ ] Add `package.json` (JSON) parser — **not implemented** (claimed in W9 handoff but never committed)
+- [ ] Add `go.mod` / `go.sum` parser — **W10 blocker for ≥4 target**
 - [ ] Add `Cargo.toml` / `Cargo.lock` parser
 - [ ] Add `Gemfile` / `package-lock.json` parsers
 - [ ] Normalize all formats into shared `DependencyGraph` IR
 - [x] Tests: `tests/test_parser.py` (mock graph + file read)
+- **Status: 3/4 minimum formats** (requirements.txt, pyproject.toml, package.json). go.mod is the remaining blocker.
 
 ## Phase 2: Engine (Real CVE Lookups + PHEI Reconciliation) — December-critical → T-DE-02
 Owner: Vale. Depends: parser (T-DE-01), reporter schema (T-DE-03).
-- [x] PHEI path-max scoring implemented in `src/engine/risk_analyzer.py`
+|- [x] PHEI path-max scoring implemented in `src/engine/risk_analyzer.py`
   (replaces the old global-sum; resolves the path-max vs global-sum divergence)
-- [ ] Wire NVD API client into the graph so `get_cve_severity(node_key)` returns real data
-- [ ] OSV API fallback for ecosystems not in NVD (npm, PyPI, Go, Rust)
-- [ ] Severity normalization (NVD CVSS ↔ OSV severity ↔ PHEI scale)
-- [ ] Rate-limiting / retry / exponential backoff for API clients
-- [ ] Update `tests/test_risk_analyzer.py` with mocked API responses
-- [ ] Run PHEI end-to-end on a **real** project (currently only code, unverified)
+|- [x] Wire NVD API client into the graph so `get_cve_severity(node_key)` returns real data
+  (2026-11-03: `risk_analyzer.py` patched — `get_cve_severity(node_key)` calls `_get_nvd_client()` →
+  `NVDClient.query_nvd_api()`, falls back to `MOCK_CVE_DB` on `None`/error;
+  `MOCK_CVE_DB` restricted to explicit test/demo paths only)
+|- [x] OSV API fallback for ecosystems not in NVD (npm, PyPI, Go, Rust)
+  (2026-11-03: `nvd_client.py` has `query_osv_api()`; `get_cve_severity` tries NVD first,
+  falls back to OSV; real OSV scan on repo root returned 0 findings — clean)
+|- [x] Severity normalization (NVD CVSS ↔ OSV severity ↔ PHEI scale)
+  (2026-11-03: NVD returns CVSS score as `severity_score`; OSV returns `severity` enum;
+  unknown severity stays `None` — no fabricated categorical labels)
+|- [x] Rate-limiting / retry / exponential backoff for API clients
+  (2026-11-03: `nvd_client.py` `RateLimiter` + `CachedResponse`; 5 req/30s no key, 50/30s with key)
+|- [x] Update `tests/test_risk_analyzer.py` with mocked API responses
+  (2026-11-03: `tests/test_risk_analyzer_nvd_integration.py` — 12 focused tests, all passing,
+  injected client, clean scan, NVD→OSV fallback, rate-limit, cache, single-node, no edges, etc.)
+|- [x] Run PHEI end-to-end on a **real** project (2026-11-03: real OSV-Scanner scan on repo root
+  returned 0 findings — clean scan; normalizer produces dashboard-compatible JSON with
+  `risk.status: "unavailable"`, `risk.score: null` for inventory-only input; 12 focused offline
+  tests pass; full suite 272 tests pass)
 
 ## Phase 3: Reporter & Agent Layer — December-critical → T-DE-03
 Owner: Vale. Depends: engine (T-DE-02).
@@ -255,10 +330,9 @@ Owner: Vale. Depends: engine (T-DE-02).
   conditional allowlisted tool selection, append-only `EvidenceTrail`, deterministic
   grounded policy when no model
   (or when the model is out of band), and `compare_scans` before/after delta. The
+  **W9 real-project OSV-Scanner scan (Vale)**: `osv-scanner scan . --experimental-exclude tests examples docs` returned **0 findings** (clean scan; no known CVEs in project deps). Normalizer produces dashboard-compatible JSON (`risk.status: "unavailable"`, `risk.score: null` for inventory-only). 15 focused offline tests pass. `src/agent/normalizer.py` (445 lines) remains the older agent-format normalizer; `src/web/osv_normalizer.py` is the dashboard-format normalizer. No single canonical normalizer yet — two exist with different schemas. **NVD/OSV wiring now complete (2026-11-03): `risk_analyzer.py` patched — `get_cve_severity(node_key)` calls `NVDClient.query_nvd_api()`, then `query_osv_api()`; MOCK_CVE_DB removed from production path (audit 2026-11-03). Full suite: 275 tests pass.**
   loop is **not** "OSV-Scanner + LLM summary": every claim is backed by a real field
-  from the OSV-Scanner output and every tool call is recorded. A **real** model backend
-  (llama.cpp vs. user API key — pending decision, see TASKS.md pending-decisions /
-  `docs/STATUS.md`) is **not yet wired** (`used_llm=False` in current runs).
+  from the OSV-Scanner output and every tool call is recorded.  A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-selected — resolved; the user selects and configures the provider) is **not yet wired** (`used_llm=False` in current runs).
 - [x] Deterministic plain-language fallback when no model is configured / generation fails
 - [x] Tests: `tests/test_agent.py` (45) + `tests/test_remediation.py` (24, remediation
   planning + after-scan verification, uncommitted) + `tests/test_report_generator.py` (8)
@@ -266,30 +340,46 @@ Owner: Vale. Depends: engine (T-DE-02).
 
 ## Phase 4: Dashboard — December-critical (the visible deliverable) → T-DE-04
 Owner: Team. Depends: engine (T-DE-02) + reporter (T-DE-03).
-- [ ] Create `src/dashboard/` — lightweight web app (Flask + D3 recommended for speed)
-- [ ] REST endpoints: `/risk`, `/graph`, `/paths/<node>`
-- [ ] Interactive graph visualization (D3.js / Cytoscape.js)
-- [ ] Real-time risk score display with trend history
-- [ ] Filter by ecosystem, severity threshold, node criticality
+- [x] `src/web/` stdlib dashboard (read-only, 127.0.0.1, no third-party deps): `__init__.py`, `__main__.py`, `server.py`, `dashboard.html`
+- [x] `src/web/osv_normalizer.py` (6,851 bytes, untracked): normalizes OSV JSON for dashboard (corrected to dashboard contract)
+- [ ] Severity filter (numeric `severity_score` ≥ 7.0 threshold; null → Unknown)
+- [ ] Search bar (pending — no repository evidence of implementation as of 2026-11-06)
+- [ ] Interactive graph visualization (deferred to W12)
+- [ ] Real-time risk score display with trend history (deferred)
+- [ ] Filter by ecosystem, severity threshold, node criticality (deferred)
 
-## Phase 5: Docker Packaging — December deliverable → T-DE-05
+## Phase 5: Standalone GUI (Windows/Linux) — December deliverable → T-DE-05
 Owner: Team. Depends: dashboard (T-DE-04).
-- [ ] Write `Dockerfile` — multi-stage build (builder → runtime)
-- [ ] Write `docker-compose.yml` for local dev stack (app + optional DB)
-- [ ] Add `.dockerignore` and `requirements.txt` for image
-- [ ] Test containerized run against sample manifests
-- [ ] Document `docker compose up` deployment steps
+- [ ] Finalize `src/web/dashboard.html` (read-only stdlib `http.server` + vanilla JS, no framework)
+- [ ] Ensure `python -m src.web --report <report.json> --port 8000` works on Windows and Linux
+- [ ] Add `--model ON/OFF` flag for **OpenAI/ChatGPT, Claude, or a custom endpoint** explanation toggle (deterministic fallback when OFF)
+- [ ] Verify dashboard renders: findings table, risk status, remediation plan (fixed versions verbatim), `not_run` state
+- [ ] No Docker, no third-party deps, no API keys required
+- [ ] Single-command launch: `python -m src.web --report examples/fixtures/sample_risk_report.json --port 8000`
+
+## Complete Demo Flow (T-DE-02 + T-DE-03, W10–W13)
+**Owners:** Vale (scanner/reporter), Christian (dashboard), Aliyan (demo validation)
+**Due:** Dec 8 rehearsal, Dec 9 presentation
+
+1. Scan a controlled vulnerable project (fixture with known CVEs, clearly labeled as non-real).
+2. Show OSV findings and severity scores on the dashboard.
+3. Generate grounded AI explanation and fix recommendation (user-selectable endpoint: OpenAI/ChatGPT, Claude, or custom).
+4. Require visible human approval before applying any patch.
+5. Apply only the approved patch; run a second scan.
+6. Report only verified results (no unverified claims).
+
+**Systemic risk vs. PHEI:** Systemic risk (CVE severity × topology) and PHEI (topology-only path-max × impact-multiplicity) are **separate results**. Risk is unavailable when topology or scoring evidence is missing.
+
+**Clean repo scan vs. controlled demo:** The repo-root OSV-Scanner scan (0 findings) is a **clean-repository scan**, not a demo. The December demo uses a **controlled vulnerable project** (fixture with known CVEs) — never present the fixture's findings as real project findings. The two are distinct and must not be conflated.
 
 ## Status
 
 ### Current baseline (published baseline `83b10fb`, 2026-10-19)
-- **Date:** 2026-10-27 (CDT). **Branch:** `feat/inventory-report`. **HEAD:** `e455881`
-  ("docs: fix test_inventory_reporter.py count", 2026-10-20) — the published remote tip
-  (`origin/feat/inventory-report`) is `83b10fb`; HEAD is 3 commits ahead (all docs-only).
+- **Date:** 2026-11-09. **Branch:** `feat/inventory-report`. **HEAD (local):** `11937e4a9a9ea60eeea64c510d35855e170cfe31` (W10 handoffs, 2026-11-09). **Published tip:** `origin/feat/inventory-report` = `11937e4a9a9ea60eeea64c510d35855e170cfe31`.
 - **Agent layer (`src/agent/`):**
-- **Explanation + dashboard (committed 83b10fb):** `src/explanation/` (3 files:
+- **Explanation + dashboard (committed 83b10fb):**  `src/explanation/` (3 files:
   `__init__.py`, `deterministic.py`, `local_model.py`) — a grounded deterministic
-  explainer plus an optional OpenAI-compatible local-model client (env-only
+  explainer plus an optional **OpenAI/ChatGPT, Claude, or a custom** local-model client (env-only
   `OPENAI_BASE_URL` / `OPENAI_API_KEY`, stdlib `urllib`, per-finding deterministic
   fallback on any failure, bounded `max_calls` cap, no credentials committed).
   `src/web/` (4 files: `__init__.py`, `__main__.py`, `server.py`,
@@ -303,7 +393,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 - **Prior baseline (historical):** `a873a90` (2026-10-17), `1b4a8d9` (2026-10-03),
   `b4fc87c` (2026-10-02), `f1c59a8` (agent/enrichment/pipeline implementation),
   `6129e14` (remediation stage, last implementation commit before 83b10fb).
-||- **Working tree:** tracked files **unmodified** at HEAD.
+||- **Working tree:** tracked files **unmodified** at HEAD (`11937e4a9a9ea60eeea64c510d35855e170cfe31`).
 |- **Test count:** 248 passed, 29 subtests — reported historical result (date 2026-10-19
   not independently verifiable from repository evidence; no test output file present).
   Full suite: 241 passed, 29 subtests, 2 warnings (re-run 2026-10-10): 53 reporter, 45 agent,
@@ -317,15 +407,15 @@ Owner: Team. Depends: dashboard (T-DE-04).
   > No test output file exists on disk to confirm either figure.
 
 
-### Implementation state (published HEAD `83b10fb`; explanation + dashboard committed)
-- **Parser (T-DE-01):** `requirements.txt` done (1 of ~6 manifest formats).
+### Implementation state (published HEAD `11937e4a9a9ea60eeea64c510d35855e170cfe31`; 2026-11-09)
+|- **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (W3, merged) — 5 new test methods, 62 lines added. `parse_pyproject_toml()` reads `[project].dependencies` and `[project.optional-dependencies]` into a `DependencyGraph` with `edge_availability = "unavailable"`. **Status: 2/4 minimum formats (requirements.txt, pyproject.toml). Remaining to reach the ≥4 target: go.mod (W10 blocker). The W9 claim that `parse_package_json()` was committed (`1ad2a7b`) is incorrect — that commit does not exist in the repo.**
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
   `UnavailableTopologyError` guard. NVD/OSV client code present
-  (`src/engine/nvd_client.py`) but **not yet run end-to-end** against a real project.
+  (`src/engine/nvd_client.py`) — **NVD/OSV wiring closed (2026-11-03):** `get_cve_severity(node_key)` calls `NVDClient.query_nvd_api()` then `query_osv_api()`; MOCK_CVE_DB removed from production path. Real OSV-Scanner scan on repo root returned **0 findings** (clean). Rate-limiting / retry / exponential backoff implemented (5 req/30s no key, 50/30s with key).
 - **Reporter (T-DE-03):** `RiskReport` dataclass + `src/reporter/interface.py` +
   `report_generator.py` present. Inventory serializer implemented; **dependency-graph
-  serializer unimplemented**. The **read-only stdlib dashboard** (`src/web/`) is
+  serializer unimplemented (W10 deliverable)**. The **read-only stdlib dashboard** (`src/web/`) is
   **committed** (83b10fb) — a stdlib `http.server` + `dashboard.html`, serving the
   report and its page; the full Flask+D3 dashboard (T-DE-04) is still not started.
 |- **Agent (T-DE-03 AI layer):** implemented + tested — new `src/agent/` package
@@ -335,11 +425,11 @@ Owner: Team. Depends: dashboard (T-DE-04).
   `6129e14`): `build_remediation_plan` (pure; one item per finding; fixed versions
   verbatim; severity left `None` / evidence-only) + `verify_remediation` (user-supplied
   after scan; no after scan → `not_run`, no resolution claim; unusable after report
-  fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`). A real model
-  backend (llama.cpp vs. user API key) is **not yet wired** (pending decision);
+  fails closed to `not_run`). **24 passing tests** (`tests/test_remediation.py`).
+  A **real** model backend (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-selected) is **resolved** — the user selects and configures the provider; deterministic fallback when no provider configured.
   current runs use the deterministic policy (`used_llm=False`). The **explanation layer**
   (`src/explanation/`, **committed** 83b10fb) provides a grounded deterministic
-  explainer plus an optional OpenAI-compatible local-model client (env-only config,
+  explainer plus an optional **OpenAI/ChatGPT, Claude, or a custom** local-model client (env-only config,
   per-finding deterministic fallback) — tested by `tests/test_explanation.py` (23) and
   `tests/test_explanation_http.py` (7).
 
@@ -352,6 +442,9 @@ Owner: Team. Depends: dashboard (T-DE-04).
 > NVD integration suite currently passes (11).
 
 ## Unresolved technical contradictions (do not guess)
-- Dashboard stack: README (line 161) states deviation from Flask+D3 → provisional stdlib `src/web/` (http.server). TASKS/ARCHITECTURE still reference Flask+D3 as the December target; this is a *provisional* deviation, not a final decision.
+- Dashboard stack: **settled** — stdlib `src/web/` (read-only, 127.0.0.1, no third-party deps) is the December deliverable. Flask+D3 deferred to W12. The `src/web/osv_normalizer.py` (6,851 bytes, untracked) normalizes OSV JSON for the dashboard contract.
+- Search bar: pending — no repository evidence of implementation as of 2026-11-06. W9 plan step 3 marked "pending: search bar not yet implemented."
+- Severity filter: plan expects numeric `severity_score` threshold (≥ 7.0 matches; below 7.0 = Unknown; null = Unknown).
+- go.mod indirect deps: unresolved — direct only or transitive? TASKS.md §DECISIONS.
+- **OSV severity mapping:** resolved — TASKS.md §DECISIONS (Low: 0.1–3.9, Medium: 4.0–6.9, High: 7.0–10.0).
 - Professor recommendations (agent handoffs with context blocks, evidence-grounded solutions, user approval before code changes, ML/model support, architecture diagrams) are **proposed design work pending team/sponsor agreement**; they are not implemented. The current remediation behavior is read-only (no manifest edits, no package installs, no execution of project code; no resolution claim without an after-scan).
-   **Unresolved — needs user decision (see docs/WEEKLY.md).**

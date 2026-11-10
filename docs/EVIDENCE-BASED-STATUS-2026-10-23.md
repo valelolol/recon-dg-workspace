@@ -25,7 +25,7 @@
 
 ### T-DE-02: Engine (partial)
 - **PHEI path-max scoring** — `src/engine/risk_analyzer.py` (216 lines). Verified: `calculate_path_weight()`, `calculate_impact_multiplicity()`, `calculate_phei()` exist; `UnavailableTopologyError` guard present.
-- **NVD/OSV client** — `src/engine/nvd_client.py` (415 lines). Verified: `NVDClient`, `RateLimiter`, `CachedResponse` classes exist. **The authoritative scanner is the external OSV-Scanner** (ROADMAP.md "Security and privacy gates" heading, line 146); NVD/OSV API calls are enrichment. No evidence of a live OSV-Scanner scan on disk.
+- **NVD/OSV client** — `src/engine/nvd_client.py` (415 lines). Verified: `NVDClient`, `RateLimiter`, `CachedResponse` classes exist. **The authoritative scanner is the external OSV-Scanner** (docs/ROADMAP.md "Security and privacy gates" heading, line 146); NVD/OSV API calls are enrichment. No evidence of a live OSV-Scanner scan on disk.
 - **`tests/test_risk_analyzer.py`** — 5 tests. Verified: exists.
 - **`tests/test_nvd_integration.py`** — 11 tests. Verified: exists (10,937 bytes).
 - **NOT done:** OSV-Scanner scan output wired into the graph for `get_cve_severity(node_key)`; severity normalization (NVD CVSS ↔ OSV ↔ PHEI).
@@ -98,8 +98,8 @@
 
 ### T-DE-02: Engine (OSV-Scanner → report workflow — unverified)
 - **Current state:** OSV-Scanner scanner (`scan_runner.py`, 305 lines) and NVD/OSV enrichment client (`nvd_client.py`, 415 lines) both exist. The gap is a **missing integration** connecting a manifest scan by the authoritative external OSV-Scanner to generation of a dashboard-compatible report — neither component has been run end-to-end against a real project.
-- **Operational concern:** NVD rate limits (5 req/30s without key) are an operational concern, not a blocker — the active roadmap (ROADMAP.md "Security and privacy gates" heading, line 142) designates OSV-Scanner as the authoritative scanner. No real scan output on disk to validate against.
-- **Evidence:** `src/engine/nvd_client.py` exists with `NVDClient`/`RateLimiter`/`CachedResponse` classes but no evidence of a live OSV-Scanner scan (no `report.json` output file, no scan log).
+- **Operational concern:** NVD rate limits (5 req/30s without key) are an operational concern, not a blocker — the active roadmap (docs/ROADMAP.md "Security and privacy gates" heading, line 142) designates OSV-Scanner as the authoritative scanner. No real scan output on disk to validate against.
+- **Evidence:** `src/engine/nvd_client.py` exists with `NVDClient`/`RateLimiter`/`CachedResponse` classes but no evidence of a live OSV-Scanner scan on the project (no `report.json` output file on disk; the committed `docs/fixtures/report-fixture-demo.json` is entirely fixture-derived from `tests/fixtures/requirements-before.txt` and `requirements_simple.txt`, **not** project-dependency evidence).
 
 ### T-DE-03: Reporter (dependency-graph serializer)
 - **Current state:** Inventory serializer (Mode A) implemented; dependency-graph serializer (Mode B) **unimplemented**.
@@ -148,7 +148,7 @@
 
 ### W7: Demo Validation (proposed, no registered task ID)
 - **Status:** proposed handoff to Aliyan; no registered task ID in TASKS.md.
-- **Evidence:** `docs/weekly-handoffs/W7-demo-validation.md` (119 lines) exists but is a **proposed** handoff — "team confirmation required, no registered task ID."
+- **Evidence:** `docs/weekly-handoffs/W7-demo-validation.md` (removed; see the four-handoff rule in `docs/weekly-handoff-template.md`) existed as a proposed handoff — "team confirmation required, no registered task ID."
 - **Deliverable:** `docs/demo-validation/validation-report.md` + `docs/demo-validation/demo-script.md` — neither directory exists.
 
 ---

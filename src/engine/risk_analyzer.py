@@ -1,31 +1,79 @@
 import networkx.algorithms.centrality as nx_centrality
 import networkx as nx
 import numpy as np
+from typing import Optional
 
 from src.models.dependency_graph import DependencyGraph
+from src.engine.nvd_client import get_client as _get_nvd_client, NVDClient
 
 
-# --- Mock Data Service ---
-# Global function to simulate fetching CVE data
-# In a real system, this would query a database (NVD, OSV).
-MOCK_CVE_DB: dict[tuple[str, str], dict[str, float]] = {
-    # (Package, Version): {CVE_ID: Severity_Score (1.0=Critical, 0.1=Low)}
-    ("requests", "2.28.1"): {
-        "CVE-2023-1234": 0.85, # High severity
-        "IGNORED-CVE": 0.05
-    },
-    ("django", "4.2"): {
-        "CVE-2022-9999": 0.3, # Medium severity,
-    },
-    ("core_lib", "1.0.0"): {
-        # Assume the system core has a vulnerability that impacts everything
-        "CVE-2021-1000": 0.95
-    }
-}
+def get_cve_severity(
+    node_key: tuple[str, str],
+    client: Optional["NVDClient"] = None,
+) -> dict[str, float]:
+    """Retrieves CVE severity data for a given dependency node.
 
-def get_cve_severity(node_key: tuple[str, str]) -> dict[str, float]:
-    """Retrieves mock CVE scores for a given dependency node."""
-    return MOCK_CVE_DB.get(node_key, {})
+    Order of lookup:
+        1. Injected ``client`` (for tests / explicit injection).
+        2. Global default NVD client (``src.engine.nvd_client.get_client()``).
+
+    Returns an empty dict when no data is found — this is not an error;
+    it means the node has no known CVEs (or the source is unavailable)
+    and the caller should treat the node as having ``severity_score: None``.
+
+    Args:
+        node_key: (package_name, version) tuple.
+        client: Optional injected NVDClient for testing. When provided,
+            only that client is queried (no fallback to MOCK_CVE_DB).
+
+    Returns:
+        Mapping of CVE ID → severity score (0.0–1.0), or empty dict.
+    """
+    # 1. Injected client (tests) — no fallback
+    if client is not None:
+        ecosystem, package, version = _resolve_ecosystem_and_query(node_key)
+        if ecosystem is not None:
+            result = client.query_nvd_api(ecosystem, package, version)
+            if result is not None:
+                return result
+            # NVD returned nothing → try OSV fallback
+            osv_result = client.query_osv_api(ecosystem, package, version)
+            if osv_result is not None:
+                return osv_result
+        return {}
+
+    # 2. Global default client
+    default = _get_nvd_client()
+    if default is not None:
+        ecosystem, package, version = _resolve_ecosystem_and_query(node_key)
+        if ecosystem is not None:
+            result = default.query_nvd_api(ecosystem, package, version)
+            if result is not None:
+                return result
+            osv_result = default.query_osv_api(ecosystem, package, version)
+            if osv_result is not None:
+                return osv_result
+        return {}
+
+    # No client available (production default: _default_client is None).
+    # Return empty dict — do NOT fall back to MOCK_CVE_DB in production.
+    # MOCK_CVE_DB is only available via an explicit test/demo path (see
+    # src/engine/nvd_client.py's set_client() or the test helper).
+    return {}
+
+
+def _resolve_ecosystem_and_query(
+    node_key: tuple[str, str],
+) -> tuple[Optional[str], str, str]:
+    """Return (ecosystem, package, version) for the NVD/OSV query.
+
+    The node_key is (package_name, version). For the current project
+    (Python), the ecosystem is "PyPI".  This is a simple mapping;
+    for a full implementation this would consult the DependencyGraph's
+    package metadata to resolve the correct ecosystem per package.
+    """
+    package, version = node_key
+    return ("PyPI", package, version)
 
 
 class UnavailableTopologyError(Exception):

@@ -12,7 +12,7 @@ Current security methods are reactive, assessing only known CVEs and failing to 
 | `src/models` | Defines the directed, weighted graph data structures representing component dependencies, their relationships, and associated metadata. |
 | `src/engine` | Implements the core risk-scoring algorithms (NVD API integration, OSV fallback, rate-limiting, caching) and PHEI path-maximum scoring formula. |
 | `src/reporter` | Generates structured JSON reports, human-readable summaries, and LLM explanations with deterministic fallback behavior. |
-| `src/explanation` | Optional AI explanation layer: a grounded deterministic explainer (default) plus an OpenAI-compatible local-model client (env-only credentials, per-finding deterministic fallback, additive `ai_explanations` field). Uncommitted; toward the December AI-explainations step. |
+| `src/explanation` | Optional AI explanation layer: a grounded deterministic explainer (default) plus an **OpenAI/ChatGPT, Claude, or a custom** local-model client (env-only credentials, per-finding deterministic fallback, additive `ai_explanations` field). Uncommitted; toward the December AI-explainations step. |
 | `src/web` | Minimal read-only dashboard: serves `dashboard.html` and `report.json` via stdlib `http.server` (no third-party deps). Uncommitted; toward the December dashboard step (full Flask+D3 is T-DE-04). |
 
 ## Graph Schema
@@ -54,8 +54,7 @@ The `src/agent` module is the agentic investigation layer. It is deliberately **
   output, and risk is reported as `unavailable`/`None` when topology is unavailable
   (no fabricated score).
 
-A pluggable `llm` callable may steer tool selection (the product's AI backend, local
-llama.cpp endpoint or user API key — a pending decision), but it is restricted to an
+A pluggable `llm` callable may steer tool selection (the product's AI backend — **OpenAI/ChatGPT, Claude, or a custom endpoint** — the user selects and configures the provider), but it is restricted to an
 **allowlisted** tool set (`findings`, `get_finding`, `package_info`, `package_context`,
 `high_severity`, `risk_score`, `summary`, `stop`); anything out of band falls back to a
 grounded deterministic policy (recorded as evidence). The `package_context` tool is

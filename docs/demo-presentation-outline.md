@@ -2,7 +2,8 @@
 
 > **Audience:** Faculty sponsor, team (Vale, Nick, Christian, Aliyan), reviewers
 > **Length:** ~15 minutes + 5 min Q&A
-> **Environment:** Stdlib `src.web` dashboard on demo machine (or local machine). Docker is optional.
+> **Environment:** Stdlib `src.web` dashboard on demo machine (or local machine). Docker is dismissed/out of scope.
+> **Interim-demo scope:** The Dec 9 presentation is an interim demonstration of progress toward the larger RECON-DG project — not a declaration that the full project is complete. The December deliverable is a working prototype (scan → graph → OSV findings → systemic risk → dashboard → AI explanation → bounded fix → human approval → rescan → verified results), not a finished application.
 
 ---
 
@@ -49,15 +50,15 @@
 
 - No model training or fine-tuning
 - No synthetic fixtures as scanner evidence (historical/demo-only)
-- No faculty/sponsor approval step in runtime
-- Flask+D3 is optional — stdlib `src.web` dashboard is the default
-- Docker is optional — manual install via `requirements.txt` is sufficient
+|- No faculty/sponsor approval step in runtime
+|- Flask+D3 is optional — stdlib `src.web` dashboard is the default
+|- Docker is dismissed/out of scope — manual install via `requirements.txt` is sufficient
 
 ## 5. Next Steps (1 min)
 
-- W5: Model backend decision (llama.cpp vs. user API key) — **pending team decision**
-- W6: Docker packaging (optional — manual install is sufficient)
-- W7: Final demo validation and preparation (independently testable checklist + demo script)
+|- W5: Model backend decision (**resolved** — user-selected: OpenAI/ChatGPT, Claude, or custom endpoint; deterministic fallback)
+|- W6: Docker packaging (**dismissed/out of scope**)
+|- W7: Final demo validation and preparation (**resolved** — Aliyan, W12 deliverable; independently testable checklist + demo script)
 - Future: deps.dev integration (optional), more manifest formats, CI integration
 
 ## 6. Q&A (5 min)
@@ -74,8 +75,7 @@
 - [ ] AI explanation shown (if `--model ON`)
 - [ ] Unavailable topology demonstrated (contrast with available)
 - [ ] `--model OFF` demonstrated (deterministic fallback)
-- [ ] **Optional (Docker):** `docker build -t recon-dg:demo .` succeeds
-- [ ] **Optional (Docker):** `docker run --rm -p 5000:5000 recon-dg:demo python -m src.web --port 5000` starts
+- [ ] **No Docker** — Docker is dismissed/out of scope; stdlib `src.web` is the demo baseline
 
 ## Notes
 

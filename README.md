@@ -28,7 +28,7 @@ pipeline, 24 remediation, 11 NVD integration, 10 parser, 8 report generator,
 5 risk analyzer, 20 explanation, 7 explanation-HTTP, 9 dashboard.
 The **stdlib-only dashboard** (`src/web/`) and the **explanation layer**
 (`src/explanation/` — a grounded deterministic explainer plus an optional
-OpenAI-compatible local-model client) are **committed** (83b10fb, 2026-10-19)
+**OpenAI/ChatGPT, Claude, or a custom** local-model client) are **committed** (83b10fb, 2026-10-19)
 and verified by real loopback HTTP tests (248 passed, 29 subtests — reported historical
 result, 2026-10-19; date not independently verifiable from repository evidence).
 The **full Flask+D3** dashboard and a *real* local model remain **planned**
@@ -45,13 +45,13 @@ real AI model backend are not yet implemented.*
 
 ## Getting started (read this first)
 
-> **Start here tonight:** [W8 kickoff page](docs/weekly-plan/W8-kickoff-2026-10-26.md) → [W8-parser.md](docs/weekly-handoffs/W8-parser.md) → [W8-dashboard-and-docker.md](docs/weekly-handoffs/W8-dashboard-and-docker.md) → [W8-demo-validation.md](docs/weekly-handoffs/W8-demo-validation.md) → [W8-engine-and-reporter.md](docs/weekly-handoffs/W8-engine-and-reporter.md)
+> **Start here tonight:** [W9 kickoff page](docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md) → [W9-Nick.md](docs/weekly-handoffs/W9-Nick.md) → [W9-Vale.md](docs/weekly-handoffs/W9-Vale.md) → [W9-Christian.md](docs/weekly-handoffs/W9-Christian.md) → [W9-Aliyan.md](docs/weekly-handoffs/W9-Aliyan.md)
 
 - **`docs/TEAM_ONBOARDING.md`** — how to clone the repo and set up **your own computer**
   (Git + Python checks, a personal branch, a virtual environment, and how to validate
   your JSON fixtures). It defines the ten terms you will meet and gives separate
   PowerShell / terminal routes.
-- **`docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md`** — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
+- **`docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`** — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
 - **`docs/weekly-handoffs/`** — individual handoffs for each teammate (Nick, Vale, Christian, Aliyan); see below
 - **`docs/STATUS.md`** — the current state (date, branch/HEAD, working-tree state)
 - **`TASKS.md`** — the task register (stable IDs), phase plans, and the shared
@@ -141,9 +141,7 @@ deterministic policy. On the checked-in flat fixture (`tests/data/osv-scanner.js
 5 findings, 4 packages, 0 edges) a 7-turn run reports `risk.status == "unavailable"`,
 `risk.score is None`, with the message *"No score is fabricated; this is an
 inventory-only result"* — no invented edges, no invented score, consistent with
-the inventory-only contract. Wiring a **real** model backend (local llama.cpp
-endpoint vs. user-provided API key) is a pending decision (see `TASKS.md`) and is
-not yet implemented. Full suite: **241 passed, 29 subtests, 2 warnings**.
+the inventory-only contract. The **explanation layer** (`src/explanation/`) is **committed** (83b10fb) and verified: a grounded deterministic explainer plus an optional local-model client (env-only `OPENAI_BASE_URL` / `OPENAI_API_KEY` pointing to any `/v1/chat/completions` endpoint). **The user selects and configures the provider (ChatGPT, Claude, or a custom URL/IP/port with credentials if required).** Model use is **not approved by default**; it requires explicit opt-in (`--model ON` + configured endpoint).
 
 ## Implemented explanation layer and read-only dashboard (committed 83b10fb)
 
@@ -179,8 +177,7 @@ real loopback HTTP tests (248 passed, 29 subtests — reported historical result
   The **default** is a grounded deterministic explainer
   (`src/explanation/deterministic.py`) that cites only facts already on the
   finding and never fabricates a numeric CVSS score, version, or CVE. The
-  **optional** backend (`src/explanation/local_model.py`) targets a single
-  OpenAI-compatible `/v1/chat/completions` endpoint via stdlib `urllib`,
+  The **optional** backend (`src/explanation/local_model.py`) targets **OpenAI/ChatGPT, Claude, or a custom** `/v1/chat/completions` endpoint via stdlib `urllib`,
   configured only by the `OPENAI_BASE_URL` / `OPENAI_API_KEY` environment
   variables (no credentials or endpoint secrets are committed). Model output is
   *optional explanatory text only*: `add_explanations(report, use_model=True)`
@@ -199,36 +196,34 @@ real loopback HTTP tests (248 passed, 29 subtests — reported historical result
 
   **Model activation:** `--model` defaults to **OFF** (deterministic only). The
   dashboard CLI flag `--model` defaults to `"OFF"`. Only the exact value `--model ON`
-  (case-insensitive) enables the optional local-model backend. When **ON** and
-  `OPENAI_BASE_URL` / `OPENAI_API_KEY` are configured, the dashboard sends
-  **finding data** (package name, version, vulnerability ID, aliases, severity score,
-  severity vector, severity types, published date, affected range, fixed versions,
-  recommended action) to the configured endpoint. Whether the configured endpoint
-  is unencrypted HTTP or encrypted HTTPS is an **open privacy decision** — the
-  endpoint receives the API key and finding data in either case. Model use is
-  **not approved by default**; it requires explicit opt-in.
+  (case-insensitive) enables the optional local-model backend, which targets any
+  `/v1/chat/completions` endpoint via `OPENAI_BASE_URL` / `OPENAI_API_KEY` env
+  vars. **No remote endpoint is approved by default.** When **ON** and the endpoint
+  is configured, the dashboard sends **finding data** (package name, version, vulnerability
+  ID, aliases, severity score, severity vector, severity types, published date, affected
+  range, fixed versions, recommended action) to the configured endpoint. Whether the
+  configured endpoint is unencrypted HTTP or encrypted HTTPS is an **open privacy decision**
+  — the endpoint receives the API key and finding data in either case. Model use is
+  **not approved by default**; it requires explicit opt-in. Deterministic fallback is
+  guaranteed and labelled `source` per finding — on *any* per-finding failure (no config,
+  network/timeout, non-2xx status, malformed body, empty or non-string completion) that
+  finding falls back to the grounded deterministic text; the request is bounded by a hard
+  `max_calls` cap. Findings, severity, fixed versions, risk, remediation, and
+  verification are **never modified** by this layer. Verified by
+  `tests/test_explanation.py` (20), `tests/test_explanation_http.py` (7, a real
+  local `/v1/chat/completions` server driven by real `urllib` requests — no
+  injected transport seam), and the dashboard tests above.
 
 ## Key documents
 
-|- [docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md](docs/weekly-plan/W8-2026-10-27-to-2026-11-02.md) — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
+|- [docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md](docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md) — current weekly plan (goals, daily checkpoints, owners, dependencies, acceptance criteria, verification commands, Friday demo checklist)
 |- [docs/weekly-handoffs/](docs/weekly-handoffs/) — individual handoffs for each teammate:
-  - [W8-parser.md](docs/weekly-handoffs/W8-parser.md) — Nick · one additional manifest format + focused fixture/tests
-  - [W8-engine-and-reporter.md](docs/weekly-handoffs/W8-engine-and-reporter.md) — Vale · one reproducible real-project OSV-Scanner scan attempt (what works, gaps, topology/risk limits; no NVD wiring promise)
-  - [W8-dashboard-and-docker.md](docs/weekly-handoffs/W8-dashboard-and-docker.md) — Christian · offline tests for scan JSON → normalized report path (empty/malformed input, unknown-topology); no Docker this week
-  - [W8-demo-validation.md](docs/weekly-handoffs/W8-demo-validation.md) — Aliyan · bounded search bar + numeric `severity_score` threshold filter in `src/web/dashboard.html` (after checking feature exists); no Flask/D3
-|- **Historical handoffs (for reference):**
-  - `HANDOFF_NICK_MDECORE.md` — Nick · fixtures + limitations note (T-DE-01/02)
-  - `HANDOFF_CHRISTIAN_MDECORE.md` — Christian · offline tests + expected results (T-DE-02/03)
-  - `HANDOFF_VALE_MDECORE.md` — Vale · loader, PHEI/report integration, reference output (T-DE-01/02/03)
-  - `HANDOFF_ALIYAN_MDECORE.md` — Aliyan (provisional) · static viewer spike (T-DE-04)
-- [docs/weekly-handoffs/W1-parser.md](docs/weekly-handoffs/W1-parser.md) — historical W1 handoff (T-DE-01)
-- [docs/weekly-handoffs/W2-engine.md](docs/weekly-handoffs/W2-engine.md) — historical W2 handoff (T-DE-02)
-- [docs/weekly-handoffs/W3-reporter.md](docs/weekly-handoffs/W3-reporter.md) — historical W3 handoff (T-DE-03)
-- [docs/weekly-handoffs/W4-dashboard.md](docs/weekly-handoffs/W4-dashboard.md) — historical W4 handoff (T-DE-04)
-- [docs/weekly-handoffs/W5-ai.md](docs/weekly-handoffs/W5-ai.md) — historical W5 handoff (T-DE-05)
-- [docs/weekly-handoffs/W6-docker.md](docs/weekly-handoffs/W6-docker.md) — historical W6 handoff (T-DE-05)
-- [docs/weekly-handoffs/W7-demo-validation.md](docs/weekly-handoffs/W7-demo-validation.md) — historical W7 handoff
-- [docs/WEEKLY.md](docs/WEEKLY.md) — historical weekly focus and acceptance criteria (M-DE-CORE demo week)
+  - [W9-Nick.md](docs/weekly-handoffs/W9-Nick.md) — Nick · one additional manifest format + focused fixture/tests
+  - [W9-Vale.md](docs/weekly-handoffs/W9-Vale.md) — Vale · one reproducible real-project OSV-Scanner scan (scan-to-report integration met 2026-11-03; `report.json` written)
+  - [W9-Christian.md](docs/weekly-handoffs/W9-Christian.md) — Christian · offline tests for scan JSON → normalized report path (empty/malformed input, unknown-topology); no Docker this week
+  - [W9-Aliyan.md](docs/weekly-handoffs/W9-Aliyan.md) — Aliyan · bounded search bar + numeric `severity_score` threshold filter in `src/web/dashboard.html` (after checking feature exists); no Flask/D3
+||- **Historical handoffs (W1–W7):** removed from the repository (see the rule in `docs/weekly-handoff-template.md` that old handoff files must not be archived in the repo). The M-DE-CORE week (Sep 28–Oct 4, 2026) is documented in `docs/WEEKLY.md` (historical) and `TASKS.md` §47.
+- [docs/WEEKLY.md](docs/WEEKLY.md) — historical weekly focus and acceptance criteria (M-DE-CORE demo week, Sep 28–Oct 4 2026; files removed from repo)
 
 > **Read the handoff list above (for reference).** `docs/WEEKLY.md` is now historical;
-> the `HANDOFF_*_MDECORE.md` files are the M-DE-CORE demo week's (complete) handoffs.
+> the `HANDOFF_*_MDECORE.md` files have been removed from the repository.

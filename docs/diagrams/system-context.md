@@ -36,7 +36,7 @@ graph TB
         end
 
         subgraph AI["W5: Model endpoint (opt-in)"]
-            A1[Configured endpoint (llama.cpp / API key)]
+            A1[Configured endpoint (**OpenAI/ChatGPT, Claude, or a custom endpoint**)]
             A2[Deterministic fallback (default)]
         end
 
@@ -102,6 +102,6 @@ graph TB
 ## Notes
 
 - **Flask+D3 is optional** — the stdlib `src.web` dashboard is sufficient for the December demo.
-- **Docker is optional** — manual install via `requirements.txt` is sufficient.
+- **Docker is dismissed/out of scope** — manual install via `requirements.txt` is sufficient.
 - **No data flows to/from external model training** — out of scope.
 - **No data flows to/from fake/synthetic CVE data** — all findings come from OSV-Scanner.

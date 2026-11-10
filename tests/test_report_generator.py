@@ -174,49 +174,25 @@ class TestReportScoreInvariantToSeverity(unittest.TestCase):
         #
         # The chain's synthetic nodes are not in MOCK_CVE_DB, so their
         # node_risks are 0.0 regardless; the 6.0 is purely from edge weights x
-        # node count.  To prove invariance more broadly, use build_mock_graph (
-        # which draws on nodes present in MOCK_CVE_DB) and show the score is
+        # node count.  To prove invariance more broadly, use build_mock_graph
+        # (which draws on nodes present in MOCK_CVE_DB) and show the score is
         # identical whether the severities are low, high, or present at all.
         self.assertEqual(baseline, 6.0)
 
         from src.parser.parser import build_mock_graph
+        from unittest.mock import patch
 
         mock_graph = build_mock_graph()
-        import src.engine.risk_analyzer as ra
-        # Save the original severities so we can restore after the test.
-        original_sev = {
-            (pk, pv): dict(ra.MOCK_CVE_DB.get((pk, pv), {}))
-            for pk, pv in [
-                ("requests", "2.28.1"),
-                ("django", "4.2"),
-                ("core_lib", "1.0.0"),
-            ]
-        }
-        try:
-            before = calculate_phei(mock_graph)
-            # Push every severity to its extreme (both very low and very high).
-            ra.MOCK_CVE_DB[("requests", "2.28.1")] = {
-                "CVE-2023-1234": 0.95,
-                "IGNORED-CVE": 0.95,
-            }
+        before = calculate_phei(mock_graph)
+
+        # Prove invariance by patching get_cve_severity with different severity values
+        # and showing the score doesn't change.
+        with patch("src.engine.risk_analyzer.get_cve_severity", return_value={"CVE-X": 0.95}):
             after_high = calculate_phei(mock_graph)
-            ra.MOCK_CVE_DB[("requests", "2.28.1")] = {
-                "CVE-2023-1234": 0.01,
-                "IGNORED-CVE": 0.01,
-            }
-            ra.MOCK_CVE_DB[("django", "4.2")] = {
-                "CVE-2022-9999": 0.01,
-            }
+        with patch("src.engine.risk_analyzer.get_cve_severity", return_value={"CVE-X": 0.01}):
             after_low = calculate_phei(mock_graph)
-            self.assertEqual(before, after_high, "score must not depend on high severity")
-            self.assertEqual(before, after_low, "score must not depend on low severity")
-        finally:
-            # Restore original severities (mock DB is shared module state).
-            for key, sev in original_sev.items():
-                if key in ra.MOCK_CVE_DB:
-                    ra.MOCK_CVE_DB[key] = sev
-                else:
-                    ra.MOCK_CVE_DB.pop(key, None)
+        self.assertEqual(before, after_high, "score must not depend on high severity")
+        self.assertEqual(before, after_low, "score must not depend on low severity")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 # December Demo Roadmap — RECON-DG
 
 > **Branch:** `feat/inventory-report`
-> **HEAD:** `77de712` (2026-10-20)
+> **HEAD:** `6f0a8337` (2026-11-10)
 > **Published baseline:** `83b10fb` (2026-10-19)
 > **Untracked:** `docs/REVIEW-DECISIONS.md` (intentionally preserved)
 
@@ -22,18 +22,18 @@
 
 ---
 
-## Implementation-state inventory (as of HEAD `77de712`)
+## Implementation-state inventory (as of HEAD `6f0a8337`)
 
 | Module | Status | Evidence |
 |--------|--------|----------|
-| `src/parser` | **Partial** — `requirements.txt` only (1 of ~6 manifest formats). | `src/parser/__init__.py`, `src/parser/parser.py:7–51` |
+| `src/parser` | **Partial — 2/4 minimum formats** — `requirements.txt`, `pyproject.toml` (W10 Nick). `package.json` does NOT exist in the source tree. `go.mod` is the remaining blocker for ≥4 target. | `src/parser/parser.py:11,78,parse_requirements,parse_pyproject_toml` |
 | `src/engine/risk_analyzer` | **Implemented** — PHEI path-max (`calculate_path_weight`, `calculate_impact_multiplicity`, `calculate_phei`) + `UnavailableTopologyError` guard. | `src/engine/__init__.py`, `src/engine/risk_analyzer.py` |
 | `src/engine/nvd_client` | **Partial** — NVD/OSV API enrichment fallback client present but **not yet run end-to-end** against a real project. | `src/engine/__init__.py`, `src/engine/nvd_client.py` |
 | `src/reporter` | **Partial** — `RiskReport` dataclass + `interface.py` + `report_generator.py` present. Inventory serializer implemented; **dependency-graph serializer unimplemented**. | `src/reporter/__init__.py`, `src/reporter/interface.py`, `src/reporter/report_generator.py`, `src/reporter/inventory.py` |
 | `src/agent` | **Implemented** — bounded tool loop, `EvidenceTrail`, allowlisted tools, deterministic grounded policy (no model). **45 passing tests** (`tests/test_agent.py`). | `src/agent/__init__.py`, `src/agent/agent.py`, `src/agent/normalizer.py`, `src/agent/pipeline.py`, `src/agent/scan_runner.py` |
 | `src/agent` remediation | **Implemented** — `build_remediation_plan` (pure, fixed versions verbatim, severity `None`) + `verify_remediation` (user-supplied after scan; no after scan → `not_run`). **24 passing tests** (`tests/test_remediation.py`). | `src/agent/agent.py` |
-| `src/explanation` | **Implemented** — grounded deterministic explainer (default) + optional OpenAI-compatible local-model client (`src/explanation/local_model.py`). Model defaults **OFF** (`--model ON` required). Per-finding deterministic fallback. | `src/explanation/__init__.py`, `src/explanation/deterministic.py`, `src/explanation/local_model.py`; `tests/test_explanation.py` (23), `tests/test_explanation_http.py` (7) |
-| `src/web` (dashboard) | **Implemented** — stdlib `http.server` + `dashboard.html` (no third-party deps). Read-only; serves report + page. **Not** Flask+D3. | `src/web/__init__.py`, `src/web/__main__.py`, `src/web/server.py`, `src/web/dashboard.html`; `tests/test_dashboard.py` (13) |
+| `src/explanation` | **Implemented** — grounded deterministic explainer (default) + optional **OpenAI/ChatGPT, Claude, or a custom** local-model client (`src/explanation/local_model.py`). Model defaults **OFF** (`--model ON` required). Per-finding deterministic fallback. | `src/explanation/__init__.py`, `src/explanation/deterministic.py`, `src/explanation/local_model.py`; `tests/test_explanation.py` (23), `tests/test_explanation_http.py` (7) |
+|| `src/web` (dashboard) | **Implemented** — stdlib `http.server` + `dashboard.html` (no third-party deps). Read-only; serves report + page. **Not** Flask+D3. `src/web/osv_normalizer.py` (6,851 bytes) corrected to dashboard contract (2026-11-03). **Note:** two normalizers exist: `src/web/osv_normalizer.py` (dashboard format) and `src/agent/normalizer.py` (445 lines, older agent format). No single canonical normalizer yet. | `src/web/__init__.py`, `src/web/__main__.py`, `src/web/server.py`, `src/web/dashboard.html`, `src/web/osv_normalizer.py`; `tests/test_dashboard.py` (13), `tests/test_osv_normalizer.py` (12) |
 | `src/enrichment` | **Implemented** — deps.dev enrichment layer (stdlib-only, `package_context` tool, additive only, never fed to PHEI). **26 passing tests** (`tests/test_enrichment.py`). | `src/enrichment/__init__.py`, `src/enrichment/deps_dev.py` |
 | `src/models/dependency_graph` | **Implemented** — `DependencyNode` + `DependencyGraph` (NetworkX DiGraph). | `src/models/__init__.py`, `src/models/dependency_graph.py` |
 | `tests/` | **Partial** — 12 test files; full suite historically ~241–248 passed (historical counts; verify before demo). | See `tests/` directory |
@@ -46,19 +46,25 @@
 
 > Week numbers are sequential relative to the start of the December build cycle. No calendar dates are assumed; the team selects the start week.
 
-### W1 — Multi-format manifest parser (T-DE-01)
+### W1 — Multi-format manifest parser (T-DE-01) — **W10 in progress (2/4)**
 
-**Milestone:** Parser supports ≥4 manifest formats (`requirements.txt`, `package.json`, `pyproject.toml`, `go.mod`) → shared `DependencyGraph` IR.
+**Milestone:** Parser supports ≥4 manifest formats (`requirements.txt`, `pyproject.toml`, `package.json`, `go.mod`) → shared `DependencyGraph` IR.
 
 **Why first:** Every downstream step (engine, reporter, dashboard) depends on a real graph.
+
+**Current state (W10):** 2/4 minimum formats implemented (requirements.txt, pyproject.toml). `package.json` does NOT exist in the source tree. `go.mod` is the remaining blocker for the ≥4 target. The W9 planning cycle has been superseded by the four current W10 handoffs (W10-Nick.md, W10-Vale.md, W10-Christian.md, W10-Aliyan.md); archived W9 handoff files are no longer present in the repository.
 
 **Deliverable:** `src/parser/parser.py` with `parse_package_json()`, `parse_pyproject_toml()`, `parse_go_mod()` (in addition to existing `parse_requirements()`), all normalizing to `DependencyGraph` with correct `edge_availability` (inventory-only → `"unavailable"`).
 
 **Verification:** `python -m pytest tests/test_parser.py -q`
 
-### W2 — Engine wiring: real OSV + PHEI on known topology (T-DE-02)
+### W2 — Engine wiring: real OSV + PHEI on known topology (T-DE-02) — **PHEI topology-only (cap 10.0), severity-aware systemic risk distinct**
 
 **Milestone:** OSV client wired into the graph; real CVE data flows into PHEI on a graph with `edge_availability = "known"`. Inventory-only input (no edges) reports risk as unavailable — no score fabricated.
+
+**⚠️ PHEI direction (agreed):** PHEI is **topology-only**: it scores per-node edge weights × impact multiplicity and caps the result at **10.0**. The current `calculate_phei()` (risk_analyzer.py) computes `path_weight × impact_multiplicity` with that 10.0 cap. It does **not** use `get_cve_severity()` values in the PHEI score; severity-aware systemic risk is handled separately by `calculate_systemic_risk()`. If trustworthy topology or an approved PHEI rule is absent, report unavailable — do not fabricate.
+
+**Proposed (unimplemented) 0–100 target:** A future 0–100 normalization using reachable dependents and importance/criticality weights is under discussion but **not yet implemented**. Do not treat it as current behavior.
 
 **Why second:** Depends on W1 (real graph needed for real lookups).
 
@@ -66,7 +72,7 @@
 
 **Verification:** `python -m pytest tests/test_nvd_integration.py tests/test_risk_analyzer.py -q`
 
-### W3 — Inventory report schema + evidence-grounded suggestions (T-DE-03)
+### W3 — Inventory report schema + evidence-grounded suggestions (T-DE-03) — **Mode B unimplemented**
 
 **Milestone:** `src/reporter/` includes an inventory-only serializer (Mode A) that emits the `RiskReport` schema with findings, OSV evidence, and remediation plan. PHEI is **not** required for inventory-only input — risk status is `"unavailable"` when topology is unknown.
 
@@ -75,6 +81,8 @@
 **Deliverable:** `src/reporter/report_generator.py` with Mode A serializer: emits `RiskReport` with `findings[]`, `evidence[]` (OSV data), `risk` (status `"unavailable"` for inventory-only), `remediation_plan[]`. Suggested fixes are evidence-grounded using project functions or cited OWASP guidance.
 
 **Verification:** `python -m pytest tests/test_report_generator.py tests/test_inventory_reporter.py -q`
+
+**Mode B (dependency-graph serializer):** Unimplemented. This is a **W10 deliverable** (moved from W9). Mode B must emit `findings[]`, `evidence[]`, `risk`, `remediation_plan[]` with no fabricated data. No out-of-spec extension emitted this week; a risk-path field is deferred to a separate schema decision. See `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`.
 
 ### W4 — Dashboard (optional / decision-dependent) (T-DE-04)
 
@@ -88,31 +96,25 @@
 
 > **Decision-dependent:** Flask+D3 requires team agreement on third-party deps and demo value. The stdlib dashboard is sufficient for the December demo.
 
-### W5 — Wire the configured model endpoint (proposed; no registered task ID)
+### W5 — Wire the configured model endpoint (resolved — user-selected provider)
 
-**Milestone:** The opt-in explanation layer (already implemented, defaults `--model OFF`) is wired to the team's chosen endpoint (llama.cpp local model or user API key). Deterministic grounded fallback remains active when the model is unavailable.
+**Milestone:** The opt-in explanation layer (already implemented, defaults `--model OFF`) is wired to the team's chosen endpoint (**OpenAI/ChatGPT, Claude, or a custom endpoint**). Deterministic grounded fallback remains active when the model is unavailable.
 
 **Why fifth:** Depends on W3 (needs findings to explain).
 
 **Deliverable:** `src/agent/` wired to the chosen endpoint. `--model ON` enables the layer; `--model OFF` (default) uses the deterministic grounded explainer. All model output is additive only (never modifies findings).
 
-**Verification:** `python -m src.agent --model OFF` is **unavailable** — the `src/agent` layer has no `--model` CLI flag. `--model` is a `src.web` dashboard flag (serves an existing report only; requires `OPENAI_BASE_URL` + `OPENAI_API_KEY` for `--model ON`). The agent layer is already implemented (bounded tool loop, `EvidenceTrail`, deterministic grounded policy) but its endpoint wiring (llama.cpp vs. user API key) is pending.
+**Verification:** `python -m src.agent --model OFF` is **unavailable** — the `src/agent` layer has no `--model` CLI flag. `--model` is a `src.web` dashboard flag (serves an existing report only; requires `OPENAI_BASE_URL` + `OPENAI_API_KEY` for `--model ON`). The agent layer is already implemented (bounded tool loop, `EvidenceTrail`, deterministic grounded policy) but its endpoint wiring (**OpenAI/ChatGPT, Claude, or a custom endpoint**, user-configured) is pending.
 
-> **Decision-dependent:** Team to decide llama.cpp vs. user API key. The agent layer is **already implemented** — only the endpoint wiring is pending.
+> **Decision settled:** The user selects **ChatGPT (OpenAI), Claude, or a custom endpoint** (URL/IP/port with credentials if required). The current client supports a generic **OpenAI/ChatGPT, Claude, or a custom** `/v1/chat/completions` endpoint; provider-selection UI and native Claude integration are **implementation gaps**, not unresolved decisions. Endpoint selection/configuration is implementation work, not a pending decision. The agent layer is **already implemented** — only the endpoint wiring is pending.
 
-### W6 — Docker packaging (optional / decision-dependent) (T-DE-05)
+### W6 — Docker packaging — **dismissed / out of scope** (2026-11-03)
 
-**Milestone:** Portable Docker image + local-dev compose. The stdlib dashboard and agent are sufficient for the December demo; Docker is an optional enhancement.
+**Decision:** Docker is **dismissed** for the December deliverable. The standalone stdlib dashboard (`src/web/`) and agent are sufficient for the Dec 9 presentation on any Python 3.10+ machine (Windows/Linux). A portable container is a future enhancement, not a December requirement.
 
-**Why sixth:** Depends on W4 (dashboard must be runnable before containerizing).
+> **Rationale:** The Dec 9 demo runs on the user's local machine. A Docker image adds complexity (multi-stage build, image size, dependency resolution) without demo value over `python -m src.web`. The team agreed to keep the product deployable as a single `python -m src.web` command.
 
-**Deliverable:** `Dockerfile` (multi-stage: builder → runtime), `docker-compose.yml`, `.dockerignore`, `requirements.txt` for image.
-
-**Verification:** `docker compose up` against a sample manifest
-
-> **Decision-dependent:** Docker is optional for the December demo. The stdlib dashboard + agent can run on any Python 3.10+ machine.
-
-### W7 — Dashboard/report usability and demo validation (proposed — team confirmation required, no registered task ID)
+### W7 — Dashboard/report usability and demo validation (resolved — Aliyan, W12 deliverable)
 
 **Milestone:** Independently testable usability validation of the dashboard and report output for the December demo.
 
@@ -122,7 +124,60 @@
 
 **Verification:** `python -m src.web` starts the stdlib dashboard; run the demo-validation checklist.
 
-> **Owner:** Aliyan (for team confirmation). This is a usability/demo-validation task, not a code task.
+> **Owner:** Aliyan (resolved, W12 deliverable). This is a usability/demo-validation task, not a code task. **W12 plan:** `docs/weekly-plan/W12-2026-11-23-to-2026-11-29.md` §Demo validation.
+
+### W8 — Historical milestone: W9 planning docs pushed to origin (2026-11-06)
+
+> **This is a historical milestone — not a deliverable week.** It records the last committed state before the W9–W13 plan cycle.
+
+**What was delivered:** The W9 planning docs (`docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`), all four W9 handoffs (`docs/weekly-handoffs/W9-*.md`, now archived — no longer present in the repository; superseded by the four current W10 handoffs), and the STATUS.md/ROADMAP.md/TASKS.md reconciliation were pushed to origin at commit `88f2b2c12e979000aaaa604955e205010f76c133` (2026-11-06). This is the published baseline for the W9–W13 cycle. The W10 handoffs (untracked) build on this baseline.
+
+**Published tip:** `origin/feat/inventory-report` = `6f0a8337`.
+
+**Why W8:** Documents the last committed state before the active W9–W13 planning cycle began. All subsequent weeks (W9–W13) build on this baseline.
+
+---
+
+### W9 — Dependency-graph serializer (T-DE-03 Mode B) — **W10 deliverable**
+
+> **Moved from W9 to W10:** The dependency-graph serializer (Mode B) was originally planned for W9 but deferred to W10 because it is unimplemented and blocks the W11 CVE→systemic-risk demo.
+
+**Milestone:** `src/reporter/report_generator.py` Mode B serializer: emits `findings[]`, `evidence[]`, `risk`, `remediation_plan[]` with no fabricated data. No out-of-spec extension emitted this week; a risk-path field is deferred to a separate schema decision.
+
+**Why ninth:** Depends on W3 (needs a structured report to serialize).
+
+**Deliverable:** `src/reporter/report_generator.py` Mode B serializer. Parses the `DependencyGraph` (NetworkX DiGraph) output from `src/parser/parser.py` and emits the `RiskReport` schema.
+
+**Verification:** `python -m pytest tests/test_report_generator.py -q` (Mode B tests).
+
+**W10 plan:** `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`
+
+**W9 handoff (archived):** No longer present in the repository; superseded by the four current W10 handoffs (W10-Nick.md, W10-Vale.md, W10-Christian.md, W10-Aliyan.md).
+
+### W10 — Dependency-graph serializer (T-DE-03 Mode B) — **W10 deliverable**
+
+**Four active handoffs, one per team member.** No archived W1–W8 or M-DE-CORE handoffs restored.
+
+**December timeline:** Dec 4 (Fri) team demo, Dec 7 (Mon) team demo, Dec 8 (Tue) rehearsal/buffer, Dec 9 (Wed) presentation.
+
+> **Interim-demo scope:** The Dec 9 presentation is an interim demonstration of progress toward the larger RECON-DG project — not a declaration that the full project is complete. The December deliverable is a working prototype (scan → graph → OSV findings → systemic risk → dashboard → AI explanation → bounded fix → human approval → rescan → verified results), not a finished application.
+
+> **Dec 4 milestone:** Team demo — `python -m src.web` serves the report dashboard; real scan evidence is present (Mode B or Mode A).
+
+> **Dec 7 milestone:** Team demo — full pipeline (scan → report → dashboard → explanation) runs end-to-end on a controlled project.
+
+> **Dec 8 milestone:** Rehearsal — the full demo script (≤10 steps, each with expected output) is dry-run on a controlled project; feedback logged in `docs/demo-validation/dec-8-rehearsal.md`.
+
+> **Dec 9 milestone:** Presentation — the December deliverable demo delivered to faculty/sponsor.
+
+|| Member | Handoff file | Focus |
+|--------|-------------|-------|
+| Nick | `docs/weekly-handoffs/W10-Nick.md` | Parser: `parse_go_mod()` (2/4 → 4/4) |
+| Vale | `docs/weekly-handoffs/W10-Vale.md` | Engine + reporter: Mode B serializer (dependency-graph serializer) |
+| Christian | `docs/weekly-handoffs/W10-Christian.md` | Dashboard validation tests (empty/malformed input, unknown-topology) |
+| Aliyan | `docs/weekly-handoffs/W10-Aliyan.md` | Demo validation: `docs/demo-validation/` directory + rehearsal checklist + demo script |
+
+**W10 plan:** `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`
 
 ---
 
@@ -130,12 +185,17 @@
 
 | # | Question | Status |
 |---|----------|--------|
-| 1 | **Demo date and meeting cadence** | Unconfirmed — no date or cadence recorded in repo files. Team to decide. |
-| 2 | **Communication channel** (Slack, Discord, email, etc.) | Unconfirmed. Team to decide. |
-| 3 | **Review policy** (who reviews, when, acceptance criteria) | Unconfirmed. Team to decide. |
-| 4 | **Model backend: llama.cpp vs. user API key** | Pending decision (see W5). |
-| 5 | **Open privacy decision:** whether the configured `OPENAI_BASE_URL` endpoint is HTTP or HTTPS — the endpoint receives the API key and finding data in either case. | Open — documented in `src/explanation/local_model.py` and `docs/STATUS.md`. |
-| 6 | **"integrations across different stories"** — phrase appears in TASKS.md without a defined meaning. | **Flagged for clarification** — do not assign an assumed meaning. |
+| 2 | **"integrations across different stories"** — phrase appears in TASKS.md without a defined meaning. | **Flagged for clarification** — do not assign an assumed meaning. |
+
+---
+
+## Implementation notes (not blockers)
+
+| Item | Status |
+|------|--------|
+| Communication channel (Slack, Discord, email, etc.) | Team to decide; not blocking current work |
+| Review policy (who reviews, when, acceptance criteria) | Team to decide; not blocking current work |
+| Open privacy decision: `OPENAI_BASE_URL` endpoint HTTP vs HTTPS | Implementation note — endpoint receives API key and finding data in either case. Documented in `src/explanation/local_model.py` and `docs/STATUS.md`. |
 
 ---
 
@@ -175,7 +235,7 @@
 | Vale | Scanner pipeline + engine + reporter (W1–W3) |
 | Nick | Parser (W1) |
 | Christian | Dashboard (W4) + Docker packaging (W6, proposed, optional) |
-| Aliyan | Dashboard/report usability + demo validation (W7, proposed) |
+| Aliyan | Dashboard/report usability + demo validation (W7 → W12, resolved) |
 
 > All proposed owner assignments are **for team confirmation**. Historical handoff assignments (M-DE-CORE) are not current agreements.
 

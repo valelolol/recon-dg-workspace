@@ -1,0 +1,1711 @@
+{
+  "findings": [
+    {
+      "id": "PYSEC-2020-176",
+      "package": "pyyaml",
+      "version": "5.1",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2020-176"
+      ],
+      "aliases": [
+        "CVE-2019-20477",
+        "GHSA-3pqx-4fqf-j49f",
+        "PYSEC-2020-176"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (advisory PYSEC-2020-176).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "GHSA-3pqx-4fqf-j49f",
+      "package": "pyyaml",
+      "version": "5.1",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-3pqx-4fqf-j49f"
+      ],
+      "aliases": [
+        "CVE-2019-20477",
+        "GHSA-3pqx-4fqf-j49f",
+        "PYSEC-2020-176"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (GHSA GHSA-3pqx-4fqf-j49f).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "PYSEC-2020-96",
+      "package": "pyyaml",
+      "version": "5.1",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2020-96"
+      ],
+      "aliases": [
+        "CVE-2020-1747",
+        "GHSA-6757-jp84-gxfx",
+        "PYSEC-2020-96"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (advisory PYSEC-2020-96).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "GHSA-6757-jp84-gxfx",
+      "package": "pyyaml",
+      "version": "5.1",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-6757-jp84-gxfx"
+      ],
+      "aliases": [
+        "CVE-2020-1747",
+        "GHSA-6757-jp84-gxfx",
+        "PYSEC-2020-96"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (GHSA GHSA-6757-jp84-gxfx).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "PYSEC-2021-142",
+      "package": "pyyaml",
+      "version": "5.1",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2021-142"
+      ],
+      "aliases": [
+        "CVE-2020-14343",
+        "GHSA-8q59-q68h-6hv4",
+        "PYSEC-2021-142"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (advisory PYSEC-2021-142).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "GHSA-8q59-q68h-6hv4",
+      "package": "pyyaml",
+      "version": "5.1",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-8q59-q68h-6hv4"
+      ],
+      "aliases": [
+        "CVE-2020-14343",
+        "GHSA-8q59-q68h-6hv4",
+        "PYSEC-2021-142"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (GHSA GHSA-8q59-q68h-6hv4).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "PYSEC-2018-32",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2018-32"
+      ],
+      "aliases": [
+        "CVE-2018-20060",
+        "GHSA-www2-v7xj-xrc6",
+        "PYSEC-2018-32"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2018-32).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "GHSA-www2-v7xj-xrc6",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-www2-v7xj-xrc6"
+      ],
+      "aliases": [
+        "CVE-2018-20060",
+        "GHSA-www2-v7xj-xrc6",
+        "PYSEC-2018-32"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-www2-v7xj-xrc6).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "PYSEC-2020-176",
+      "package": "pyyaml",
+      "version": "5.1.0",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2020-176"
+      ],
+      "aliases": [
+        "CVE-2019-20477",
+        "GHSA-3pqx-4fqf-j49f",
+        "PYSEC-2020-176"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (advisory PYSEC-2020-176).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "GHSA-3pqx-4fqf-j49f",
+      "package": "pyyaml",
+      "version": "5.1.0",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-3pqx-4fqf-j49f"
+      ],
+      "aliases": [
+        "CVE-2019-20477",
+        "GHSA-3pqx-4fqf-j49f",
+        "PYSEC-2020-176"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (GHSA GHSA-3pqx-4fqf-j49f).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "PYSEC-2020-96",
+      "package": "pyyaml",
+      "version": "5.1.0",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2020-96"
+      ],
+      "aliases": [
+        "CVE-2020-1747",
+        "GHSA-6757-jp84-gxfx",
+        "PYSEC-2020-96"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (advisory PYSEC-2020-96).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "GHSA-6757-jp84-gxfx",
+      "package": "pyyaml",
+      "version": "5.1.0",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-6757-jp84-gxfx"
+      ],
+      "aliases": [
+        "CVE-2020-1747",
+        "GHSA-6757-jp84-gxfx",
+        "PYSEC-2020-96"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (GHSA GHSA-6757-jp84-gxfx).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "PYSEC-2021-142",
+      "package": "pyyaml",
+      "version": "5.1.0",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2021-142"
+      ],
+      "aliases": [
+        "CVE-2020-14343",
+        "GHSA-8q59-q68h-6hv4",
+        "PYSEC-2021-142"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (advisory PYSEC-2021-142).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "GHSA-8q59-q68h-6hv4",
+      "package": "pyyaml",
+      "version": "5.1.0",
+      "ecosystem": "PyPI",
+      "severity": 9.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-8q59-q68h-6hv4"
+      ],
+      "aliases": [
+        "CVE-2020-14343",
+        "GHSA-8q59-q68h-6hv4",
+        "PYSEC-2021-142"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade pyyaml to the latest patched version (GHSA GHSA-8q59-q68h-6hv4).",
+      "severity_score": 9.8
+    },
+    {
+      "id": "PYSEC-2026-4320",
+      "package": "certifi",
+      "version": "2026.7.22",
+      "ecosystem": "PyPI",
+      "severity": 9.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-4320"
+      ],
+      "aliases": [
+        "GHSA-6q48-6c7w-9gw2",
+        "PYSEC-2026-4320"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade certifi to the latest patched version (advisory PYSEC-2026-4320).",
+      "severity_score": 9.1
+    },
+    {
+      "id": "GHSA-6q48-6c7w-9gw2",
+      "package": "certifi",
+      "version": "2026.7.22",
+      "ecosystem": "PyPI",
+      "severity": 9.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-6q48-6c7w-9gw2"
+      ],
+      "aliases": [
+        "GHSA-6q48-6c7w-9gw2",
+        "PYSEC-2026-4320"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade certifi to the latest patched version (GHSA GHSA-6q48-6c7w-9gw2).",
+      "severity_score": 9.1
+    },
+    {
+      "id": "PYSEC-2026-4320",
+      "package": "certifi",
+      "version": "2023.7.22",
+      "ecosystem": "PyPI",
+      "severity": 9.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-4320"
+      ],
+      "aliases": [
+        "GHSA-6q48-6c7w-9gw2",
+        "PYSEC-2026-4320"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade certifi to the latest patched version (advisory PYSEC-2026-4320).",
+      "severity_score": 9.1
+    },
+    {
+      "id": "GHSA-6q48-6c7w-9gw2",
+      "package": "certifi",
+      "version": "2023.7.22",
+      "ecosystem": "PyPI",
+      "severity": 9.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-6q48-6c7w-9gw2"
+      ],
+      "aliases": [
+        "GHSA-6q48-6c7w-9gw2",
+        "PYSEC-2026-4320"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade certifi to the latest patched version (GHSA GHSA-6q48-6c7w-9gw2).",
+      "severity_score": 9.1
+    },
+    {
+      "id": "PYSEC-2026-1994",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1994"
+      ],
+      "aliases": [
+        "CVE-2025-66471",
+        "GHSA-2xpw-w6gg-jr37",
+        "PYSEC-2026-1994"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-1994).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "GHSA-2xpw-w6gg-jr37",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-2xpw-w6gg-jr37"
+      ],
+      "aliases": [
+        "CVE-2025-66471",
+        "GHSA-2xpw-w6gg-jr37",
+        "PYSEC-2026-1994"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-2xpw-w6gg-jr37).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "PYSEC-2026-4177",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-4177"
+      ],
+      "aliases": [
+        "CVE-2026-97689",
+        "GHSA-vxq7-64xx-v4gw",
+        "PYSEC-2026-4177"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-4177).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "GHSA-vxq7-64xx-v4gw",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-vxq7-64xx-v4gw"
+      ],
+      "aliases": [
+        "CVE-2026-97689",
+        "GHSA-vxq7-64xx-v4gw",
+        "PYSEC-2026-4177"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-vxq7-64xx-v4gw).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "PYSEC-2026-1994",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1994"
+      ],
+      "aliases": [
+        "CVE-2025-66471",
+        "GHSA-2xpw-w6gg-jr37",
+        "PYSEC-2026-1994"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-1994).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "GHSA-2xpw-w6gg-jr37",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-2xpw-w6gg-jr37"
+      ],
+      "aliases": [
+        "CVE-2025-66471",
+        "GHSA-2xpw-w6gg-jr37",
+        "PYSEC-2026-1994"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-2xpw-w6gg-jr37).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "PYSEC-2026-1996",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1996"
+      ],
+      "aliases": [
+        "CVE-2026-21441",
+        "GHSA-38jv-5279-wg99",
+        "PYSEC-2026-1996"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-1996).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "GHSA-38jv-5279-wg99",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-38jv-5279-wg99"
+      ],
+      "aliases": [
+        "CVE-2026-21441",
+        "GHSA-38jv-5279-wg99",
+        "PYSEC-2026-1996"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-38jv-5279-wg99).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "PYSEC-2026-1998",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1998"
+      ],
+      "aliases": [
+        "CVE-2025-66418",
+        "GHSA-gm62-xv2j-4w53",
+        "PYSEC-2026-1998"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-1998).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "GHSA-gm62-xv2j-4w53",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-gm62-xv2j-4w53"
+      ],
+      "aliases": [
+        "CVE-2025-66418",
+        "GHSA-gm62-xv2j-4w53",
+        "PYSEC-2026-1998"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-gm62-xv2j-4w53).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "PYSEC-2026-4177",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-4177"
+      ],
+      "aliases": [
+        "CVE-2026-97689",
+        "GHSA-vxq7-64xx-v4gw",
+        "PYSEC-2026-4177"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-4177).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "GHSA-vxq7-64xx-v4gw",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-vxq7-64xx-v4gw"
+      ],
+      "aliases": [
+        "CVE-2026-97689",
+        "GHSA-vxq7-64xx-v4gw",
+        "PYSEC-2026-4177"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-vxq7-64xx-v4gw).",
+      "severity_score": 8.9
+    },
+    {
+      "id": "PYSEC-2025-49",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 8.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2025-49"
+      ],
+      "aliases": [
+        "BIT-setuptools-2025-47273",
+        "CVE-2025-47273",
+        "GHSA-5rjg-fvgr-3xxf",
+        "PYSEC-2025-49"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade setuptools to the latest patched version (advisory PYSEC-2025-49).",
+      "severity_score": 8.8
+    },
+    {
+      "id": "GHSA-5rjg-fvgr-3xxf",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 8.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-5rjg-fvgr-3xxf"
+      ],
+      "aliases": [
+        "BIT-setuptools-2025-47273",
+        "CVE-2025-47273",
+        "GHSA-5rjg-fvgr-3xxf",
+        "PYSEC-2025-49"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade setuptools to the latest patched version (GHSA GHSA-5rjg-fvgr-3xxf).",
+      "severity_score": 8.8
+    },
+    {
+      "id": "PYSEC-2026-1918",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 8.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1918"
+      ],
+      "aliases": [
+        "BIT-setuptools-2024-6345",
+        "CVE-2024-6345",
+        "GHSA-cx63-2mw6-8hw5",
+        "PYSEC-2026-1918"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade setuptools to the latest patched version (advisory PYSEC-2026-1918).",
+      "severity_score": 8.8
+    },
+    {
+      "id": "GHSA-cx63-2mw6-8hw5",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 8.8,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-cx63-2mw6-8hw5"
+      ],
+      "aliases": [
+        "BIT-setuptools-2024-6345",
+        "CVE-2024-6345",
+        "GHSA-cx63-2mw6-8hw5",
+        "PYSEC-2026-1918"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade setuptools to the latest patched version (GHSA GHSA-cx63-2mw6-8hw5).",
+      "severity_score": 8.8
+    },
+    {
+      "id": "PYSEC-2023-62",
+      "package": "flask",
+      "version": "2.1.1",
+      "ecosystem": "PyPI",
+      "severity": 8.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2023-62"
+      ],
+      "aliases": [
+        "CVE-2023-30861",
+        "GHSA-m2qf-hxjv-5gpq",
+        "PYSEC-2023-62"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade flask to the latest patched version (advisory PYSEC-2023-62).",
+      "severity_score": 8.7
+    },
+    {
+      "id": "GHSA-m2qf-hxjv-5gpq",
+      "package": "flask",
+      "version": "2.1.1",
+      "ecosystem": "PyPI",
+      "severity": 8.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-m2qf-hxjv-5gpq"
+      ],
+      "aliases": [
+        "CVE-2023-30861",
+        "GHSA-m2qf-hxjv-5gpq",
+        "PYSEC-2023-62"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade flask to the latest patched version (GHSA GHSA-m2qf-hxjv-5gpq).",
+      "severity_score": 8.7
+    },
+    {
+      "id": "PYSEC-2022-43012",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 8.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2022-43012"
+      ],
+      "aliases": [
+        "BIT-setuptools-2022-40897",
+        "CVE-2022-40897",
+        "GHSA-r9hx-vwmv-q579",
+        "PYSEC-2022-43012"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade setuptools to the latest patched version (advisory PYSEC-2022-43012).",
+      "severity_score": 8.7
+    },
+    {
+      "id": "GHSA-r9hx-vwmv-q579",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 8.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-r9hx-vwmv-q579"
+      ],
+      "aliases": [
+        "BIT-setuptools-2022-40897",
+        "CVE-2022-40897",
+        "GHSA-r9hx-vwmv-q579",
+        "PYSEC-2022-43012"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade setuptools to the latest patched version (GHSA GHSA-r9hx-vwmv-q579).",
+      "severity_score": 8.7
+    },
+    {
+      "id": "PYSEC-2019-133",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 8.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2019-133"
+      ],
+      "aliases": [
+        "CVE-2019-11324",
+        "GHSA-mh33-7rrq-662w",
+        "PYSEC-2019-133"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2019-133).",
+      "severity_score": 8.7
+    },
+    {
+      "id": "GHSA-mh33-7rrq-662w",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 8.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-mh33-7rrq-662w"
+      ],
+      "aliases": [
+        "CVE-2019-11324",
+        "GHSA-mh33-7rrq-662w",
+        "PYSEC-2019-133"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-mh33-7rrq-662w).",
+      "severity_score": 8.7
+    },
+    {
+      "id": "PYSEC-2026-141",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.2,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-141"
+      ],
+      "aliases": [
+        "CVE-2026-44431",
+        "GHSA-qccp-gfcp-xxvc",
+        "PYSEC-2026-141"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-141).",
+      "severity_score": 8.2
+    },
+    {
+      "id": "GHSA-qccp-gfcp-xxvc",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.2,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-qccp-gfcp-xxvc"
+      ],
+      "aliases": [
+        "CVE-2026-44431",
+        "GHSA-qccp-gfcp-xxvc",
+        "PYSEC-2026-141"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-qccp-gfcp-xxvc).",
+      "severity_score": 8.2
+    },
+    {
+      "id": "PYSEC-2023-192",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 8.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2023-192"
+      ],
+      "aliases": [
+        "CVE-2023-43804",
+        "GHSA-v845-jxx5-vc9f",
+        "PYSEC-2023-192"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2023-192).",
+      "severity_score": 8.1
+    },
+    {
+      "id": "GHSA-v845-jxx5-vc9f",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 8.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-v845-jxx5-vc9f"
+      ],
+      "aliases": [
+        "CVE-2023-43804",
+        "GHSA-v845-jxx5-vc9f",
+        "PYSEC-2023-192"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-v845-jxx5-vc9f).",
+      "severity_score": 8.1
+    },
+    {
+      "id": "PYSEC-2023-192",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2023-192"
+      ],
+      "aliases": [
+        "CVE-2023-43804",
+        "GHSA-v845-jxx5-vc9f",
+        "PYSEC-2023-192"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2023-192).",
+      "severity_score": 8.1
+    },
+    {
+      "id": "GHSA-v845-jxx5-vc9f",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 8.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-v845-jxx5-vc9f"
+      ],
+      "aliases": [
+        "CVE-2023-43804",
+        "GHSA-v845-jxx5-vc9f",
+        "PYSEC-2023-192"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-v845-jxx5-vc9f).",
+      "severity_score": 8.1
+    },
+    {
+      "id": "PYSEC-2026-4175",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 7.6,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-4175"
+      ],
+      "aliases": [
+        "CVE-2026-97687",
+        "GHSA-8988-9cw3-xx77",
+        "PYSEC-2026-4175"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-4175).",
+      "severity_score": 7.6
+    },
+    {
+      "id": "GHSA-8988-9cw3-xx77",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 7.6,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-8988-9cw3-xx77"
+      ],
+      "aliases": [
+        "CVE-2026-97687",
+        "GHSA-8988-9cw3-xx77",
+        "PYSEC-2026-4175"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-8988-9cw3-xx77).",
+      "severity_score": 7.6
+    },
+    {
+      "id": "PYSEC-2024-230",
+      "package": "certifi",
+      "version": "2023.7.22",
+      "ecosystem": "PyPI",
+      "severity": 7.5,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2024-230"
+      ],
+      "aliases": [
+        "CVE-2024-39689",
+        "GHSA-248v-346w-9cwc",
+        "PYSEC-2024-230"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade certifi to the latest patched version (advisory PYSEC-2024-230).",
+      "severity_score": 7.5
+    },
+    {
+      "id": "GHSA-248v-346w-9cwc",
+      "package": "certifi",
+      "version": "2023.7.22",
+      "ecosystem": "PyPI",
+      "severity": 7.5,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-248v-346w-9cwc"
+      ],
+      "aliases": [
+        "CVE-2024-39689",
+        "GHSA-248v-346w-9cwc",
+        "PYSEC-2024-230"
+      ],
+      "risk_level": "high",
+      "recommendation": "Upgrade certifi to the latest patched version (GHSA GHSA-248v-346w-9cwc).",
+      "severity_score": 7.5
+    },
+    {
+      "id": "PYSEC-2020-148",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 6.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2020-148"
+      ],
+      "aliases": [
+        "CVE-2020-26137",
+        "GHSA-wqvq-5m8c-6g24",
+        "PYSEC-2020-148"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2020-148).",
+      "severity_score": 6.9
+    },
+    {
+      "id": "GHSA-wqvq-5m8c-6g24",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 6.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-wqvq-5m8c-6g24"
+      ],
+      "aliases": [
+        "CVE-2020-26137",
+        "GHSA-wqvq-5m8c-6g24",
+        "PYSEC-2020-148"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-wqvq-5m8c-6g24).",
+      "severity_score": 6.9
+    },
+    {
+      "id": "PYSEC-2026-215",
+      "package": "idna",
+      "version": "3.9.0",
+      "ecosystem": "PyPI",
+      "severity": 6.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-215"
+      ],
+      "aliases": [
+        "CVE-2026-45409",
+        "GHSA-65pc-fj4g-8rjx",
+        "PYSEC-2026-215"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade idna to the latest patched version (advisory PYSEC-2026-215).",
+      "severity_score": 6.9
+    },
+    {
+      "id": "GHSA-65pc-fj4g-8rjx",
+      "package": "idna",
+      "version": "3.9.0",
+      "ecosystem": "PyPI",
+      "severity": 6.9,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-65pc-fj4g-8rjx"
+      ],
+      "aliases": [
+        "CVE-2026-45409",
+        "GHSA-65pc-fj4g-8rjx",
+        "PYSEC-2026-215"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade idna to the latest patched version (GHSA GHSA-65pc-fj4g-8rjx).",
+      "severity_score": 6.9
+    },
+    {
+      "id": "PYSEC-2023-74",
+      "package": "requests",
+      "version": "2.28.0",
+      "ecosystem": "PyPI",
+      "severity": 6.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2023-74"
+      ],
+      "aliases": [
+        "CVE-2023-32681",
+        "GHSA-j8r2-6x86-q33q",
+        "PYSEC-2023-74"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (advisory PYSEC-2023-74).",
+      "severity_score": 6.1
+    },
+    {
+      "id": "GHSA-j8r2-6x86-q33q",
+      "package": "requests",
+      "version": "2.28.0",
+      "ecosystem": "PyPI",
+      "severity": 6.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-j8r2-6x86-q33q"
+      ],
+      "aliases": [
+        "CVE-2023-32681",
+        "GHSA-j8r2-6x86-q33q",
+        "PYSEC-2023-74"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (GHSA GHSA-j8r2-6x86-q33q).",
+      "severity_score": 6.1
+    },
+    {
+      "id": "PYSEC-2026-3447",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 6.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-3447"
+      ],
+      "aliases": [
+        "BIT-setuptools-2026-59890",
+        "CVE-2026-59890",
+        "GHSA-h35f-9h28-mq5c",
+        "PYSEC-2026-3447"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade setuptools to the latest patched version (advisory PYSEC-2026-3447).",
+      "severity_score": 6.1
+    },
+    {
+      "id": "GHSA-h35f-9h28-mq5c",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 6.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-h35f-9h28-mq5c"
+      ],
+      "aliases": [
+        "BIT-setuptools-2026-59890",
+        "CVE-2026-59890",
+        "GHSA-h35f-9h28-mq5c",
+        "PYSEC-2026-3447"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade setuptools to the latest patched version (GHSA GHSA-h35f-9h28-mq5c).",
+      "severity_score": 6.1
+    },
+    {
+      "id": "PYSEC-2019-132",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 6.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2019-132"
+      ],
+      "aliases": [
+        "CVE-2019-11236",
+        "GHSA-r64q-w8jr-g9qp",
+        "PYSEC-2019-132"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2019-132).",
+      "severity_score": 6.1
+    },
+    {
+      "id": "GHSA-r64q-w8jr-g9qp",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 6.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-r64q-w8jr-g9qp"
+      ],
+      "aliases": [
+        "CVE-2019-11236",
+        "GHSA-r64q-w8jr-g9qp",
+        "PYSEC-2019-132"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-r64q-w8jr-g9qp).",
+      "severity_score": 6.1
+    },
+    {
+      "id": "PYSEC-2023-207",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 6.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2023-207"
+      ],
+      "aliases": [
+        "CVE-2018-25091",
+        "GHSA-gwvm-45gx-3cf8",
+        "PYSEC-2023-207"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2023-207).",
+      "severity_score": 6.1
+    },
+    {
+      "id": "GHSA-gwvm-45gx-3cf8",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 6.1,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-gwvm-45gx-3cf8"
+      ],
+      "aliases": [
+        "CVE-2018-25091",
+        "GHSA-gwvm-45gx-3cf8",
+        "PYSEC-2023-207"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-gwvm-45gx-3cf8).",
+      "severity_score": 6.1
+    },
+    {
+      "id": "PYSEC-2023-212",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 5.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2023-212"
+      ],
+      "aliases": [
+        "CVE-2023-45803",
+        "GHSA-g4mx-q9vg-27p4",
+        "PYSEC-2023-212"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2023-212).",
+      "severity_score": 5.7
+    },
+    {
+      "id": "GHSA-g4mx-q9vg-27p4",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 5.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-g4mx-q9vg-27p4"
+      ],
+      "aliases": [
+        "CVE-2023-45803",
+        "GHSA-g4mx-q9vg-27p4",
+        "PYSEC-2023-212"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-g4mx-q9vg-27p4).",
+      "severity_score": 5.7
+    },
+    {
+      "id": "PYSEC-2023-212",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 5.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2023-212"
+      ],
+      "aliases": [
+        "CVE-2023-45803",
+        "GHSA-g4mx-q9vg-27p4",
+        "PYSEC-2023-212"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2023-212).",
+      "severity_score": 5.7
+    },
+    {
+      "id": "GHSA-g4mx-q9vg-27p4",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 5.7,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-g4mx-q9vg-27p4"
+      ],
+      "aliases": [
+        "CVE-2023-45803",
+        "GHSA-g4mx-q9vg-27p4",
+        "PYSEC-2023-212"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-g4mx-q9vg-27p4).",
+      "severity_score": 5.7
+    },
+    {
+      "id": "PYSEC-2026-1873",
+      "package": "requests",
+      "version": "2.28.0",
+      "ecosystem": "PyPI",
+      "severity": 5.6,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1873"
+      ],
+      "aliases": [
+        "CVE-2024-35195",
+        "GHSA-9wx4-h78v-vm56",
+        "PYSEC-2026-1873"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (advisory PYSEC-2026-1873).",
+      "severity_score": 5.6
+    },
+    {
+      "id": "GHSA-9wx4-h78v-vm56",
+      "package": "requests",
+      "version": "2.28.0",
+      "ecosystem": "PyPI",
+      "severity": 5.6,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-9wx4-h78v-vm56"
+      ],
+      "aliases": [
+        "CVE-2024-35195",
+        "GHSA-9wx4-h78v-vm56",
+        "PYSEC-2026-1873"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (GHSA GHSA-9wx4-h78v-vm56).",
+      "severity_score": 5.6
+    },
+    {
+      "id": "PYSEC-2026-1873",
+      "package": "requests",
+      "version": "2.31.0",
+      "ecosystem": "PyPI",
+      "severity": 5.6,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1873"
+      ],
+      "aliases": [
+        "CVE-2024-35195",
+        "GHSA-9wx4-h78v-vm56",
+        "PYSEC-2026-1873"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (advisory PYSEC-2026-1873).",
+      "severity_score": 5.6
+    },
+    {
+      "id": "GHSA-9wx4-h78v-vm56",
+      "package": "requests",
+      "version": "2.31.0",
+      "ecosystem": "PyPI",
+      "severity": 5.6,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-9wx4-h78v-vm56"
+      ],
+      "aliases": [
+        "CVE-2024-35195",
+        "GHSA-9wx4-h78v-vm56",
+        "PYSEC-2026-1873"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (GHSA GHSA-9wx4-h78v-vm56).",
+      "severity_score": 5.6
+    },
+    {
+      "id": "PYSEC-2026-2275",
+      "package": "requests",
+      "version": "2.28.0",
+      "ecosystem": "PyPI",
+      "severity": 5.5,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-2275"
+      ],
+      "aliases": [
+        "CVE-2026-25645",
+        "GHSA-gc5v-m9x4-r6x2",
+        "PYSEC-2026-2275"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (advisory PYSEC-2026-2275).",
+      "severity_score": 5.5
+    },
+    {
+      "id": "GHSA-gc5v-m9x4-r6x2",
+      "package": "requests",
+      "version": "2.28.0",
+      "ecosystem": "PyPI",
+      "severity": 5.5,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-gc5v-m9x4-r6x2"
+      ],
+      "aliases": [
+        "CVE-2026-25645",
+        "GHSA-gc5v-m9x4-r6x2",
+        "PYSEC-2026-2275"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (GHSA GHSA-gc5v-m9x4-r6x2).",
+      "severity_score": 5.5
+    },
+    {
+      "id": "PYSEC-2026-2275",
+      "package": "requests",
+      "version": "2.31.0",
+      "ecosystem": "PyPI",
+      "severity": 5.5,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-2275"
+      ],
+      "aliases": [
+        "CVE-2026-25645",
+        "GHSA-gc5v-m9x4-r6x2",
+        "PYSEC-2026-2275"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (advisory PYSEC-2026-2275).",
+      "severity_score": 5.5
+    },
+    {
+      "id": "GHSA-gc5v-m9x4-r6x2",
+      "package": "requests",
+      "version": "2.31.0",
+      "ecosystem": "PyPI",
+      "severity": 5.5,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-gc5v-m9x4-r6x2"
+      ],
+      "aliases": [
+        "CVE-2026-25645",
+        "GHSA-gc5v-m9x4-r6x2",
+        "PYSEC-2026-2275"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (GHSA GHSA-gc5v-m9x4-r6x2).",
+      "severity_score": 5.5
+    },
+    {
+      "id": "PYSEC-2026-1872",
+      "package": "requests",
+      "version": "2.28.0",
+      "ecosystem": "PyPI",
+      "severity": 5.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1872"
+      ],
+      "aliases": [
+        "CVE-2024-47081",
+        "GHSA-9hjg-9r4m-mvj7",
+        "PYSEC-2026-1872"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (advisory PYSEC-2026-1872).",
+      "severity_score": 5.3
+    },
+    {
+      "id": "GHSA-9hjg-9r4m-mvj7",
+      "package": "requests",
+      "version": "2.28.0",
+      "ecosystem": "PyPI",
+      "severity": 5.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-9hjg-9r4m-mvj7"
+      ],
+      "aliases": [
+        "CVE-2024-47081",
+        "GHSA-9hjg-9r4m-mvj7",
+        "PYSEC-2026-1872"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (GHSA GHSA-9hjg-9r4m-mvj7).",
+      "severity_score": 5.3
+    },
+    {
+      "id": "PYSEC-2026-1999",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 5.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1999"
+      ],
+      "aliases": [
+        "CVE-2025-50181",
+        "GHSA-pq67-6m6q-mj2v",
+        "PYSEC-2026-1999"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-1999).",
+      "severity_score": 5.3
+    },
+    {
+      "id": "GHSA-pq67-6m6q-mj2v",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 5.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-pq67-6m6q-mj2v"
+      ],
+      "aliases": [
+        "CVE-2025-50181",
+        "GHSA-pq67-6m6q-mj2v",
+        "PYSEC-2026-1999"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-pq67-6m6q-mj2v).",
+      "severity_score": 5.3
+    },
+    {
+      "id": "PYSEC-2026-1872",
+      "package": "requests",
+      "version": "2.31.0",
+      "ecosystem": "PyPI",
+      "severity": 5.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1872"
+      ],
+      "aliases": [
+        "CVE-2024-47081",
+        "GHSA-9hjg-9r4m-mvj7",
+        "PYSEC-2026-1872"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (advisory PYSEC-2026-1872).",
+      "severity_score": 5.3
+    },
+    {
+      "id": "GHSA-9hjg-9r4m-mvj7",
+      "package": "requests",
+      "version": "2.31.0",
+      "ecosystem": "PyPI",
+      "severity": 5.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-9hjg-9r4m-mvj7"
+      ],
+      "aliases": [
+        "CVE-2024-47081",
+        "GHSA-9hjg-9r4m-mvj7",
+        "PYSEC-2026-1872"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade requests to the latest patched version (GHSA GHSA-9hjg-9r4m-mvj7).",
+      "severity_score": 5.3
+    },
+    {
+      "id": "PYSEC-2026-1999",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 5.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1999"
+      ],
+      "aliases": [
+        "CVE-2025-50181",
+        "GHSA-pq67-6m6q-mj2v",
+        "PYSEC-2026-1999"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-1999).",
+      "severity_score": 5.3
+    },
+    {
+      "id": "GHSA-pq67-6m6q-mj2v",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 5.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-pq67-6m6q-mj2v"
+      ],
+      "aliases": [
+        "CVE-2025-50181",
+        "GHSA-pq67-6m6q-mj2v",
+        "PYSEC-2026-1999"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-pq67-6m6q-mj2v).",
+      "severity_score": 5.3
+    },
+    {
+      "id": "PYSEC-2026-1995",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 4.4,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1995"
+      ],
+      "aliases": [
+        "CVE-2024-37891",
+        "GHSA-34jh-p97f-mpxf",
+        "PYSEC-2026-1995"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-1995).",
+      "severity_score": 4.4
+    },
+    {
+      "id": "GHSA-34jh-p97f-mpxf",
+      "package": "urllib3",
+      "version": "1.21.1",
+      "ecosystem": "PyPI",
+      "severity": 4.4,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-34jh-p97f-mpxf"
+      ],
+      "aliases": [
+        "CVE-2024-37891",
+        "GHSA-34jh-p97f-mpxf",
+        "PYSEC-2026-1995"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-34jh-p97f-mpxf).",
+      "severity_score": 4.4
+    },
+    {
+      "id": "PYSEC-2026-1995",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 4.4,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "PYSEC-2026-1995"
+      ],
+      "aliases": [
+        "CVE-2024-37891",
+        "GHSA-34jh-p97f-mpxf",
+        "PYSEC-2026-1995"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (advisory PYSEC-2026-1995).",
+      "severity_score": 4.4
+    },
+    {
+      "id": "GHSA-34jh-p97f-mpxf",
+      "package": "urllib3",
+      "version": "2.0.4",
+      "ecosystem": "PyPI",
+      "severity": 4.4,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements_simple.txt",
+      "advisory_ids": [
+        "GHSA-34jh-p97f-mpxf"
+      ],
+      "aliases": [
+        "CVE-2024-37891",
+        "GHSA-34jh-p97f-mpxf",
+        "PYSEC-2026-1995"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade urllib3 to the latest patched version (GHSA GHSA-34jh-p97f-mpxf).",
+      "severity_score": 4.4
+    },
+    {
+      "id": "PYSEC-2026-2151",
+      "package": "flask",
+      "version": "2.1.1",
+      "ecosystem": "PyPI",
+      "severity": 4.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "PYSEC-2026-2151"
+      ],
+      "aliases": [
+        "CVE-2026-27205",
+        "GHSA-68rp-wp8r-4726",
+        "PYSEC-2026-2151"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade flask to the latest patched version (advisory PYSEC-2026-2151).",
+      "severity_score": 4.3
+    },
+    {
+      "id": "GHSA-68rp-wp8r-4726",
+      "package": "flask",
+      "version": "2.1.1",
+      "ecosystem": "PyPI",
+      "severity": 4.3,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-68rp-wp8r-4726"
+      ],
+      "aliases": [
+        "CVE-2026-27205",
+        "GHSA-68rp-wp8r-4726",
+        "PYSEC-2026-2151"
+      ],
+      "risk_level": "medium",
+      "recommendation": "Upgrade flask to the latest patched version (GHSA GHSA-68rp-wp8r-4726).",
+      "severity_score": 4.3
+    },
+    {
+      "id": "GHSA-xmj3-9gf7-h52w",
+      "package": "setuptools",
+      "version": "58.0.0",
+      "ecosystem": "PyPI",
+      "severity": 1.0,
+      "source_file": "/home/vale/projects/recon-dg-workspace/tests/fixtures/requirements-before.txt",
+      "advisory_ids": [
+        "GHSA-xmj3-9gf7-h52w"
+      ],
+      "aliases": [
+        "GHSA-xmj3-9gf7-h52w"
+      ],
+      "risk_level": "low",
+      "recommendation": "Upgrade setuptools to the latest patched version (GHSA GHSA-xmj3-9gf7-h52w).",
+      "severity_score": 1.0
+    }
+  ],
+  "findings_count": 89,
+  "high_severity_count": 50,
+  "scan_source": "/tmp/recon-dg-osvscan-w9-v2.json",
+  "scan_timestamp": "2026-11-03T01:17:26.727323+00:00",
+  "total_packages_scanned": 11,
+  "total_unique_vulnerabilities": 89,
+  "summary": "OSV-Scanner scan of 2 file(s) found 89 unique vulnerabilities across 11 package(s); 50 are high or critical severity.",
+  "ai_explanations": [],
+  "_provenance": {
+    "source": "test fixture (tests/fixtures/requirements-before.txt + requirements_simple.txt)",
+    "note": "NOT project-dependency evidence. All 89 findings come from fixture manifests. The real OSV-Scanner scan of the project returned 0 findings (clean).",
+    "real_scan_result": "clean (0 findings) on 2026-11-03",
+    "used_as": "demo/fixture artifact only"
+  }
+}
