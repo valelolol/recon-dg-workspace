@@ -1,7 +1,7 @@
 # December Demo Roadmap — RECON-DG
 
 > **Branch:** `feat/inventory-report`
-> **HEAD:** `88f2b2c12e979000aaaa604955e205010f76c133` (2026-11-06)
+> **HEAD:** `11937e4a9a9ea60eeea64c510d35855e170cfe31` (2026-11-09)
 > **Published baseline:** `83b10fb` (2026-10-19)
 > **Untracked:** `docs/REVIEW-DECISIONS.md` (intentionally preserved)
 
@@ -22,7 +22,7 @@
 
 ---
 
-## Implementation-state inventory (as of HEAD `88f2b2c12e979000aaaa604955e205010f76c133`)
+## Implementation-state inventory (as of HEAD `11937e4a9a9ea60eeea64c510d35855e170cfe31`)
 
 | Module | Status | Evidence |
 |--------|--------|----------|
@@ -52,13 +52,13 @@
 
 **Why first:** Every downstream step (engine, reporter, dashboard) depends on a real graph.
 
-**Current state (W9):** 3/4 minimum formats implemented (requirements.txt, pyproject.toml, package.json). `go.mod` is the remaining blocker for the ≥4 target. See `docs/weekly-handoffs/W9-Nick.md` for W9 deliverable.
+**Current state (W9):** 3/4 minimum formats implemented (requirements.txt, pyproject.toml, package.json). `go.mod` is the remaining blocker for the ≥4 target. See archived W9-Nick.md for W9 deliverable.
 
 **Deliverable:** `src/parser/parser.py` with `parse_package_json()`, `parse_pyproject_toml()`, `parse_go_mod()` (in addition to existing `parse_requirements()`), all normalizing to `DependencyGraph` with correct `edge_availability` (inventory-only → `"unavailable"`).
 
 **Verification:** `python -m pytest tests/test_parser.py -q`
 
-**W9 handoff:** `docs/weekly-handoffs/W9-Nick.md`
+**W9 handoff (archived):** `docs/weekly-handoffs/W9-Nick.md`
 
 ### W2 — Engine wiring: real OSV + PHEI on known topology (T-DE-02) — **PHEI partial**
 
@@ -72,7 +72,7 @@
 
 **Verification:** `python -m pytest tests/test_nvd_integration.py tests/test_risk_analyzer.py -q`
 
-**W9 handoff:** `docs/weekly-handoffs/W9-Vale.md`
+**W9 handoff (archived):** `docs/weekly-handoffs/W9-Vale.md`
 
 ### W3 — Inventory report schema + evidence-grounded suggestions (T-DE-03) — **Mode B unimplemented**
 
@@ -86,7 +86,7 @@
 
 **Mode B (dependency-graph serializer):** Unimplemented. This is a **W3 deliverable** that has been missed; rescheduled to W10 (see W10 plan). Mode B must emit `findings[]`, `evidence[]`, `risk`, `remediation_plan[]` with no fabricated data. No out-of-spec extension emitted this week; a risk-path field is deferred to a separate schema decision. See `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`.
 
-**W9 handoff:** `docs/weekly-handoffs/W9-Vale.md` (PHEI gap documentation)
+**W9 handoff (archived):** `docs/weekly-handoffs/W9-Vale.md` (PHEI gap documentation)
 
 ### W4 — Dashboard (optional / decision-dependent) (T-DE-04)
 
@@ -134,9 +134,9 @@
 
 > **This is a historical milestone — not a deliverable week.** It records the last committed state before the W9–W13 plan cycle.
 
-**What was delivered:** The W9 planning docs (`docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`), all four W9 handoffs (`docs/weekly-handoffs/W9-*.md`), and the STATUS.md/ROADMAP.md/TASKS.md reconciliation were pushed to origin at commit `88f2b2c12e979000aaaa604955e205010f76c133` (2026-11-06). This is the published baseline for the W9–W13 cycle.
+**What was delivered:** The W9 planning docs (`docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`), all four W9 handoffs (`docs/weekly-handoffs/W9-*.md`, now archived), and the STATUS.md/ROADMAP.md/TASKS.md reconciliation were pushed to origin at commit `88f2b2c12e979000aaaa604955e205010f76c133` (2026-11-06). This is the published baseline for the W9–W13 cycle. The W10 handoffs (untracked) build on this baseline.
 
-**Published tip:** `origin/feat/inventory-report` = `88f2b2c12e979000aaaa604955e205010f76c133`.
+**Published tip:** `origin/feat/inventory-report` = `11937e4a9a9ea60eeea64c510d35855e170cfe31`.
 
 **Why W8:** Documents the last committed state before the active W9–W13 planning cycle began. All subsequent weeks (W9–W13) build on this baseline.
 
@@ -156,29 +156,32 @@
 
 **W10 plan:** `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`
 
-**W9 handoff:** `docs/weekly-handoffs/W9-Vale.md` (Mode B deliverable moved to W10)
+**W9 handoff (archived):** `docs/weekly-handoffs/W9-Vale.md` (Mode B deliverable moved to W10)
 
 ### W10 — Dependency-graph serializer (T-DE-03 Mode B) — **W10 deliverable**
 
 **Four active handoffs, one per team member.** No archived W1–W8 or M-DE-CORE handoffs restored.
 
-**December timeline:** Dec 3 (candidate freeze), Dec 4 (team demo), Dec 7 (team demo), Dec 8 (rehearsal/buffer), Dec 9 (presentation).
+**December timeline:** Dec 4 (Fri) team demo, Dec 7 (Mon) team demo, Dec 8 (Tue) rehearsal/buffer, Dec 9 (Wed) presentation.
+
+> **Interim-demo scope:** The Dec 9 presentation is an interim demonstration of progress toward the larger RECON-DG project — not a declaration that the full project is complete. The December deliverable is a working prototype (scan → graph → OSV findings → systemic risk → dashboard → AI explanation → bounded fix → human approval → rescan → verified results), not a finished application.
 
 > **Dec 4 milestone:** Team demo — `python -m src.web` serves the report dashboard; real scan evidence is present (Mode B or Mode A).
+
 > **Dec 7 milestone:** Team demo — full pipeline (scan → report → dashboard → explanation) runs end-to-end on a controlled project.
+
 > **Dec 8 milestone:** Rehearsal — the full demo script (≤10 steps, each with expected output) is dry-run on a controlled project; feedback logged in `docs/demo-validation/dec-8-rehearsal.md`.
+
 > **Dec 9 milestone:** Presentation — the December deliverable demo delivered to faculty/sponsor.
 
-| Member | Handoff file | Focus |
+|| Member | Handoff file | Focus |
 |--------|-------------|-------|
-| Nick | `docs/weekly-handoffs/W9-Nick.md` | Parser: `parse_package_json()` (3/4 → 4/4) |
-| Vale | `docs/weekly-handoffs/W9-Vale.md` | PHEI gap documentation (severity → topology-only target); real-scan demo |
-| Christian | `docs/weekly-handoffs/W9-Christian.md` | Dashboard validation tests; normalizer/schema gap |
-| Aliyan | `docs/weekly-handoffs/W9-Aliyan.md` | Dec 8 rehearsal checklist; demo script (≤10 steps) |
+| Nick | `docs/weekly-handoffs/W10-Nick.md` | Parser: `parse_go_mod()` (3/4 → 4/4) |
+| Vale | `docs/weekly-handoffs/W10-Vale.md` | Engine + reporter: Mode B serializer (dependency-graph serializer) |
+| Christian | `docs/weekly-handoffs/W10-Christian.md` | Dashboard validation tests (empty/malformed input, unknown-topology) |
+| Aliyan | `docs/weekly-handoffs/W10-Aliyan.md` | Demo validation: `docs/demo-validation/` directory + rehearsal checklist + demo script |
 
-**Dec 8 rehearsal:** Single source of truth in `docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md` §Dec 8 Rehearsal. See Aliyan's handoff for the checklist.
-
-**W9 plan:** `docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`
+**W10 plan:** `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`
 
 ---
 

@@ -3,6 +3,7 @@
 > **Audience:** Faculty sponsor, team (Vale, Nick, Christian, Aliyan), reviewers
 > **Length:** ~15 minutes + 5 min Q&A
 > **Environment:** Stdlib `src.web` dashboard on demo machine (or local machine). Docker is optional.
+> **Interim-demo scope:** The Dec 9 presentation is an interim demonstration of progress toward the larger RECON-DG project — not a declaration that the full project is complete. The December deliverable is a working prototype (scan → graph → OSV findings → systemic risk → dashboard → AI explanation → bounded fix → human approval → rescan → verified results), not a finished application.
 
 ---
 

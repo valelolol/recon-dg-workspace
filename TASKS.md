@@ -28,6 +28,9 @@ array stays empty and risk is unavailable.
 3. **Dec 7 (Mon):** team demo (internal).
 4. **Dec 8 (Tue):** rehearsal/buffer.
 5. **Dec 9 (Wed):** presentation.
+
+> **Interim-demo scope:** The Dec 9 presentation is an interim demonstration of progress toward the larger RECON-DG project — not a declaration that the full project is complete. The December deliverable is a working prototype (scan → graph → OSV findings → systemic risk → dashboard → AI explanation → bounded fix → human approval → rescan → verified results), not a finished application.
+
 6. Parser: enough manifest formats to scan a real project.
 7. Engine: wire NVD/OSV into the graph so **real** CVE data flows into PHEI.
 8. Reporter: structured report schema + deterministic fallback.
@@ -358,7 +361,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 ## Status
 
 ### Current baseline (published baseline `83b10fb`, 2026-10-19)
-- **Date:** 2026-11-06. **Branch:** `feat/inventory-report`. **HEAD (local):** `88f2b2c12e979000aaaa604955e205010f76c133` (W9 planning docs pushed to origin; 2026-11-06). **Published tip:** `origin/feat/inventory-report` = `88f2b2c12e979000aaaa604955e205010f76c133`.
+- **Date:** 2026-11-09. **Branch:** `feat/inventory-report`. **HEAD (local):** `11937e4a9a9ea60eeea64c510d35855e170cfe31` (W10 handoffs, 2026-11-09). **Published tip:** `origin/feat/inventory-report` = `11937e4a9a9ea60eeea64c510d35855e170cfe31`.
 - **Agent layer (`src/agent/`):**
 - **Explanation + dashboard (committed 83b10fb):**  `src/explanation/` (3 files:
   `__init__.py`, `deterministic.py`, `local_model.py`) — a grounded deterministic
@@ -376,7 +379,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 - **Prior baseline (historical):** `a873a90` (2026-10-17), `1b4a8d9` (2026-10-03),
   `b4fc87c` (2026-10-02), `f1c59a8` (agent/enrichment/pipeline implementation),
   `6129e14` (remediation stage, last implementation commit before 83b10fb).
-||- **Working tree:** tracked files **unmodified** at HEAD (88f2b2c12e979000aaaa604955e205010f76c133).
+||- **Working tree:** tracked files **unmodified** at HEAD (`11937e4a9a9ea60eeea64c510d35855e170cfe31`).
 |- **Test count:** 248 passed, 29 subtests — reported historical result (date 2026-10-19
   not independently verifiable from repository evidence; no test output file present).
   Full suite: 241 passed, 29 subtests, 2 warnings (re-run 2026-10-10): 53 reporter, 45 agent,
@@ -390,7 +393,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
   > No test output file exists on disk to confirm either figure.
 
 
-### Implementation state (published HEAD `88f2b2c12e979000aaaa604955e205010f76c133`; 2026-11-06)
+### Implementation state (published HEAD `11937e4a9a9ea60eeea64c510d35855e170cfe31`; 2026-11-09)
 |- **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (W3, merged) — 5 new test methods, 62 lines added. `parse_pyproject_toml()` reads `[project].dependencies` and `[project.optional-dependencies]` into a `DependencyGraph` with `edge_availability = "unavailable"`. `parse_package_json()` added (W9, committed `1ad2a7b`). **Status: 3/4 minimum formats (requirements.txt, pyproject.toml, package.json). Remaining to reach the ≥4 target: go.mod (W10 blocker).**
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
