@@ -101,7 +101,7 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 
 ## Implementation state (current tree: `11937e4a9a9ea60eeea64c510d35855e170cfe31`; published baseline `83b10fb`)
 
-- **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (PR #4, merged 5d1101d, 2026-11-02). `parse_pyproject_toml()` added with fixture `tests/fixtures/pyproject_with_deps.toml` and **5 new test methods** (`tests/test_parser.py`). `parse_package_json()` added (W9, committed `1ad2a7b`). The repo-root `pyproject.toml` declares no dependencies (confirmed by `test_repo_pyproject_has_no_dependencies`). **Status: 3/4 minimum formats (requirements.txt, pyproject.toml, package.json). Remaining to reach the ≥4 target: go.mod (W10 blocker).**
+- **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (PR #4, merged 5d1101d, 2026-11-02). `parse_pyproject_toml()` added with fixture `tests/fixtures/pyproject_with_deps.toml` and **5 new test methods** (`tests/test_parser.py`). `parse_package_json()` was **never merged** — committed `1ad2a7b` was reverted/discarded. The repo-root `pyproject.toml` declares no dependencies (confirmed by `test_repo_pyproject_has_no_dependencies`). **Status: 2/4 minimum formats (requirements.txt, pyproject.toml). Remaining to reach the ≥4 target: go.mod (W10 blocker).**
 |- **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
   `UnavailableTopologyError` guard. NVD/OSV client code present

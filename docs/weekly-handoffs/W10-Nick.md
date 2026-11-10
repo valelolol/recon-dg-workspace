@@ -14,16 +14,16 @@ Nick (for team confirmation).
 
 ## Prerequisites
 
-- `src/parser/parser.py` must already contain `parse_requirements()`, `parse_pyproject_toml()`, and `parse_package_json()` (3/4 minimum, confirmed in published tree `11937e4a9a9ea60eeea64c510d35855e170cfe31`).
+- `src/parser/parser.py` must already contain `parse_requirements()` and `parse_pyproject_toml()` (2/4 minimum, verified in published tree `6f0a8337`). `parse_package_json()` does NOT exist.
 - `src/models/dependency_graph.py` defines `DependencyNode` + `DependencyGraph` (NetworkX DiGraph). Edge availability: inventory-only → `"unavailable"`.
-- TASKS.md §T-DE-01: Parser: multi-format manifest support — **In progress** (3/4).
+- TASKS.md §T-DE-01: Parser: multi-format manifest support — **In progress** (2/4).
 - TASKS.md §T-DE-02 audit note: W10 must demonstrate end-to-end real scan → real CVE data → `calculate_systemic_risk()` on a controlled project.
 
 ## Input / Output contract
 
 | Direction | Artifact | Format |
 |-----------|----------|--------|
-| Input | `src/parser/parser.py` (current 3-format state) | Python module with `parse_requirements`, `parse_pyproject_toml`, `parse_package_json` |
+| Input | `src/parser/parser.py` (current 2-format state) | Python module with `parse_requirements`, `parse_pyproject_toml` |
 | Output | `src/parser/parser.py` with added `parse_go_mod()` | Python module with 4th parser function, normalizing to `DependencyGraph` |
 
 ## Deliverable (one bounded item)

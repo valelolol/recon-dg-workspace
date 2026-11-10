@@ -273,7 +273,7 @@ Owner: Vale. Depends: shared `DependencyGraph` IR (T-DE-03 schema).
 - [x] Parse `requirements.txt` (`package==version`) — `src/parser/parser.py:7–57`
 - [x] Parse `pyproject.toml` (`[project] dependencies`) — `src/parser/parser.py:78–111`
 - [x] `build_mock_graph()` test helper — `src/parser/parser.py:113–130`
-- [x] Add `package.json` (JSON) parser via `json` module — `src/parser/parser.py:parse_package_json` (W9, Nick)
+- [ ] Add `package.json` (JSON) parser — **not implemented** (claimed in W9 handoff but never committed)
 - [ ] Add `go.mod` / `go.sum` parser — **W10 blocker for ≥4 target**
 - [ ] Add `Cargo.toml` / `Cargo.lock` parser
 - [ ] Add `Gemfile` / `package-lock.json` parsers
@@ -408,7 +408,7 @@ Owner: Team. Depends: dashboard (T-DE-04).
 
 
 ### Implementation state (published HEAD `11937e4a9a9ea60eeea64c510d35855e170cfe31`; 2026-11-09)
-|- **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (W3, merged) — 5 new test methods, 62 lines added. `parse_pyproject_toml()` reads `[project].dependencies` and `[project.optional-dependencies]` into a `DependencyGraph` with `edge_availability = "unavailable"`. `parse_package_json()` added (W9, committed `1ad2a7b`). **Status: 3/4 minimum formats (requirements.txt, pyproject.toml, package.json). Remaining to reach the ≥4 target: go.mod (W10 blocker).**
+|- **Parser (T-DE-01):** `requirements.txt` + `pyproject.toml` (W3, merged) — 5 new test methods, 62 lines added. `parse_pyproject_toml()` reads `[project].dependencies` and `[project.optional-dependencies]` into a `DependencyGraph` with `edge_availability = "unavailable"`. **Status: 2/4 minimum formats (requirements.txt, pyproject.toml). Remaining to reach the ≥4 target: go.mod (W10 blocker). The W9 claim that `parse_package_json()` was committed (`1ad2a7b`) is incorrect — that commit does not exist in the repo.**
 - **Engine (T-DE-02):** PHEI path-max scoring implemented
   (`calculate_path_weight` / `calculate_impact_multiplicity` / `calculate_phei`) +
   `UnavailableTopologyError` guard. NVD/OSV client code present

@@ -1,7 +1,7 @@
 # December Demo Roadmap — RECON-DG
 
 > **Branch:** `feat/inventory-report`
-> **HEAD:** `11937e4a9a9ea60eeea64c510d35855e170cfe31` (2026-11-09)
+> **HEAD:** `6f0a8337` (2026-11-10)
 > **Published baseline:** `83b10fb` (2026-10-19)
 > **Untracked:** `docs/REVIEW-DECISIONS.md` (intentionally preserved)
 
@@ -22,11 +22,11 @@
 
 ---
 
-## Implementation-state inventory (as of HEAD `11937e4a9a9ea60eeea64c510d35855e170cfe31`)
+## Implementation-state inventory (as of HEAD `6f0a8337`)
 
 | Module | Status | Evidence |
 |--------|--------|----------|
-| `src/parser` | **Partial — 3/4 minimum formats** — `requirements.txt`, `pyproject.toml`, `package.json` (W9 Nick). `go.mod` is the remaining blocker for ≥4 target. | `src/parser/parser.py:11,78,parse_package_json` |
+| `src/parser` | **Partial — 2/4 minimum formats** — `requirements.txt`, `pyproject.toml` (W10 Nick). `package.json` does NOT exist in the source tree. `go.mod` is the remaining blocker for ≥4 target. | `src/parser/parser.py:11,78,parse_requirements,parse_pyproject_toml` |
 | `src/engine/risk_analyzer` | **Implemented** — PHEI path-max (`calculate_path_weight`, `calculate_impact_multiplicity`, `calculate_phei`) + `UnavailableTopologyError` guard. | `src/engine/__init__.py`, `src/engine/risk_analyzer.py` |
 | `src/engine/nvd_client` | **Partial** — NVD/OSV API enrichment fallback client present but **not yet run end-to-end** against a real project. | `src/engine/__init__.py`, `src/engine/nvd_client.py` |
 | `src/reporter` | **Partial** — `RiskReport` dataclass + `interface.py` + `report_generator.py` present. Inventory serializer implemented; **dependency-graph serializer unimplemented**. | `src/reporter/__init__.py`, `src/reporter/interface.py`, `src/reporter/report_generator.py`, `src/reporter/inventory.py` |
@@ -46,33 +46,31 @@
 
 > Week numbers are sequential relative to the start of the December build cycle. No calendar dates are assumed; the team selects the start week.
 
-### W1 — Multi-format manifest parser (T-DE-01) — **W9 in progress (3/4)**
+### W1 — Multi-format manifest parser (T-DE-01) — **W10 in progress (2/4)**
 
 **Milestone:** Parser supports ≥4 manifest formats (`requirements.txt`, `pyproject.toml`, `package.json`, `go.mod`) → shared `DependencyGraph` IR.
 
 **Why first:** Every downstream step (engine, reporter, dashboard) depends on a real graph.
 
-**Current state (W9):** 3/4 minimum formats implemented (requirements.txt, pyproject.toml, package.json). `go.mod` is the remaining blocker for the ≥4 target. See archived W9-Nick.md for W9 deliverable.
+**Current state (W10):** 2/4 minimum formats implemented (requirements.txt, pyproject.toml). `package.json` does NOT exist in the source tree. `go.mod` is the remaining blocker for the ≥4 target. The W9 planning cycle has been superseded by the four current W10 handoffs (W10-Nick.md, W10-Vale.md, W10-Christian.md, W10-Aliyan.md); archived W9 handoff files are no longer present in the repository.
 
 **Deliverable:** `src/parser/parser.py` with `parse_package_json()`, `parse_pyproject_toml()`, `parse_go_mod()` (in addition to existing `parse_requirements()`), all normalizing to `DependencyGraph` with correct `edge_availability` (inventory-only → `"unavailable"`).
 
 **Verification:** `python -m pytest tests/test_parser.py -q`
 
-**W9 handoff (archived):** `docs/weekly-handoffs/W9-Nick.md`
-
-### W2 — Engine wiring: real OSV + PHEI on known topology (T-DE-02) — **PHEI partial**
+### W2 — Engine wiring: real OSV + PHEI on known topology (T-DE-02) — **PHEI topology-only (cap 10.0), severity-aware systemic risk distinct**
 
 **Milestone:** OSV client wired into the graph; real CVE data flows into PHEI on a graph with `edge_availability = "known"`. Inventory-only input (no edges) reports risk as unavailable — no score fabricated.
 
-**⚠️ PHEI gap (agreed direction):** The agreed PHEI target is a **topology-based 0–100 impact score using reachable dependents and existing importance/criticality, separate from OSV severity**. The current `calculate_phei()` (risk_analyzer.py:124–200) uses `get_cve_severity()` (NVD/OSV severity) as node risk values (lines 147–154), mixing severity into the score. **This contradicts the agreed topology-only direction.** PHEI is **partial/unavailable** pending topology data (reachable dependents, importance/criticality). The severity-to-PHEI mapping is **not an open decision** — topology-only is the agreed direction. If trustworthy topology or approved rule absent → report unavailable; do not fabricate.
+**⚠️ PHEI direction (agreed):** PHEI is **topology-only**: it scores per-node edge weights × impact multiplicity and caps the result at **10.0**. The current `calculate_phei()` (risk_analyzer.py) computes `path_weight × impact_multiplicity` with that 10.0 cap. It does **not** use `get_cve_severity()` values in the PHEI score; severity-aware systemic risk is handled separately by `calculate_systemic_risk()`. If trustworthy topology or an approved PHEI rule is absent, report unavailable — do not fabricate.
+
+**Proposed (unimplemented) 0–100 target:** A future 0–100 normalization using reachable dependents and importance/criticality weights is under discussion but **not yet implemented**. Do not treat it as current behavior.
 
 **Why second:** Depends on W1 (real graph needed for real lookups).
 
 **Deliverable:** `src/engine/nvd_client.py` calls the real NVD/OSV API enrichment fallback (with rate-limiting, exponential backoff). `calculate_phei` runs on real graph data with known topology. Inventory-only input → `UnavailableTopologyError` → risk status `"unavailable"`.
 
 **Verification:** `python -m pytest tests/test_nvd_integration.py tests/test_risk_analyzer.py -q`
-
-**W9 handoff (archived):** `docs/weekly-handoffs/W9-Vale.md`
 
 ### W3 — Inventory report schema + evidence-grounded suggestions (T-DE-03) — **Mode B unimplemented**
 
@@ -84,9 +82,7 @@
 
 **Verification:** `python -m pytest tests/test_report_generator.py tests/test_inventory_reporter.py -q`
 
-**Mode B (dependency-graph serializer):** Unimplemented. This is a **W3 deliverable** that has been missed; rescheduled to W10 (see W10 plan). Mode B must emit `findings[]`, `evidence[]`, `risk`, `remediation_plan[]` with no fabricated data. No out-of-spec extension emitted this week; a risk-path field is deferred to a separate schema decision. See `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`.
-
-**W9 handoff (archived):** `docs/weekly-handoffs/W9-Vale.md` (PHEI gap documentation)
+**Mode B (dependency-graph serializer):** Unimplemented. This is a **W10 deliverable** (moved from W9). Mode B must emit `findings[]`, `evidence[]`, `risk`, `remediation_plan[]` with no fabricated data. No out-of-spec extension emitted this week; a risk-path field is deferred to a separate schema decision. See `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`.
 
 ### W4 — Dashboard (optional / decision-dependent) (T-DE-04)
 
@@ -134,9 +130,9 @@
 
 > **This is a historical milestone — not a deliverable week.** It records the last committed state before the W9–W13 plan cycle.
 
-**What was delivered:** The W9 planning docs (`docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`), all four W9 handoffs (`docs/weekly-handoffs/W9-*.md`, now archived), and the STATUS.md/ROADMAP.md/TASKS.md reconciliation were pushed to origin at commit `88f2b2c12e979000aaaa604955e205010f76c133` (2026-11-06). This is the published baseline for the W9–W13 cycle. The W10 handoffs (untracked) build on this baseline.
+**What was delivered:** The W9 planning docs (`docs/weekly-plan/W9-2026-11-02-to-2026-11-08.md`), all four W9 handoffs (`docs/weekly-handoffs/W9-*.md`, now archived — no longer present in the repository; superseded by the four current W10 handoffs), and the STATUS.md/ROADMAP.md/TASKS.md reconciliation were pushed to origin at commit `88f2b2c12e979000aaaa604955e205010f76c133` (2026-11-06). This is the published baseline for the W9–W13 cycle. The W10 handoffs (untracked) build on this baseline.
 
-**Published tip:** `origin/feat/inventory-report` = `11937e4a9a9ea60eeea64c510d35855e170cfe31`.
+**Published tip:** `origin/feat/inventory-report` = `6f0a8337`.
 
 **Why W8:** Documents the last committed state before the active W9–W13 planning cycle began. All subsequent weeks (W9–W13) build on this baseline.
 
@@ -156,7 +152,7 @@
 
 **W10 plan:** `docs/weekly-plan/W10-2026-11-09-to-2026-11-15.md`
 
-**W9 handoff (archived):** `docs/weekly-handoffs/W9-Vale.md` (Mode B deliverable moved to W10)
+**W9 handoff (archived):** No longer present in the repository; superseded by the four current W10 handoffs (W10-Nick.md, W10-Vale.md, W10-Christian.md, W10-Aliyan.md).
 
 ### W10 — Dependency-graph serializer (T-DE-03 Mode B) — **W10 deliverable**
 
@@ -176,7 +172,7 @@
 
 || Member | Handoff file | Focus |
 |--------|-------------|-------|
-| Nick | `docs/weekly-handoffs/W10-Nick.md` | Parser: `parse_go_mod()` (3/4 → 4/4) |
+| Nick | `docs/weekly-handoffs/W10-Nick.md` | Parser: `parse_go_mod()` (2/4 → 4/4) |
 | Vale | `docs/weekly-handoffs/W10-Vale.md` | Engine + reporter: Mode B serializer (dependency-graph serializer) |
 | Christian | `docs/weekly-handoffs/W10-Christian.md` | Dashboard validation tests (empty/malformed input, unknown-topology) |
 | Aliyan | `docs/weekly-handoffs/W10-Aliyan.md` | Demo validation: `docs/demo-validation/` directory + rehearsal checklist + demo script |
