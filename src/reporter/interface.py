@@ -72,11 +72,27 @@ class RiskReport:
     
     # Core metrics
     current_systemic_risk: float = 0.0
+    phei_score: Optional[float] = None
     previous_systemic_risk: float = 0.0
     risk_delta: float = 0.0
     risk_percent_change: float = 0.0
     overall_risk_level: RiskLevel = RiskLevel.LOW
     
+    # Contract fields (TASKS.md §DECISIONS / ROADMAP W9/W10)
+    findings: List[Dict[str, Any]] = field(default_factory=list)
+    evidence: List[Dict[str, Any]] = field(default_factory=list)
+    risk: Dict[str, Any] = field(default_factory=dict)
+    remediation_plan: List[str] = field(default_factory=list)
+
+    # Contract fields (TASKS.md §DECISIONS / ROADMAP W9/W10)
+    input: Dict[str, Any] = field(default_factory=dict)
+    analysis_mode: str = ""
+    topology_status: str = ""
+    warnings: List[str] = field(default_factory=list)
+    vulnerability_lookup: Dict[str, Any] = field(default_factory=dict)
+    packages: List[Dict[str, Any]] = field(default_factory=list)
+    edges_contract: List[Dict[str, Any]] = field(default_factory=list)
+
     # Node-level analysis
     nodes: Dict[str, DependencyNode] = field(default_factory=dict)
     edges: Dict[tuple, EdgeInfo] = field(default_factory=dict)
@@ -110,10 +126,22 @@ class RiskReport:
             "timestamp": self.timestamp,
             "graph_version": self.graph_version,
             "current_systemic_risk": round(self.current_systemic_risk, 6),
+            "phei_score": round(self.phei_score, 6) if self.phei_score is not None else None,
             "previous_systemic_risk": round(self.previous_systemic_risk, 6),
             "risk_delta": round(self.risk_delta, 6),
             "risk_percent_change": round(self.risk_percent_change, 2),
             "overall_risk_level": self.overall_risk_level.value,
+            "findings": self.findings,
+            "evidence": self.evidence,
+            "risk": self.risk,
+            "remediation_plan": self.remediation_plan,
+            "input": self.input,
+            "analysis_mode": self.analysis_mode,
+            "topology_status": self.topology_status,
+            "warnings": self.warnings,
+            "vulnerability_lookup": self.vulnerability_lookup,
+            "packages": self.packages,
+            "edges": self.edges_contract,
             "nodes": {
                 k: {
                     "package_name": v.package_name,
@@ -127,7 +155,7 @@ class RiskReport:
                 }
                 for k, v in self.nodes.items()
             },
-            "edges": {
+            "edges_dict": {
                 f"{s} -> {t}": {
                     "weight": w.weight,
                     "risk_contribution": round(w.risk_contribution, 6)
@@ -186,6 +214,7 @@ class RiskReport:
         lines.append(f"Previous Systemic Risk: {self.previous_systemic_risk:.4f}")
         lines.append(f"Risk Delta: {self.risk_delta:+.4f} ({self.risk_percent_change:+.2f}%)")
         lines.append(f"Overall Risk Level: {self.overall_risk_level.value.upper()}")
+        lines.append(f"PHEI (topology-only): {self.phei_score:.4f}" if self.phei_score is not None else "PHEI (topology-only): unavailable")
         lines.append("")
         
         # Risk breakdown
@@ -317,7 +346,12 @@ def create_report(
         edges=edges,
         node_changes=node_changes,
         top_risks=top_risks or [],
-        recommendations=recommendations or []
+        recommendations=recommendations or [],
+        # Contract fields: Mode A defaults (no PHEI computed)
+        risk={"status": "unavailable", "score": None, "method": "phei",
+              "reason": "Mode A: no PHEI score computed; severity-aware systemic risk only"},
+        analysis_mode="inventory",
+        topology_status="unavailable",
     )
     
     # Handle fallback behavior

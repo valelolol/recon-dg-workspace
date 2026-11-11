@@ -1,7 +1,195 @@
-from typing import Tuple
+from typing import Any, Optional, Tuple
 
 from src.models.dependency_graph import DependencyGraph
 from src.engine.risk_analyzer import calculate_phei, calculate_systemic_risk, UnavailableTopologyError
+from src.reporter.interface import RiskReport, RiskLevel, DependencyNode as InterfaceNode, EdgeInfo, CVEInfo
+
+
+def generate_report_mode_b(graph: DependencyGraph) -> RiskReport:
+    """Mode B: emit a structured RiskReport from a single DependencyGraph.
+
+    Populates the RiskReport dataclass using only verified source data:
+    - nodes from graph.nodes (evidence: package, version, CVE list)
+    - edges from graph.edge_weights
+    - PHEI score from calculate_phei (topology-only, capped at 10.0)
+      stored in ``phei_score``; NOT in ``current_systemic_risk``.
+    - top_risks populated from actual CVE findings on graph nodes
+    - recommendations left empty (no ScanResult available for
+      build_remediation_plan); see build_remediation_plan in
+      src/agent/agent.py for the remediation planner contract.
+
+    For unavailable topology, returns a RiskReport with:
+      - phei_score = None (not 0.0 — no score is fabricated)
+      - has_fallback_applied = True, fallback_reason set
+      - current_systemic_risk = 0.0 (default, not a calculated value)
+      - overall_risk_level = LOW (default; no severity data available)
+
+    Distinctions from the contract (TASKS.md §DECISIONS):
+      - PHEI is topology-only (edge weights × node multiplicity).
+      - Severity-aware systemic risk is computed by calculate_systemic_risk()
+        and is distinct from PHEI. Mode B does not call it.
+      - PHEI scores are NOT mapped through OSV severity thresholds
+        (e.g. 7.0 for High). A PHEI score is a topology score, not a
+        severity category.
+      - Per-finding severity (Low/Medium/High) applies to vulnerability
+        findings, not to topology scores.
+    """
+    # --- PHEI score (topology-only, distinct from systemic risk) ---
+    phei_score: Optional[float] = None
+    try:
+        phei_score = calculate_phei(graph)
+    except UnavailableTopologyError:
+        pass  # phei_score stays None; no score fabricated
+
+    # --- Nodes (evidence): actual CVE findings per node ---
+    nodes: dict[str, InterfaceNode] = {}
+    for key, node in graph.nodes.items():
+        pkg = key[0]
+        ver = key[1]
+        # Pull actual CVE data from the graph node's vulnerability dict
+        cves: list[CVEInfo] = []
+        for cve_id, sev in node.vulnerabilities.items():
+            cves.append(CVEInfo(cve_id=cve_id, severity_score=sev))
+        nodes[str(key)] = InterfaceNode(
+            package_name=pkg,
+            version=ver,
+            risk_level=RiskLevel.LOW,  # default; no severity-aware risk here
+            cves=cves,
+        )
+
+    # --- Edges ---
+    edges: dict[tuple, EdgeInfo] = {}
+    for (src, tgt), weight in graph.edge_weights.items():
+        edges[(str(src), str(tgt))] = EdgeInfo(
+            source=str(src),
+            target=str(tgt),
+            weight=weight,
+        )
+
+    # --- Top risks: actual CVE findings (one per CVE per node), not PHEI ---
+    top_risks: list[dict[str, Any]] = []
+    for key, node in graph.nodes.items():
+        pkg = key[0]
+        ver = key[1]
+        for cve_id, sev in node.vulnerabilities.items():
+            top_risks.append({
+                "package": pkg,
+                "version": ver,
+                "cve_id": cve_id,
+                "severity_score": sev,
+            })
+
+    # --- Remediation: no ScanResult available, leave empty ---
+    # The remediation planner (build_remediation_plan in src/agent/agent.py)
+    # requires a ScanResult with findings. Mode B receives only a graph,
+    # so no structured remediation plan can be produced.
+    recommendations: list[str] = []
+    remediation_plan: list[str] = []
+
+    # --- Contract fields (TASKS.md §DECISIONS / ROADMAP W9/W10) ---
+    # findings: mapped from actual node.vulnerabilities (one per CVE per node)
+    findings: list[dict[str, Any]] = []
+    for key, node in graph.nodes.items():
+        pkg = key[0]
+        ver = key[1]
+        for cve_id, sev in node.vulnerabilities.items():
+            findings.append({
+                "id": f"finding-{pkg}-{cve_id}",
+                "package_id": str(key),
+                "advisory_source": "graph-node",
+                "advisory_id": cve_id,
+                "severity": None,  # no severity data from graph nodes
+                "title": f"{pkg}@{ver}: {cve_id}",
+                "description": f"CVE {cve_id} on {pkg}@{ver}",
+            })
+    # evidence: no ScanResult available; leave empty
+    evidence: list[dict[str, Any]] = []
+    # risk: topology-only PHEI status
+    risk: dict[str, Any] = {}
+    if phei_score is not None:
+        risk = {
+            "status": "available",
+            "score": phei_score,
+            "method": "phei",
+            "reason": f"topology-based PHEI (edge weights x node multiplicity); severity unspecified",
+        }
+    else:
+        risk = {
+            "status": "unavailable",
+            "score": None,
+            "method": "phei",
+            "reason": "unavailable topology; no score fabricated",
+        }
+    # input / analysis_mode / topology_status
+    input_data: dict[str, Any] = {"type": "file", "filename": "known_topology.json", "format": "synthetic-graph"}
+    analysis_mode: str = "dependency_graph"
+    topology_status: str = "known" if phei_score is not None else "unavailable"
+    # warnings (TASKS.md §DECISIONS)
+    warnings: list[str] = [
+        "CVE/advisory data is a synthetic fixture, not a live lookup; "
+        "findings[].severity is unspecified (null) and not in the score; "
+        "edge-weight function resolved as topology-only.",
+    ]
+    # vulnerability_lookup
+    vulnerability_lookup: dict[str, Any] = {
+        "status": "complete",
+        "total_packages": len(graph.nodes),
+        "checked_package_ids": list(graph.nodes.keys()),
+        "matched": len(findings),
+    }
+    # packages[]
+    packages: list[dict[str, Any]] = []
+    for key, node in graph.nodes.items():
+        packages.append({
+            "id": str(key),
+            "name": key[0],
+            "version": key[1],
+            "hash": None,
+        })
+    # edges_contract[] (edge weight is input, not output; emit type only)
+    edges_contract: list[dict[str, Any]] = []
+    for (src, tgt), _weight in graph.edge_weights.items():
+        edges_contract.append({
+            "id": f"edge-{src}-{tgt}",
+            "source_id": str(src),
+            "target_id": str(tgt),
+            "type": "dependency",
+        })
+
+    # --- Build report ---
+    report = RiskReport(
+        report_id="",
+        timestamp="",
+        graph_version="",
+        current_systemic_risk=0.0,  # no severity-aware systemic risk computed
+        phei_score=phei_score,       # topology-only PHEI (or None)
+        previous_systemic_risk=0.0,
+        risk_delta=0.0,
+        risk_percent_change=0.0,
+        overall_risk_level=RiskLevel.LOW,  # default; no severity data
+        nodes=nodes,
+        edges=edges,
+        node_changes=[],
+        top_risks=top_risks,
+        recommendations=recommendations,
+        findings=findings,
+        evidence=evidence,
+        risk=risk,
+        remediation_plan=remediation_plan,
+        input=input_data,
+        analysis_mode=analysis_mode,
+        topology_status=topology_status,
+        warnings=warnings,
+        vulnerability_lookup=vulnerability_lookup,
+        packages=packages,
+        edges_contract=edges_contract,
+    )
+
+    if phei_score is None:
+        report.has_fallback_applied = True
+        report.fallback_reason = "unavailable topology; no score fabricated"
+
+    return report
 
 
 def generate_report(current_graph: DependencyGraph, previous_graph: DependencyGraph) -> str:
