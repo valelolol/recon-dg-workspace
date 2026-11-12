@@ -141,17 +141,25 @@ document.getElementById("package-search")
 function render(){
   const app=document.getElementById('app');
   if(!report){app.innerHTML='';return;}
+  if(!Array.isArray(report.findings)) report.findings=[];
   const src=report.source_path||'';
   const mode=report.scan_mode||'';
   const sub=document.getElementById('subtitle');
   sub.textContent=`source: ${src||'(unnamed)'} · ${mode||'unknown mode'} · `
     +`${report.turns_used||0}/${report.max_turns||0} turns · `
     +`${report.used_llm?'LLM supplied (may still fall back to deterministic policy)':'no LLM supplied'}`;
+  if(report.error){
+    sub.replaceChildren(textEl('span',['class','error'],
+      'Report could not be loaded: '+report.error+'. No findings are shown.'));
+  }
 
   // Summary cards
   const sum=document.getElementById('summary'); sum.innerHTML='';
   const risk=report.risk||{};
   const riskStatus=risk.status||'unknown';
+  // Topology is only treated as known when the report carries a real score;
+  // a missing/unknown risk block must never be presented as a known topology.
+  const topoKnown=riskStatus!=='unavailable' && risk.score!=null;
   const riskText=risk.score==null?
     (riskStatus==='unavailable'?'unavailable':'unreported')
     :fmtScore(risk.score);
@@ -164,7 +172,7 @@ function render(){
   const g=el('div',['class','grid']);
   cards.forEach(([k,v],i)=>{
     const c=el('div',['class','card']);
-    if(i===2 && riskStatus==='unavailable') c.style.borderColor='#4a3a3f';
+    if(i===2 && !topoKnown) c.style.borderColor='#4a3a3f';
     c.appendChild(textEl('div',['class','k'],k));
     c.appendChild(textEl('div',['class','v '+(i===2?'muted':'')], v));
     g.appendChild(c);
@@ -182,7 +190,7 @@ function render(){
   pkgs.forEach(p=>chips.appendChild(textEl('span',['class','chip pk'],p)));
   top.appendChild(chips);
   const tnote=el('div',['class','note']);
-  if(riskStatus==='unavailable'){
+  if(!topoKnown){
     tnote.textContent='No dependency relationships were reported (inventory-only input). '+
       'No score is fabricated; PHEI requires a known topology.';
   } else {
@@ -193,7 +201,7 @@ function render(){
 
   // Findings
   const fsec=document.getElementById('findings'); fsec.innerHTML='';
-  fsec.appendChild(textEl('h2',null,'Findings ('+(report.findings_count||0)+')'));
+  fsec.appendChild(textEl('h2',null,'Findings ('+(report.findings_count||report.findings.length)+')'));
   (report.findings||[]).forEach((f,idx)=>{
 
   const packageName = String(f.package_name || "").toLowerCase();
