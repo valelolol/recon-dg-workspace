@@ -195,5 +195,256 @@ class TestReportScoreInvariantToSeverity(unittest.TestCase):
         self.assertEqual(before, after_low, "score must not depend on low severity")
 
 
+class TestReportGeneratorModeB(unittest.TestCase):
+    """Mode B: generate_report_mode_b emits a RiskReport dataclass.
+
+    Contract requirements (TASKS.md §DECISIONS):
+      - PHEI is topology-only; stored in ``phei_score``, NOT in
+        ``current_systemic_risk``.
+      - Unavailable topology → ``phei_score=None`` (not 0.0),
+        ``has_fallback_applied=True``, ``fallback_reason`` set.
+      - PHEI is NOT mapped through OSV severity thresholds.
+      - Findings reflect actual CVE data on graph nodes only.
+      - No remediation plan is generated (no ScanResult available).
+    """
+
+    def test_known_topology_returns_risk_report(self):
+        """Mode B returns a RiskReport with PHEI in phei_score, not
+        current_systemic_risk. The 3-node unit chain yields PHEI=6.0."""
+        from src.reporter.report_generator import generate_report_mode_b
+        from src.reporter.interface import RiskReport
+
+        graph = make_known_unit_chain()
+        report = generate_report_mode_b(graph)
+        self.assertIsInstance(report, RiskReport)
+        self.assertEqual(report.phei_score, 6.0)
+        self.assertEqual(report.current_systemic_risk, 0.0)  # not PHEI
+        self.assertEqual(report.overall_risk_level.value, "low")  # no severity data
+        self.assertEqual(len(report.nodes), 3)
+        self.assertEqual(len(report.edges), 2)
+        self.assertFalse(report.has_fallback_applied)
+
+    def test_unavailable_topology_no_fabricated_score(self):
+        """Unavailable topology yields phei_score=None (not 0.0) and
+        fallback flag. A score of 0.0 is not a substitute for unavailable."""
+        from src.reporter.report_generator import generate_report_mode_b
+
+        graph = make_unavailable_graph()
+        report = generate_report_mode_b(graph)
+        self.assertIsNone(report.phei_score)
+        self.assertTrue(report.has_fallback_applied)
+        self.assertEqual(report.fallback_reason, "unavailable topology; no score fabricated")
+        self.assertEqual(report.current_systemic_risk, 0.0)  # default, not calculated
+        self.assertEqual(report.overall_risk_level.value, "low")
+        # Contract fields: risk status unavailable
+        self.assertEqual(report.risk["status"], "unavailable")
+        self.assertIsNone(report.risk["score"])
+        self.assertEqual(report.risk["method"], "phei")
+        # topology_status reflects unavailable
+        self.assertEqual(report.topology_status, "unavailable")
+        # findings/evidence/remediation_plan empty (no data available)
+        self.assertEqual(report.findings, [])
+        self.assertEqual(report.evidence, [])
+        self.assertEqual(report.remediation_plan, [])
+
+    def test_edgeless_known_graph_no_edges(self):
+        """Known but edgeless graph produces zero edges and PHEI=0.0
+        (a real calculated score, not a fabrication)."""
+        from src.reporter.report_generator import generate_report_mode_b
+
+        graph = make_edgeless_known_graph()
+        report = generate_report_mode_b(graph)
+        self.assertEqual(len(report.edges), 0)
+        self.assertEqual(report.phei_score, 0.0)  # real score, not None
+        self.assertFalse(report.has_fallback_applied)
+        self.assertEqual(report.current_systemic_risk, 0.0)
+
+    def test_mode_b_does_not_call_calculate_systemic_risk(self):
+        """Mode B must not invoke the legacy global-sum function."""
+        from src.reporter.report_generator import generate_report_mode_b
+
+        graph = make_known_unit_chain()
+        called = []
+
+        def _should_never_call(g):
+            called.append(g)
+            raise AssertionError("generate_report_mode_b must not call calculate_systemic_risk")
+
+        original = report_gen.calculate_systemic_risk
+        report_gen.calculate_systemic_risk = _should_never_call
+        try:
+            generate_report_mode_b(graph)
+        finally:
+            report_gen.calculate_systemic_risk = original
+
+        self.assertEqual(called, [], "calculate_systemic_risk must not be called")
+
+    def test_mode_b_output_to_dict_serializable(self):
+        """RiskReport.to_dict() must not raise on Mode B output and must
+        include phei_score (possibly None)."""
+        from src.reporter.report_generator import generate_report_mode_b
+
+        graph = make_known_unit_chain()
+        report = generate_report_mode_b(graph)
+        d = report.to_dict()
+        self.assertIn("current_systemic_risk", d)
+        self.assertIn("phei_score", d)
+        self.assertEqual(d["phei_score"], 6.0)
+        self.assertIn("nodes", d)
+        self.assertIn("edges", d)
+        self.assertIn("top_risks", d)
+        self.assertIn("recommendations", d)
+        # Contract fields (TASKS.md §DECISIONS / ROADMAP W9/W10)
+        self.assertIn("findings", d)
+        self.assertIn("evidence", d)
+        self.assertIn("risk", d)
+        self.assertIn("remediation_plan", d)
+        self.assertIn("input", d)
+        self.assertIn("analysis_mode", d)
+        self.assertIn("topology_status", d)
+        self.assertIn("warnings", d)
+        self.assertIn("vulnerability_lookup", d)
+        self.assertIn("packages", d)
+        self.assertIn("edges", d)
+        self.assertEqual(d["risk"]["status"], "available")
+        self.assertEqual(d["risk"]["score"], 6.0)
+        self.assertEqual(d["risk"]["method"], "phei")
+        # input / analysis_mode / topology_status
+        self.assertEqual(d["input"]["type"], "file")
+        self.assertEqual(d["input"]["format"], "synthetic-graph")
+        self.assertEqual(d["analysis_mode"], "dependency_graph")
+        self.assertEqual(d["topology_status"], "known")
+        # warnings present
+        self.assertGreater(len(d["warnings"]), 0)
+
+    def test_phei_not_mapped_through_severity_thresholds(self):
+        """PHEI is a topology score (0–10); it must NOT be compared against
+        OSV severity thresholds (e.g. 7.0 for High). The overall_risk_level
+        must remain LOW when only PHEI is available."""
+        from src.reporter.report_generator import generate_report_mode_b
+        from src.reporter.interface import RiskLevel
+
+        graph = make_known_unit_chain()
+        report = generate_report_mode_b(graph)
+        # PHEI=6.0 is NOT >= 7.0; even if it were, we must not map it
+        # through severity thresholds.
+        self.assertEqual(report.overall_risk_level, RiskLevel.LOW)
+        # Confirm phei_score is the topology score, not a severity category
+        self.assertEqual(report.phei_score, 6.0)
+        self.assertEqual(report.current_systemic_risk, 0.0)
+
+    def test_findings_only_reflect_actual_vulnerability_data(self):
+        """top_risks must contain actual CVE findings (one per CVE per node),
+        not per-node PHEI scores repeated. nodes.cves must match node data."""
+        from src.reporter.report_generator import generate_report_mode_b
+
+        graph = make_known_unit_chain()
+        report = generate_report_mode_b(graph)
+
+        # top_risks should be populated from node.vulnerabilities
+        # (the synthetic test graph has no CVEs, so top_risks may be empty)
+        # The key assertion is the structure: each entry has cve_id, not score
+        for entry in report.top_risks:
+            self.assertIn("cve_id", entry)
+            self.assertIn("package", entry)
+            self.assertIn("version", entry)
+            self.assertIn("severity_score", entry)
+            self.assertNotIn("score", entry)  # no PHEI score in findings
+
+        # nodes must have cves matching node.vulnerabilities
+        for key, node in graph.nodes.items():
+            node_key = str(key)
+            self.assertIn(node_key, report.nodes)
+            cves = report.nodes[node_key].cves
+            expected_cve_count = len(node.vulnerabilities)
+            self.assertEqual(len(cves), expected_cve_count)
+
+    def test_no_invented_remediation(self):
+        """Mode B must not fabricate remediation strings. The remediation
+        planner (build_remediation_plan) requires a ScanResult; Mode B
+        receives only a graph."""
+        from src.reporter.report_generator import generate_report_mode_b
+
+        graph = make_known_unit_chain()
+        report = generate_report_mode_b(graph)
+        self.assertEqual(report.recommendations, [])
+        self.assertEqual(len(report.recommendations), 0)
+
+    def test_mode_a_risk_not_empty_dict(self):
+        """create_report (Mode A) must not leave risk={} — that signals
+        missing data rather than 'unavailable'."""
+        from src.reporter.interface import create_report, RiskLevel
+
+        report = create_report(
+            report_id="test-001",
+            current_risk=0.5,
+            previous_risk=0.3,
+            nodes={},
+            edges={},
+            node_changes=[],
+        )
+        self.assertNotEqual(report.risk, {})
+        self.assertEqual(report.risk["status"], "unavailable")
+        self.assertIsNone(report.risk["score"])
+        self.assertEqual(report.risk["method"], "phei")
+        self.assertEqual(report.analysis_mode, "inventory")
+        self.assertEqual(report.topology_status, "unavailable")
+
+    def test_mode_a_json_shape_regression(self):
+        """Old Mode A consumers expect: edges=[] (empty list), risk truthy
+        (not {}), analysis_mode='inventory', topology_status='unavailable'.
+        This is the pre-change contract shape that must not regresses."""
+        from src.reporter.interface import create_report
+
+        report = create_report(
+            report_id="reg-a",
+            current_risk=0.5,
+            previous_risk=0.3,
+            nodes={},
+            edges={},
+            node_changes=[],
+        )
+        d = report.to_dict()
+        # edges must be an empty list (not a dict, not None)
+        self.assertEqual(d["edges"], [])
+        self.assertIsInstance(d["edges"], list)
+        # risk must be truthy (not the empty dict that signaled 'missing')
+        self.assertTrue(d["risk"])
+        self.assertIn("status", d["risk"])
+        self.assertEqual(d["risk"]["status"], "unavailable")
+        # analysis_mode / topology_status must not be empty strings
+        self.assertEqual(d["analysis_mode"], "inventory")
+        self.assertEqual(d["topology_status"], "unavailable")
+        # internal edges dict is under 'edges_dict', not 'edges'
+        self.assertIn("edges_dict", d)
+        self.assertIsInstance(d["edges_dict"], dict)
+
+    def test_mode_b_contract_edges_shape_regression(self):
+        """Mode B contract: edges[] is a list of dicts with id/source_id/
+        target_id/type — not a dict, not edges_output. This is the documented
+        schema that dashboard/consumers rely on."""
+        from src.reporter.report_generator import generate_report_mode_b
+
+        graph = make_known_unit_chain()
+        report = generate_report_mode_b(graph)
+        d = report.to_dict()
+
+        self.assertIn("edges", d)
+        edges = d["edges"]
+        self.assertIsInstance(edges, list)
+        self.assertEqual(len(edges), 2)
+        for edge in edges:
+            self.assertIn("id", edge)
+            self.assertIn("source_id", edge)
+            self.assertIn("target_id", edge)
+            self.assertIn("type", edge)
+            self.assertEqual(edge["type"], "dependency")
+
+        # Internal dict must NOT be under 'edges' (collision fix)
+        self.assertNotIsInstance(d["edges"], dict)
+        self.assertIn("edges_dict", d)
+        self.assertIsInstance(d["edges_dict"], dict)
+
+
 if __name__ == "__main__":
     unittest.main()

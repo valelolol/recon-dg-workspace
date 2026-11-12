@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from src.models.dependency_graph import DependencyGraph, DependencyNode
-from src.parser.parser import build_mock_graph, parse_pyproject_toml, parse_requirements
+from src.parser.parser import build_mock_graph, parse_go_mod, parse_pyproject_toml, parse_requirements
 from src.engine.risk_analyzer import calculate_systemic_risk, UnavailableTopologyError
 
 
@@ -140,6 +140,76 @@ class TestPyprojectParsing(unittest.TestCase):
     def test_invalid_toml_raises(self):
         with self.assertRaises(IOError):
             self._parse_text("[project\nname = ")
+
+
+SAMPLE_GO_MOD = os.path.join(REPO_ROOT, "examples", "fixtures", "sample_go.mod")
+
+
+class TestGoModParsing(unittest.TestCase):
+
+    def _parse_text(self, text, **kwargs):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "go.mod")
+            with open(path, "w") as f:
+                f.write(text)
+            return parse_go_mod(path, **kwargs)
+
+    def test_fixture_direct_only_by_default(self):
+        graph = parse_go_mod(SAMPLE_GO_MOD)
+
+        self.assertEqual(graph.get_nodes_list(), [("github.com/gin-gonic/gin", "v1.9.1")])
+        self.assertEqual(graph.get_edges_list(), [])
+        self.assertEqual(graph.edge_availability, "unavailable")
+
+    def test_fixture_include_indirect(self):
+        graph = parse_go_mod(SAMPLE_GO_MOD, include_indirect=True)
+
+        self.assertCountEqual(
+            graph.get_nodes_list(),
+            [
+                ("github.com/gin-gonic/gin", "v1.9.1"),
+                ("golang.org/x/net", "v0.17.0"),
+                ("golang.org/x/text", "v0.13.0"),
+            ],
+        )
+        self.assertEqual(graph.get_edges_list(), [])
+        self.assertEqual(graph.edge_availability, "unavailable")
+
+    def test_fixture_is_labeled_synthetic(self):
+        with open(SAMPLE_GO_MOD) as f:
+            self.assertIn("SYNTHETIC", f.readline())
+
+    def test_ignores_replace_exclude_and_comments(self):
+        graph = self._parse_text(
+            "module example.com/x\n\ngo 1.22\n\n"
+            "// a comment\n"
+            "require (\n"
+            "\t// comment inside block\n"
+            "\tgithub.com/a/b v1.0.0\n"
+            "\tgithub.com/c/d v2.1.0+incompatible\n"
+            ")\n\n"
+            "replace github.com/a/b => github.com/fork/b v1.0.1\n"
+            "exclude (\n\tgithub.com/e/f v0.1.0\n)\n"
+        )
+
+        self.assertCountEqual(
+            graph.get_nodes_list(),
+            [("github.com/a/b", "v1.0.0"), ("github.com/c/d", "v2.1.0+incompatible")],
+        )
+
+    def test_go_mod_without_requires_returns_empty_graph(self):
+        graph = self._parse_text("module example.com/x\n\ngo 1.22\n")
+
+        self.assertEqual(graph.get_nodes_list(), [])
+        self.assertEqual(graph.edge_availability, "unavailable")
+
+    def test_missing_file_raises(self):
+        with self.assertRaises(FileNotFoundError):
+            parse_go_mod("nonexistent_go.mod")
+
+    def test_scoring_inventory_only_go_graph_raises(self):
+        with self.assertRaises(UnavailableTopologyError):
+            calculate_systemic_risk(parse_go_mod(SAMPLE_GO_MOD))
 
 
 class TestUnavailableTopology(unittest.TestCase):

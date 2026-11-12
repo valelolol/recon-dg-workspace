@@ -110,6 +110,71 @@ def parse_pyproject_toml(file_path: str) -> DependencyGraph:
     return graph
 
 
+def _go_require_entry(line: str) -> tuple[str, str, bool] | None:
+    """Split one go.mod require entry into (module, version, is_indirect)."""
+    code, _, comment = line.partition("//")
+    fields = code.split()
+    if len(fields) != 2:
+        return None
+    is_indirect = comment.strip().startswith("indirect")
+    return fields[0], fields[1], is_indirect
+
+
+def parse_go_mod(file_path: str, include_indirect: bool = False) -> DependencyGraph:
+    """
+    Reads a Go 'go.mod' file and builds a DependencyGraph from its require
+    entries (single-line and block form). replace/exclude/retract are ignored.
+
+    By default only direct requirements are kept: entries marked
+    '// indirect' are skipped unless include_indirect=True
+    (see docs/REVIEW-DECISIONS.md).
+
+    Raises FileNotFoundError if the file does not exist.
+    Returns a graph with edge_availability = 'unavailable' because
+    go.mod does not encode dependency topology (edges).
+    """
+    graph = DependencyGraph()
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"go.mod not found: {file_path}")
+
+    try:
+        with open(file_path) as f:
+            lines = f.readlines()
+    except OSError as e:
+        raise OSError(f"Error reading file '{file_path}': {e}") from e
+
+    block = None
+    for raw in lines:
+        line = raw.strip()
+        if not line or line.startswith("//"):
+            continue
+
+        if block is not None:
+            if line == ")":
+                block = None
+                continue
+            entry = _go_require_entry(line) if block == "require" else None
+        else:
+            directive, _, rest = line.partition(" ")
+            rest = rest.strip()
+            if rest == "(":
+                block = directive
+                continue
+            entry = _go_require_entry(rest) if directive == "require" else None
+
+        if entry is None:
+            continue
+        module, version, is_indirect = entry
+        if is_indirect and not include_indirect:
+            continue
+        graph.add_node(DependencyNode(module, version))
+
+    graph.edge_availability = "unavailable"
+
+    return graph
+
+
 def build_mock_graph() -> DependencyGraph:
     """Helper function for tests to create a graph structure."""
     graph = DependencyGraph()
