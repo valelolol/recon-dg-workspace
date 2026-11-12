@@ -344,6 +344,7 @@ Owner: Team. Depends: engine (T-DE-02) + reporter (T-DE-03).
 - [x] `src/web/osv_normalizer.py` (6,851 bytes, untracked): normalizes OSV JSON for dashboard (corrected to dashboard contract)
 - [ ] Severity filter (numeric `severity_score` ≥ 7.0 threshold; null → Unknown)
 - [ ] Search bar (pending — no repository evidence of implementation as of 2026-11-06)
+- [x] W10 dashboard validation (Christian, 2026-11-12): `tests/test_dashboard.py` 13 → 20 tests covering empty, non-object, malformed, unknown-topology, real-fixture insertion order, fixture schema gap, and normalizer → dashboard contract. `dashboard.html` hardened: missing `findings` no longer crashes `render()`; `report.error` is shown; missing/scoreless risk is rendered as unavailable topology. Verification: `python -m pytest tests/test_dashboard.py -q` → 20 passed (Windows, Python 3.15, repo `.venv`). Fixture schema gap documented in `docs/STATUS.md` (not resolved).
 - [ ] Interactive graph visualization (deferred to W12)
 - [ ] Real-time risk score display with trend history (deferred)
 - [ ] Filter by ecosystem, severity threshold, node criticality (deferred)

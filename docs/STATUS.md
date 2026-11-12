@@ -208,6 +208,46 @@ produce invented dependency edges; risk scoring requires explicitly "known" topo
 
 > **Interim-demo scope:** The Dec 9 presentation is an interim demonstration of progress toward the larger RECON-DG project — not a declaration that the full project is complete. The December deliverable is a working prototype (scan → graph → OSV findings → systemic risk → dashboard → AI explanation → bounded fix → human approval → rescan → verified results), not a finished application.
 
+## W10 dashboard validation (2026-11-12, Christian)
+
+- **Branch:** `mde-christian-e2e` (fast-forwarded to `origin/main` `21e73b4` before the change).
+- **Tests:** `tests/test_dashboard.py` extended from 13 to 20 tests. Verification:
+  `python -m pytest tests/test_dashboard.py -q` → **20 passed** (Windows, Python 3.15, repo `.venv`).
+  New cases: empty `{}` report, non-object JSON (`[]`, `null`, scalar), malformed/truncated JSON,
+  unknown topology (`risk.status == "unavailable"` and missing risk block), the committed
+  `docs/fixtures/report-fixture-demo.json` served verbatim in insertion order (no sort),
+  a characterisation test for the fixture schema gap, and `src/web/osv_normalizer.normalize`
+  output checked against the keys `dashboard.html` reads. No findings are invented: tests use
+  the existing `SYNTH-` sample or the committed fixture's real advisory data.
+- **Dashboard fixes (`src/web/dashboard.html`), found while validating:**
+  1. An empty `{}` or malformed report crashed `render()` (`report.findings.length` on
+     `undefined`), showing "Failed to load report: Cannot read properties of undefined".
+     A missing `findings` list is now treated as `[]` and the "No findings in this report."
+     message renders.
+  2. A malformed report (`{"error": "report is not valid JSON"}` from the server) now shows
+     "Report could not be loaded: …" instead of looking like a clean empty scan.
+  3. A report with no `risk` block (e.g. the demo fixture) was rendered as "Risk scoring uses
+     the known dependency topology". The topology is now treated as known only when
+     `risk.status != "unavailable"` and `risk.score` is non-null; otherwise the PHEI card gets
+     the red border and the "No score is fabricated" note.
+  4. The findings header used `findings_count || 0`; it now falls back to the list length.
+  Page behaviour was checked manually in a browser against `python -m src.web --report …` for
+  empty, malformed, unknown-topology and demo-fixture reports. The Python tests do not execute
+  the page's JavaScript; they assert on the served script.
+- **Schema gap (documented, not resolved — team decision):** `docs/fixtures/report-fixture-demo.json`
+  findings use `id` / `package` / `severity` (plus `severity_score`, `advisory_ids`, `risk_level`,
+  `recommendation`, `source_file`) and carry **no `risk` block**. `dashboard.html` and
+  `src/web/osv_normalizer.py` use `vulnerability_id` / `package_name` / `severity_score` and emit
+  `risk: {"status": "unavailable", "score": null}`. Served as-is, the fixture renders every finding
+  header as `undefined@<version>` and the deterministic explanation as "advisory unknown".
+  The fixture also contains repeated rows (e.g. each `pyyaml 5.1` advisory appears twice, once per
+  scanned manifest). Options: regenerate the fixture via `python -m src.web.osv_normalizer`, or add
+  a key mapping in the server/page. `test_demo_fixture_schema_gap_is_still_present` pins the
+  current state and should be replaced by a positive rendering test once resolved.
+- **Not covered:** the 7 skipped tests in `tests/test_e2e_risk.py` (still need
+  `examples/fixtures/sample_risk_report.json`, `load_known_topo_json()`, `known_topology.json`);
+  Flask/D3 (T-DE-04) remains deferred.
+
 ## Critical dependency correction
 
 The dependency-graph serializer (T-DE-03 Mode B) is **unimplemented** and **must be scheduled before** the W11 end-to-end CVE-to-PHEI demo. The W9 plan already noted this gap; W10 delivers the serializer; W11 demonstrates it. Without the serializer, the W10 CVE-to-PHEI demo milestone is impossible. T-DE-03 is corrected from "Done" to "Partial" in TASKS.md (2026-11-03).
