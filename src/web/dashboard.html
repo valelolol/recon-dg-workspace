@@ -193,7 +193,9 @@ function render(){
 
   // Findings
   const fsec=document.getElementById('findings'); fsec.innerHTML='';
-  fsec.appendChild(textEl('h2',null,'Findings ('+(report.findings_count||0)+')'));
+  const findingsHeading = textEl('h2', null, 'Findings');
+fsec.appendChild(findingsHeading);
+let visibleFindings = 0;
   (report.findings||[]).forEach((f,idx)=>{
 
   const packageName = String(f.package_name || "").toLowerCase();
@@ -247,7 +249,9 @@ if (severityFilter === "unknown") {
     box.appendChild(t);
     c.appendChild(box);
     fsec.appendChild(c);
+    visibleFindings++;
   });
+  findingsHeading.textContent = 'Findings (' + visibleFindings + ' of ' + (report.findings||[]).length + ')';
   if(!(report.findings||[]).length){
     fsec.appendChild(textEl('p',['class','note'],'No findings in this report.'));
   }
