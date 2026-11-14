@@ -403,3 +403,193 @@ def test_cli_model_on_enables_request(monkeypatch, tmp_path):
     assert len(urlopen_calls) == 2  # one per finding
     assert result["explanation_source"]["model"] == 2
     assert result["explanation_source"]["deterministic"] == 0
+
+
+# ── W10: real-report rendering — empty / malformed / unknown topology ─────────
+# These cases exercise the server -> /report.json -> dashboard.html contract for
+# inputs the December pipeline can actually produce.  No finding is invented
+# here: the empty / malformed / unknown-topology cases carry no findings (or the
+# clearly-labelled SYNTH- ones above), and the "real report" cases read the
+# committed fixture ``docs/fixtures/report-fixture-demo.json`` verbatim (itself
+# labelled as fixture-only, not project-dependency evidence).
+#
+# The page's JavaScript is not executed here (stdlib only, no browser); the
+# page-side behaviour is pinned by asserting on the served script, and was
+# checked manually in a browser (see docs/STATUS.md, W10 dashboard validation).
+
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_DEMO_FIXTURE = os.path.join(_REPO_ROOT, "docs", "fixtures", "report-fixture-demo.json")
+
+
+def _serve_raw_and_read(raw: str) -> tuple[dict, str]:
+    """Like ``_serve_and_read`` but writes ``raw`` text (possibly invalid JSON)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        rp = os.path.join(tmp, "report.json")
+        with open(rp, "w", encoding="utf-8") as f:
+            f.write(raw)
+        server = build_server("127.0.0.1", 0, rp, use_model=False)
+        loop = threading.Thread(target=server.serve_forever, daemon=True)
+        loop.start()
+        try:
+            base = f"http://127.0.0.1:{server.server_address[1]}"
+            page_status, html_body = _get(base, "/")
+            status, report_body = _get(base, "/report.json")
+            assert page_status == 200 and status == 200
+            return json.loads(report_body), html_body
+        finally:
+            server.shutdown()
+            loop.join(timeout=5)
+            server.server_close()
+
+
+def _dashboard_script() -> str:
+    with open(src.web.server._resolve_dashboard_path(), encoding="utf-8") as f:
+        html = f.read()
+    return html.split("<script>", 1)[1].split("</script>", 1)[0]
+
+
+def test_empty_report_serves_no_data_without_crash() -> None:
+    """An empty ``{}`` report is served (200) with no findings and a "no data" path.
+
+    Before W10 the page crashed in ``render()`` on ``report.findings.length``
+    when ``findings`` was absent ("Failed to load report: Cannot read properties
+    of undefined"); the page now normalises a missing findings list to ``[]``
+    and renders the "No findings in this report." message.
+    """
+    out, html = _serve_raw_and_read("{}")
+    assert out.get("findings", []) == []
+    assert out["ai_explanations"] == []
+    assert out["explanation_source"]["total"] == 0
+    assert "risk" not in out  # nothing is invented for a missing risk block
+    script = _dashboard_script()
+    assert "if(!Array.isArray(report.findings)) report.findings=[];" in script
+    assert "No findings in this report." in script
+    assert "RECON-DG" in html
+
+
+def test_non_object_reports_fall_back_to_empty() -> None:
+    """A JSON array / null / scalar report falls back to an empty report, not a crash."""
+    for raw in ("[]", "[1, 2, 3]", "null", "42"):
+        out, _ = _serve_raw_and_read(raw)
+        assert out["findings"] == [], raw
+        assert out["findings_count"] == 0, raw
+        assert out["ai_explanations"] == [], raw
+
+
+def test_malformed_report_serves_graceful_error() -> None:
+    """Truncated/invalid JSON is served as an explicit error, never as findings."""
+    out, _ = _serve_raw_and_read('{"findings": [ {"package_name": ')
+    assert out["error"] == "report is not valid JSON"
+    assert out.get("findings", []) == []
+    assert out["ai_explanations"] == []
+    assert out["explanation_source"]["total"] == 0
+    # The page surfaces ``report.error`` instead of rendering an empty report
+    # as if it were a clean scan.
+    script = _dashboard_script()
+    assert "if(report.error)" in script
+    assert "Report could not be loaded: " in script
+
+
+def test_unknown_topology_is_rendered_unavailable_not_fabricated() -> None:
+    """``risk.status == "unavailable"`` (inventory-only) is served unchanged with no score.
+
+    The page renders the PHEI card as unavailable with the red border and the
+    "No score is fabricated" note, and does the same when the risk block is
+    missing or carries no score (``topoKnown`` gate) — before W10 a report with
+    no risk block was rendered as "Risk scoring uses the known dependency
+    topology".
+    """
+    report = _sample_report()
+    out, _ = _serve_and_read(report, use_model=False)
+    assert out["risk"]["status"] == "unavailable"
+    assert out["risk"]["score"] is None
+    assert out["risk"] == report["risk"]
+
+    # A report with no risk block must not gain one (or a score) on the way through.
+    no_risk = _sample_report()
+    del no_risk["risk"]
+    out2, _ = _serve_and_read(no_risk, use_model=False)
+    assert "risk" not in out2
+
+    script = _dashboard_script()
+    assert "const topoKnown=riskStatus!=='unavailable' && risk.score!=null;" in script
+    assert "if(i===2 && !topoKnown) c.style.borderColor='#4a3a3f';" in script
+    assert "if(!topoKnown){" in script
+    assert "No score is fabricated; PHEI requires a known topology." in script
+
+
+def test_real_fixture_report_served_in_insertion_order() -> None:
+    """The committed demo report is served verbatim, in file order (no sort).
+
+    Equivalent to ``python -m src.web --report docs/fixtures/report-fixture-demo.json``.
+    """
+    with open(_DEMO_FIXTURE, encoding="utf-8") as f:
+        fixture = json.load(f)
+    out, _ = _serve_and_read(fixture, use_model=False)
+    assert out["findings_count"] == len(fixture["findings"]) == len(out["findings"])
+    assert [(x["id"], x["package"], x["version"]) for x in out["findings"]] == \
+        [(x["id"], x["package"], x["version"]) for x in fixture["findings"]]
+    assert out["findings"] == fixture["findings"]  # explanation layer is additive
+    assert len(out["ai_explanations"]) == len(fixture["findings"])
+    # The page iterates report.findings in place and never re-orders it.
+    script = _dashboard_script()
+    assert "(report.findings||[]).forEach(" in script
+    assert ".sort(" not in script
+
+
+def test_demo_fixture_schema_gap_is_still_present() -> None:
+    """Characterise the documented schema gap (docs/STATUS.md, W10 dashboard validation).
+
+    ``report-fixture-demo.json`` uses ``id`` / ``package`` / ``severity``; the
+    dashboard and ``src.web.osv_normalizer`` use ``vulnerability_id`` /
+    ``package_name`` / ``severity_score``.  Rendered as-is, each finding header
+    shows ``undefined@<version>``.  When the gap is resolved this test should be
+    replaced by a positive rendering test.
+    """
+    with open(_DEMO_FIXTURE, encoding="utf-8") as f:
+        fixture = json.load(f)
+    first = fixture["findings"][0]
+    assert {"id", "package", "severity"} <= set(first)
+    assert "package_name" not in first
+    assert "vulnerability_id" not in first
+    assert "risk" not in fixture  # no risk block -> topology not known
+
+
+def test_osv_normalizer_output_matches_dashboard_contract(tmp_path) -> None:
+    """``osv_normalizer.normalize`` emits the keys ``dashboard.html`` reads.
+
+    The OSV input is rebuilt from the first finding of the committed demo
+    fixture (its real advisory ID / aliases / score), so no finding is invented.
+    """
+    from src.web.osv_normalizer import normalize
+
+    with open(_DEMO_FIXTURE, encoding="utf-8") as f:
+        f0 = json.load(f)["findings"][0]
+    osv = {"results": [{
+        "source": {"path": "tests/fixtures/requirements-before.txt"},
+        "packages": [{
+            "package": {"name": f0["package"], "version": f0["version"],
+                        "ecosystem": f0["ecosystem"]},
+            "groups": [{"ids": [f0["id"]], "aliases": f0["aliases"],
+                        "max_severity": f0["severity"]}],
+        }],
+    }]}
+    p = tmp_path / "osv.json"
+    p.write_text(json.dumps(osv), encoding="utf-8")
+    report = normalize(str(p))
+
+    assert report["risk"] == {"status": "unavailable", "score": None}
+    assert report["findings_count"] == 1
+    finding = report["findings"][0]
+    for key in ("package_name", "version", "vulnerability_id", "aliases",
+                "ecosystem", "severity_score", "fixed_versions"):
+        assert key in finding, key
+    assert finding["package_name"] == f0["package"]
+    assert finding["vulnerability_id"] == f0["id"]
+    assert finding["severity_score"] == f0["severity"]
+
+    # And it is served unchanged through the dashboard server.
+    out, _ = _serve_and_read(report, use_model=False)
+    assert out["findings"] == report["findings"]
+    assert out["risk"]["status"] == "unavailable"
+    assert f0["package"] in out["ai_explanations"][0]["text"]
